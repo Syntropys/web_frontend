@@ -1,23 +1,47 @@
 import { createBrowserRouter, redirect } from "react-router";
 import { RootLayout } from "./components/scroll-to-top";
 import { RouterErrorBoundary } from "./components/error-boundary";
-import Landing from "./pages/landing";
-import Masuk from "./pages/masuk";
-import Daftar from "./pages/daftar";
-import LupaPassword from "./pages/lupa-password";
-import ResetPassword from "./pages/reset-password";
-import NotFound from "./pages/not-found";
 
 export const router = createBrowserRouter([
   {
     Component: RootLayout,
     ErrorBoundary: RouterErrorBoundary,
     children: [
-      { path: "/", Component: Landing },
-      { path: "/masuk", Component: Masuk },
-      { path: "/daftar", Component: Daftar },
-      { path: "/lupa-password", Component: LupaPassword },
-      { path: "/reset-password", Component: ResetPassword },
+      {
+        path: "/",
+        lazy: async () => {
+          const { default: Component } = await import("./pages/landing");
+          return { Component };
+        },
+      },
+      {
+        path: "/masuk",
+        lazy: async () => {
+          const { default: Component } = await import("./pages/masuk");
+          return { Component };
+        },
+      },
+      {
+        path: "/daftar",
+        lazy: async () => {
+          const { default: Component } = await import("./pages/daftar");
+          return { Component };
+        },
+      },
+      {
+        path: "/lupa-password",
+        lazy: async () => {
+          const { default: Component } = await import("./pages/lupa-password");
+          return { Component };
+        },
+      },
+      {
+        path: "/reset-password",
+        lazy: async () => {
+          const { default: Component } = await import("./pages/reset-password");
+          return { Component };
+        },
+      },
       { path: "/dashboard", loader: () => redirect("/dashboard/ringkasan") },
       {
         path: "/dashboard/ringkasan",
@@ -97,7 +121,13 @@ export const router = createBrowserRouter([
           return { Component };
         },
       },
-      { path: "*", Component: NotFound },
+      {
+        path: "*",
+        lazy: async () => {
+          const { default: Component } = await import("./pages/not-found");
+          return { Component };
+        },
+      },
     ],
   },
 ]);
