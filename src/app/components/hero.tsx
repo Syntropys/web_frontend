@@ -8,11 +8,13 @@ export function Hero() {
     <section id="beranda" className="relative min-h-[88svh] lg:min-h-screen w-full overflow-hidden bg-[#0B1215]">
       <div className="absolute inset-0">
         <img
-          src="/hero.webp"
+          src="/hero-desktop.webp"
+          srcSet="/hero-mobile.webp 800w, /hero-desktop.webp 1200w"
+          sizes="(max-width: 768px) 100vw, 100vw"
           alt="Sawah padi Kalimantan saat senja — latar visual platform Agrolytics"
           className="w-full h-full object-cover opacity-55"
-          width={1600}
-          height={1066}
+          width={1200}
+          height={800}
           loading="eager"
           decoding="async"
           {...({ fetchpriority: "high" } as Record<string, string>)}
