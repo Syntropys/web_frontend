@@ -1,6 +1,7 @@
 import { createBrowserRouter, redirect } from "react-router";
 import { RootLayout } from "./components/scroll-to-top";
 import { RouterErrorBoundary } from "./components/error-boundary";
+import Landing from "./pages/landing";
 
 export const router = createBrowserRouter([
   {
@@ -9,10 +10,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        lazy: async () => {
-          const { default: Component } = await import("./pages/landing");
-          return { Component };
-        },
+        Component: Landing,
       },
       {
         path: "/masuk",
