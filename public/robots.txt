@@ -4,4 +4,4 @@ Disallow: /dashboard/
 Disallow: /reset-password
 Disallow: /lupa-password
 
-Sitemap: https://agrolytics-test.vercel.app/sitemap.xml
+Sitemap: https://agrolytic-testing.vercel.app/sitemap.xml
