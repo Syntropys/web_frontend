@@ -1,20 +1,21 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { useTheme } from "../hooks/use-theme";
-import { useActiveSection } from "../hooks/use-active-section";
-import { useProfile } from "../hooks/use-profile";
-import { BrandMark } from "./brand-mark";
+import { useTheme } from "@/app/hooks/use-theme";
+import { useActiveSection } from "@/app/hooks/use-active-section";
+import { useProfile } from "@/app/hooks/use-profile";
+import { BrandMark } from "@/app/components/brand-mark";
+
+const links = [
+  { label: "Beranda", href: "#beranda", id: "beranda" },
+  { label: "Masalah", href: "#masalah", id: "masalah" },
+  { label: "Peta", href: "#peta", id: "peta" },
+  { label: "Solusi", href: "#solusi", id: "solusi" },
+];
 
 export function Nav() {
   const { profile } = useProfile();
   const target = profile.email ? "/dashboard" : "/masuk";
   const label = profile.email ? "Dashboard" : "Masuk";
-  const links = [
-    { label: "Beranda", href: "#beranda", id: "beranda" },
-    { label: "Masalah", href: "#masalah", id: "masalah" },
-    { label: "Peta", href: "#peta", id: "peta" },
-    { label: "Solusi", href: "#solusi", id: "solusi" },
-  ];
 
   const { theme, toggle } = useTheme();
   const [open, setOpen] = useState(false);

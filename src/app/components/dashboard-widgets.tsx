@@ -41,29 +41,29 @@ function Card({
   );
 }
 
-export function ClimateKpiCard() {
-  const items = [
-    {
-      icon: <CloudRain size={16} strokeWidth={1.6} />,
-      value: "150 mm",
-      label: "Curah Hujan",
-    },
-    {
-      icon: <Thermometer size={16} strokeWidth={1.6} />,
-      value: "28°C",
-      label: "Suhu",
-    },
-    {
-      icon: <Droplets size={16} strokeWidth={1.6} />,
-      value: "80%",
-      label: "Kelembapan",
-    },
-  ];
+const climateKpiItems = [
+  {
+    icon: <CloudRain size={16} strokeWidth={1.6} />,
+    value: "150 mm",
+    label: "Curah Hujan",
+  },
+  {
+    icon: <Thermometer size={16} strokeWidth={1.6} />,
+    value: "28°C",
+    label: "Suhu",
+  },
+  {
+    icon: <Droplets size={16} strokeWidth={1.6} />,
+    value: "80%",
+    label: "Kelembapan",
+  },
+];
 
+export function ClimateKpiCard() {
   return (
     <Card title="Rata-Rata Iklim (NASA POWER)" eyebrow="Iklim">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {items.map((it) => (
+        {climateKpiItems.map((it) => (
           <div
             key={it.label}
             className="rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-white/40 dark:bg-white/[0.04] p-3 flex sm:block items-center gap-3"
@@ -183,13 +183,13 @@ export function TrendChartCard() {
   );
 }
 
-export function PriorityTableCard() {
-  const rows = [
-    { wilayah: "Kab. Alpha", kategori: "Tinggi", estimasi: "14.500" },
-    { wilayah: "Kab. Beta", kategori: "Sedang", estimasi: "9.820" },
-    { wilayah: "Kab. Gamma", kategori: "Tinggi", estimasi: "12.140" },
-  ];
+const priorityRows = [
+  { wilayah: "Kab. Alpha", kategori: "Tinggi", estimasi: "14.500" },
+  { wilayah: "Kab. Beta", kategori: "Sedang", estimasi: "9.820" },
+  { wilayah: "Kab. Gamma", kategori: "Tinggi", estimasi: "12.140" },
+];
 
+export function PriorityTableCard() {
   const badge = (k: string) =>
     k === "Tinggi"
       ? "bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B]"
@@ -198,7 +198,7 @@ export function PriorityTableCard() {
   return (
     <Card title="Rekomendasi Prioritas" eyebrow="Rekomendasi">
       <div className="sm:hidden space-y-2.5">
-        {rows.map((r) => (
+        {priorityRows.map((r) => (
           <div
             key={r.wilayah}
             className="rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-white/30 dark:bg-white/[0.04] p-3.5"
@@ -237,7 +237,7 @@ export function PriorityTableCard() {
             </tr>
           </thead>
           <tbody className="text-[13px] text-[#2A3530] dark:text-[#E8E6DF]">
-            {rows.map((r) => (
+            {priorityRows.map((r) => (
               <tr
                 key={r.wilayah}
                 className="border-t border-[#2A3530]/15 dark:border-[#E8E6DF]/12"

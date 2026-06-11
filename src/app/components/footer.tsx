@@ -1,21 +1,21 @@
-import { BrandMark } from "./brand-mark";
+import { BrandMark } from "@/app/components/brand-mark";
+
+const groups = [
+  {
+    title: "Dokumentasi",
+    links: ["Arsitektur Model", "Repositori GitHub", "Metodologi Riset"],
+  },
+  {
+    title: "Informasi",
+    links: ["Panduan Pengguna", "Pusat Bantuan", "Hubungi Kami"],
+  },
+  {
+    title: "Legalitas",
+    links: ["Syarat Layanan", "Kebijakan Privasi", "Keamanan Data"],
+  },
+];
 
 export function Footer() {
-  const groups = [
-    {
-      title: "Dokumentasi",
-      links: ["Arsitektur Model", "Repositori GitHub", "Metodologi Riset"],
-    },
-    {
-      title: "Informasi",
-      links: ["Panduan Pengguna", "Pusat Bantuan", "Hubungi Kami"],
-    },
-    {
-      title: "Legalitas",
-      links: ["Syarat Layanan", "Kebijakan Privasi", "Keamanan Data"],
-    },
-  ];
-
   return (
     <footer className="relative px-5 sm:px-8 lg:px-14 pt-16 sm:pt-20 pb-8 border-t border-[#2A3530]/15 dark:border-[#E8E6DF]/12">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10 lg:gap-12 pb-12 sm:pb-16">
