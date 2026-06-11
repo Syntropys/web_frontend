@@ -10,29 +10,28 @@
     content="business intelligence pertanian, prediksi panen padi kalimantan, deteksi penyakit daun padi, computer vision agrikultur, kecerdasan buatan penyakit tanaman, dashboard pertanian cerdas">
   <meta name="author" content="Tim Agrolytics">
   <link rel="canonical" href="https://agrolytic-testing.vercel.app/">
-  
-  <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:locale" content="id_ID">
   <meta property="og:site_name" content="Agrolytics">
   <meta property="og:url" content="https://agrolytic-testing.vercel.app/">
-  <meta property="og:title" content="Agrolytics - Smart Agricultural BI Kalimantan">
+  <meta property="og:title" content="Smart Agricultural BI Kalimantan">
   <meta property="og:description" content="Platform AI prediksi panen dan deteksi penyakit padi.">
   <meta property="og:image" content="https://agrolytic-testing.vercel.app/hero.webp">
-
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://agrolytic-testing.vercel.app/">
-  <meta name="twitter:title" content="Agrolytics - Smart Agricultural BI Kalimantan">
+  <meta name="twitter:title" content="Smart Agricultural BI Kalimantan">
   <meta name="twitter:description" content="Platform AI prediksi panen dan deteksi penyakit padi.">
   <meta name="twitter:image" content="https://agrolytic-testing.vercel.app/hero.webp">
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="preload" as="image" href="/hero-desktop.webp" imagesrcset="/hero-mobile.webp 800w, /hero-desktop.webp 1200w" imagesizes="(max-width: 768px) 100vw, 100vw" type="image/webp" fetchpriority="high" />
+  <link rel="preload" as="image" href="/hero-desktop.webp"
+    imagesrcset="/hero-mobile.webp 800w, /hero-desktop.webp 1200w" imagesizes="(max-width: 768px) 100vw, 100vw"
+    type="image/webp" fetchpriority="high" />
   <style>
     .hero-bg {
       background-image: url('/hero-desktop.webp');
     }
+
     @media (max-width: 768px) {
       .hero-bg {
         background-image: url('/hero-mobile.webp');
@@ -50,36 +49,51 @@
 
 <body>
   <div id="root">
-    <!-- Static Skeleton for Instant Render (LCP Optimization) -->
-    <div style="min-height: 100vh; background-color: #0b1215; color: #e8e6df; font-family: 'Inter', system-ui, sans-serif; position: relative; overflow: hidden;">
-      <!-- Hero Image Placeholder Background -->
-      <div class="hero-bg" style="position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.55;"></div>
-      <div style="position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(11, 18, 21, 0.7) 0%, rgba(11, 18, 21, 0.4) 50%, rgba(11, 18, 21, 1) 100%);"></div>
-      <div style="position: absolute; inset: 0; background: linear-gradient(to right, rgba(11, 18, 21, 0.8) 0%, transparent 100%);"></div>
-      
-      <!-- Nav Skeleton -->
-      <header style="position: fixed; top: 0; left: 0; right: 0; height: 64px; border-bottom: 1px solid rgba(232, 230, 223, 0.12); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background-color: rgba(11, 18, 21, 0.75); display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(20px, 5vw, 56px); z-index: 40;">
+    <div
+      style="min-height: 100vh; background-color: #0b1215; color: #e8e6df; font-family: 'Inter', system-ui, sans-serif; position: relative; overflow: hidden;">
+      <div class="hero-bg"
+        style="position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.55;"></div>
+      <div
+        style="position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(11, 18, 21, 0.7) 0%, rgba(11, 18, 21, 0.4) 50%, rgba(11, 18, 21, 1) 100%);">
+      </div>
+      <div
+        style="position: absolute; inset: 0; background: linear-gradient(to right, rgba(11, 18, 21, 0.8) 0%, transparent 100%);">
+      </div>
+
+      <header
+        style="position: fixed; top: 0; left: 0; right: 0; height: 64px; border-bottom: 1px solid rgba(232, 230, 223, 0.12); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background-color: rgba(11, 18, 21, 0.75); display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(20px, 5vw, 56px); z-index: 40;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <div style="width: 22px; height: 22px; background-color: #c9a24b; border-radius: 50%;"></div>
-          <span style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500; color: #e8e6df;">Agrolytics</span>
+          <span
+            style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500; color: #e8e6df;">Agrolytics</span>
         </div>
       </header>
 
-      <!-- Hero Content Skeleton -->
-      <div style="position: relative; z-index: 10; padding: clamp(120px, 20vh, 200px) clamp(20px, 5vw, 56px) 60px clamp(20px, 5vw, 56px); display: flex; flex-direction: column; justify-content: center; min-height: 88vh; max-width: 1200px; margin: 0 auto;">
+      <div
+        style="position: relative; z-index: 10; padding: clamp(120px, 20vh, 200px) clamp(20px, 5vw, 56px) 60px clamp(20px, 5vw, 56px); display: flex; flex-direction: column; justify-content: center; min-height: 88vh; max-width: 1200px; margin: 0 auto;">
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
           <span style="height: 1px; width: 32px; background-color: #c9a24b;"></span>
-          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; tracking: 0.2em; text-transform: uppercase; color: #c9a24b;">Agri BI · Est. 2026</span>
+          <span
+            style="font-family: 'JetBrains Mono', monospace; font-size: 11px; tracking: 0.2em; text-transform: uppercase; color: #c9a24b;">Agri
+            BI · Est. 2026</span>
         </div>
-        <h1 style="font-family: 'Fraunces', serif; font-size: clamp(34px, 5vw, 76px); line-height: 1.05; font-weight: 500; margin: 0; letter-spacing: -0.02em; color: #e8e6df; max-width: 960px;">
-          Pastikan Hasil Panen Padi <span style="font-style: italic; color: #c9a24b;">Kalimantan</span> Anda Maksimal dengan Prediksi AI Presisi.
+        <h1
+          style="font-family: 'Fraunces', serif; font-size: clamp(34px, 5vw, 76px); line-height: 1.05; font-weight: 500; margin: 0; letter-spacing: -0.02em; color: #e8e6df; max-width: 960px;">
+          Pastikan Hasil Panen Padi <span style="font-style: italic; color: #c9a24b;">Kalimantan</span> Anda Maksimal
+          dengan Prediksi AI Presisi.
         </h1>
-        <p style="margin-top: clamp(24px, 4vh, 32px); color: #b8bfb9; font-size: clamp(14px, 2vw, 16px); line-height: 1.7; max-width: 650px;">
-          Platform AI dan Business Intelligence untuk memprediksi produktivitas panen padi dan diagnosis penyakit tanaman secara instan berbasis data terintegrasi.
+        <p
+          style="margin-top: clamp(24px, 4vh, 32px); color: #b8bfb9; font-size: clamp(14px, 2vw, 16px); line-height: 1.7; max-width: 650px;">
+          Platform AI dan Business Intelligence untuk memprediksi produktivitas panen padi dan diagnosis penyakit
+          tanaman secara instan berbasis data terintegrasi.
         </p>
         <div style="margin-top: clamp(32px, 5vh, 40px); display: flex; flex-wrap: wrap; gap: 16px;">
-          <div style="padding: 14px 28px; border-radius: 9999px; background-color: #c9a24b; color: #2a1f08; font-size: 13px; font-weight: 500; cursor: pointer;">Masuk ke Dashboard</div>
-          <div style="padding: 14px 28px; border-radius: 9999px; border: 1px solid rgba(232, 230, 223, 0.2); color: #e8e6df; font-size: 13px; font-weight: 500; cursor: pointer;">Daftar Sekarang</div>
+          <div
+            style="padding: 14px 28px; border-radius: 9999px; background-color: #c9a24b; color: #2a1f08; font-size: 13px; font-weight: 500; cursor: pointer;">
+            Masuk ke Dashboard</div>
+          <div
+            style="padding: 14px 28px; border-radius: 9999px; border: 1px solid rgba(232, 230, 223, 0.2); color: #e8e6df; font-size: 13px; font-weight: 500; cursor: pointer;">
+            Daftar Sekarang</div>
         </div>
       </div>
     </div>
