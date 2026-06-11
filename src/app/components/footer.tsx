@@ -20,9 +20,12 @@ export function Footer() {
     <footer className="relative px-5 sm:px-8 lg:px-14 pt-16 sm:pt-20 pb-8 border-t border-[#2A3530]/15 dark:border-[#E8E6DF]/12">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10 lg:gap-12 pb-12 sm:pb-16">
         <div className="lg:max-w-sm">
-          <a href="#beranda" className="group inline-flex items-center gap-2 mb-5">
+          <a
+            href="#beranda"
+            className="group inline-flex items-center gap-2 mb-5"
+          >
             <BrandMark size={22} className="text-[#C9A24B]" />
-            <span className="font-serif text-[20px] tracking-tight text-[#2A3530] dark:text-[#E8E6DF] transition-colors group-hover:text-[#A07F2E] dark:group-hover:text-[#C9A24B]">
+            <span className="font-serif text-[20px] tracking-tight text-[#2A3530] dark:text-[#E8E6DF] transition-colors group-hover:text-[#8C6E26] dark:group-hover:text-[#C9A24B]">
               Agrolytics
             </span>
           </a>
@@ -35,13 +38,15 @@ export function Footer() {
 
         {groups.map((g) => (
           <div key={g.title}>
-            <div className="text-[14px] text-[#2A3530] dark:text-[#E8E6DF] mb-5">{g.title}</div>
+            <div className="text-[14px] text-[#2A3530] dark:text-[#E8E6DF] mb-5">
+              {g.title}
+            </div>
             <ul className="space-y-3.5">
               {g.links.map((l) => (
                 <li key={l}>
                   <a
                     href="#"
-                    className="text-[13px] text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors"
+                    className="text-[13px] text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
                   >
                     {l}
                   </a>
