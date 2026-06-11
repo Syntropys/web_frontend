@@ -2,17 +2,27 @@ import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router";
 import { User, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { AuthShell } from "../components/auth-shell";
-import { Field, PrimaryButton, OrDivider, GoogleButton } from "../components/auth-fields";
-import { saveProfile, upsertAccount, hashPassword, useProfile } from "../hooks/use-profile";
+import {
+  Field,
+  PrimaryButton,
+  OrDivider,
+  GoogleButton,
+} from "../components/auth-fields";
+import {
+  saveProfile,
+  upsertAccount,
+  hashPassword,
+  useProfile,
+} from "../hooks/use-profile";
 import { setStoredRole } from "../hooks/use-role";
 import { useDebouncedValue } from "../hooks/use-debounced-value";
 import { DaftarSchema, fieldErrors, passwordStrength } from "../data/schemas";
 import { usePrefetchDashboard } from "../hooks/use-prefetch-dashboard";
 
-const STRENGTH_COLORS = ["#B85C5C", "#C9A24B", "#7A9A6E", "#5A8A4E"] as const;
+const STRENGTH_COLORS = ["#A04848", "#C9A24B", "#7A9A6E", "#5A8A4E"] as const;
 const STRENGTH_TEXT_CLASSES = [
-  "text-[#B85C5C] dark:text-[#D17878]",
-  "text-[#A07F2E] dark:text-[#C9A24B]",
+  "text-[#A04848] dark:text-[#D17878]",
+  "text-[#8C6E26] dark:text-[#C9A24B]",
   "text-[#5F7E55] dark:text-[#9CB892]",
   "text-[#4A7A40] dark:text-[#84B878]",
 ] as const;
@@ -44,10 +54,13 @@ export default function Daftar() {
     password: debouncedPassword,
     setuju,
   });
-  const debouncedErrs = debouncedParsed.success ? {} : fieldErrors(debouncedParsed);
+  const debouncedErrs = debouncedParsed.success
+    ? {}
+    : fieldErrors(debouncedParsed);
   const errs = submitAttempted ? liveErrs : debouncedErrs;
 
-  const onBlur = (field: string) => setTouched((t) => ({ ...t, [field]: true }));
+  const onBlur = (field: string) =>
+    setTouched((t) => ({ ...t, [field]: true }));
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +91,10 @@ export default function Daftar() {
       footer={
         <>
           Sudah memiliki akun?{" "}
-          <Link to="/masuk" className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors">
+          <Link
+            to="/masuk"
+            className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
+          >
             Masuk di sini
           </Link>
         </>
@@ -111,7 +127,7 @@ export default function Daftar() {
           maxLength={120}
           required
         />
-<div>
+        <div>
           <Field
             label="Kata Sandi"
             type={showPassword ? "text" : "password"}
@@ -127,10 +143,18 @@ export default function Daftar() {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-                className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+                aria-label={
+                  showPassword
+                    ? "Sembunyikan kata sandi"
+                    : "Tampilkan kata sandi"
+                }
+                className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
               >
-                {showPassword ? <EyeOff size={16} strokeWidth={1.6} /> : <Eye size={16} strokeWidth={1.6} />}
+                {showPassword ? (
+                  <EyeOff size={16} strokeWidth={1.6} />
+                ) : (
+                  <Eye size={16} strokeWidth={1.6} />
+                )}
               </button>
             }
             required
@@ -146,12 +170,18 @@ export default function Daftar() {
                       className={`h-1 flex-1 rounded-full transition-colors ${
                         filled ? "" : "bg-[#2A3530]/15 dark:bg-[#E8E6DF]/12"
                       }`}
-                      style={filled ? { background: STRENGTH_COLORS[strength.level] } : undefined}
+                      style={
+                        filled
+                          ? { background: STRENGTH_COLORS[strength.level] }
+                          : undefined
+                      }
                     />
                   );
                 })}
               </div>
-              <span className={`text-[11px] ${STRENGTH_TEXT_CLASSES[strength.level]}`}>
+              <span
+                className={`text-[12px] ${STRENGTH_TEXT_CLASSES[strength.level]}`}
+              >
                 {strength.label}
               </span>
             </div>
@@ -171,18 +201,26 @@ export default function Daftar() {
             />
             <span className="text-[12px] leading-[1.6] text-[#5F6A64] dark:text-[#B8BFB9]">
               Setuju dengan{" "}
-              <a href="#" className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors">
+              <a
+                href="#"
+                className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
+              >
                 Syarat
               </a>{" "}
               &{" "}
-              <a href="#" className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors">
+              <a
+                href="#"
+                className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
+              >
                 Privasi
               </a>
               .
             </span>
           </label>
           {touched.setuju && errs.setuju && (
-            <p className="mt-1.5 ml-[22px] text-[11px] text-[#B85C5C] dark:text-[#D17878]">{errs.setuju}</p>
+            <p className="mt-1.5 ml-[22px] text-[12px] text-[#A04848] dark:text-[#D17878]">
+              {errs.setuju}
+            </p>
           )}
         </div>
 
@@ -194,7 +232,7 @@ export default function Daftar() {
                 Memproses…
               </span>
             ) : (
-              "Daftar Sekarang"
+              "Daftar"
             )}
           </PrimaryButton>
           <OrDivider />
