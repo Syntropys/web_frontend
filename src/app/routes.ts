@@ -1,6 +1,7 @@
 import { createBrowserRouter, redirect } from "react-router";
 import { RootLayout } from "./components/scroll-to-top";
 import { RouterErrorBoundary } from "./components/error-boundary";
+import { HydrateFallback } from "./components/hydrate-fallback";
 import Landing from "./pages/landing";
 import Masuk from "./pages/masuk";
 import Daftar from "./pages/daftar";
@@ -12,6 +13,7 @@ export const router = createBrowserRouter([
   {
     Component: RootLayout,
     ErrorBoundary: RouterErrorBoundary,
+    HydrateFallback,
     children: [
       { path: "/", Component: Landing },
       { path: "/masuk", Component: Masuk },
