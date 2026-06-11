@@ -1,33 +1,33 @@
-import { Reveal } from "./reveal";
+import { Reveal } from "@/app/components/reveal";
+
+const metrics = [
+  {
+    value: "8",
+    unit: "Tahun",
+    label: "Data Historis BPS",
+    detail:
+      "Time-series produksi padi 2018–2025 yang diolah, dibersihkan, dan dinormalisasi pada level kabupaten.",
+    n: "01",
+  },
+  {
+    value: "56",
+    unit: "Kab/Kota",
+    label: "Wilayah Terpetakan",
+    detail:
+      "Cakupan lima provinsi Kalimantan, lengkap dengan stratifikasi agro-ekologi dan tipologi lahan.",
+    n: "02",
+  },
+  {
+    value: "1",
+    unit: "Platform",
+    label: "Sumber Kebenaran",
+    detail:
+      "Pengganti tumpukan spreadsheet dan laporan PDF — satu antarmuka untuk seluruh siklus keputusan.",
+    n: "03",
+  },
+];
 
 export function Problem() {
-  const metrics = [
-    {
-      value: "8",
-      unit: "Tahun",
-      label: "Data Historis BPS",
-      detail:
-        "Time-series produksi padi 2018–2025 yang diolah, dibersihkan, dan dinormalisasi pada level kabupaten.",
-      n: "01",
-    },
-    {
-      value: "56",
-      unit: "Kab/Kota",
-      label: "Wilayah Terpetakan",
-      detail:
-        "Cakupan lima provinsi Kalimantan, lengkap dengan stratifikasi agro-ekologi dan tipologi lahan.",
-      n: "02",
-    },
-    {
-      value: "1",
-      unit: "Platform",
-      label: "Sumber Kebenaran",
-      detail:
-        "Pengganti tumpukan spreadsheet dan laporan PDF — satu antarmuka untuk seluruh siklus keputusan.",
-      n: "03",
-    },
-  ];
-
   return (
     <section
       id="masalah"

@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Reveal } from "./reveal";
+import { Reveal } from "@/app/components/reveal";
 
 function SectionLabel({ index, label }: { index: string; label: string }) {
   return (
@@ -15,8 +15,9 @@ function SectionLabel({ index, label }: { index: string; label: string }) {
   );
 }
 
+const points = [38, 42, 41, 47, 52, 49, 58, 64, 71];
+
 const PredictiveChart = memo(function PredictiveChart() {
-  const points = [38, 42, 41, 47, 52, 49, 58, 64, 71];
   const max = 80;
   const w = 260;
   const h = 120;
@@ -71,20 +72,21 @@ const PredictiveChart = memo(function PredictiveChart() {
   );
 });
 
+const dots = [
+  { x: 30, y: 40, p: "high" },
+  { x: 60, y: 30, p: "high" },
+  { x: 90, y: 55, p: "med" },
+  { x: 130, y: 35, p: "low" },
+  { x: 160, y: 70, p: "med" },
+  { x: 200, y: 50, p: "high" },
+  { x: 230, y: 80, p: "low" },
+  { x: 75, y: 80, p: "med" },
+  { x: 180, y: 95, p: "high" },
+  { x: 120, y: 90, p: "low" },
+  { x: 50, y: 105, p: "med" },
+];
+
 const MapSnippet = memo(function MapSnippet() {
-  const dots = [
-    { x: 30, y: 40, p: "high" },
-    { x: 60, y: 30, p: "high" },
-    { x: 90, y: 55, p: "med" },
-    { x: 130, y: 35, p: "low" },
-    { x: 160, y: 70, p: "med" },
-    { x: 200, y: 50, p: "high" },
-    { x: 230, y: 80, p: "low" },
-    { x: 75, y: 80, p: "med" },
-    { x: 180, y: 95, p: "high" },
-    { x: 120, y: 90, p: "low" },
-    { x: 50, y: 105, p: "med" },
-  ];
   const dotClass = (p: string) =>
     p === "high"
       ? "fill-[#C9A24B]"
@@ -154,6 +156,7 @@ const ScanSnippet = memo(function ScanSnippet() {
         stroke="currentColor"
         strokeOpacity="0.25"
         strokeWidth="0.8"
+        className="text-[#2A3530] dark:text-[#E8E6DF]"
       />
       <circle cx="138" cy="60" r="3" fill="#C9A24B" />
       <circle cx="124" cy="78" r="2" fill="#C9A24B" />
@@ -225,34 +228,34 @@ const ScanSnippet = memo(function ScanSnippet() {
   );
 });
 
-export function Pillars() {
-  const cards = [
-    {
-      n: "i.",
-      tag: "Forecasting",
-      title: "Predictive Analytics",
-      copy: "Model ensemble XGBoost + LSTM memproyeksikan produktivitas panen 2026 hingga tingkat kabupaten.",
-      visual: <PredictiveChart />,
-      meta: "Proyeksi 2026 · ton/ha",
-    },
-    {
-      n: "ii.",
-      tag: "Spatial",
-      title: "Geospatial Intelligence",
-      copy: "Pemetaan klaster prioritas tinggi, sedang, dan rendah berbasis indeks vegetasi & data cuaca real-time.",
-      visual: <MapSnippet />,
-      meta: "Kalimantan · 56 titik aktif",
-    },
-    {
-      n: "iii.",
-      tag: "Vision",
-      title: "Deteksi Penyakit Instan",
-      copy: "Computer vision berbasis CNN mendiagnosis penyakit daun padi langsung dari kamera ponsel lapangan.",
-      visual: <ScanSnippet />,
-      meta: "On-device · ResNet-50",
-    },
-  ];
+const cards = [
+  {
+    n: "i.",
+    tag: "Forecasting",
+    title: "Predictive Analytics",
+    copy: "Model ensemble XGBoost + LSTM memproyeksikan produktivitas panen 2026 hingga tingkat kabupaten.",
+    visual: <PredictiveChart />,
+    meta: "Proyeksi 2026 · ton/ha",
+  },
+  {
+    n: "ii.",
+    tag: "Spatial",
+    title: "Geospatial Intelligence",
+    copy: "Pemetaan klaster prioritas tinggi, sedang, dan rendah berbasis indeks vegetasi & data cuaca real-time.",
+    visual: <MapSnippet />,
+    meta: "Kalimantan · 56 titik aktif",
+  },
+  {
+    n: "iii.",
+    tag: "Vision",
+    title: "Deteksi Penyakit Instan",
+    copy: "Computer vision berbasis CNN mendiagnosis penyakit daun padi langsung dari kamera ponsel lapangan.",
+    visual: <ScanSnippet />,
+    meta: "On-device · ResNet-50",
+  },
+];
 
+export function Pillars() {
   return (
     <section
       id="solusi"
