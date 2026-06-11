@@ -1,12 +1,30 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router";
-import { Mail, Lock, Eye, EyeOff, AlertCircle, ShieldAlert, Loader2 } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  ShieldAlert,
+  Loader2,
+} from "lucide-react";
 import { AuthShell } from "../components/auth-shell";
-import { Field, PrimaryButton, OrDivider, GoogleButton } from "../components/auth-fields";
+import {
+  Field,
+  PrimaryButton,
+  OrDivider,
+  GoogleButton,
+} from "../components/auth-fields";
 import { isAdminCredential, ADMIN_CREDENTIAL } from "../data/auth";
 import { LoginSchema, fieldErrors } from "../data/schemas";
 import { setStoredRole } from "../hooks/use-role";
-import { saveProfile, findAccount, hashPassword, useProfile } from "../hooks/use-profile";
+import {
+  saveProfile,
+  findAccount,
+  hashPassword,
+  useProfile,
+} from "../hooks/use-profile";
 import { usePrefetchDashboard } from "../hooks/use-prefetch-dashboard";
 
 const MAX_ATTEMPTS = 5;
@@ -49,13 +67,18 @@ export default function Masuk() {
     };
   }, []);
 
-  const secondsLeft = lockUntil ? Math.max(0, Math.ceil((lockUntil - now) / 1000)) : 0;
+  const secondsLeft = lockUntil
+    ? Math.max(0, Math.ceil((lockUntil - now) / 1000))
+    : 0;
   const isLocked = lockUntil !== null && secondsLeft > 0;
   const attemptsLeft = Math.max(0, MAX_ATTEMPTS - failCount);
 
   const startCooldown = () => {
     setSubmitting(true);
-    cooldownRef.current = window.setTimeout(() => setSubmitting(false), SUBMIT_COOLDOWN_MS);
+    cooldownRef.current = window.setTimeout(
+      () => setSubmitting(false),
+      SUBMIT_COOLDOWN_MS,
+    );
   };
 
   const registerFail = (message: string) => {
@@ -104,7 +127,11 @@ export default function Masuk() {
     if (account) {
       const submittedHash = await hashPassword(cleanPassword);
       if (submittedHash === account.passwordHash) {
-        saveProfile({ nama: account.nama, email: account.email, wilayah: account.wilayah });
+        saveProfile({
+          nama: account.nama,
+          email: account.email,
+          wilayah: account.wilayah,
+        });
         setStoredRole("user");
         setFailCount(0);
         navigate("/dashboard");
@@ -126,7 +153,10 @@ export default function Masuk() {
       footer={
         <>
           Belum punya akun?{" "}
-          <Link to="/daftar" className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors">
+          <Link
+            to="/daftar"
+            className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
+          >
             Daftar sekarang
           </Link>
         </>
@@ -154,29 +184,37 @@ export default function Masuk() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           onBlur={() => setTouched((t) => ({ ...t, password: true }))}
-          error={touched.password ? fieldErr.password || errs.password : undefined}
+          error={
+            touched.password ? fieldErr.password || errs.password : undefined
+          }
           disabled={isLocked}
           autoComplete="current-password"
           trailing={
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+              aria-label={
+                showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"
+              }
+              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
             >
-              {showPassword ? <EyeOff size={16} strokeWidth={1.6} /> : <Eye size={16} strokeWidth={1.6} />}
+              {showPassword ? (
+                <EyeOff size={16} strokeWidth={1.6} />
+              ) : (
+                <Eye size={16} strokeWidth={1.6} />
+              )}
             </button>
           }
           required
         />
 
         {isLocked ? (
-          <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg border border-[#B85C5C]/30 bg-[#B85C5C]/12 dark:bg-[#B85C5C]/15 text-[11.5px] text-[#B85C5C] dark:text-[#D17878]">
+          <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg border border-[#B85C5C]/30 bg-[#B85C5C]/12 dark:bg-[#B85C5C]/15 text-[12px] text-[#A04848] dark:text-[#D17878]">
             <ShieldAlert size={13} strokeWidth={1.7} className="shrink-0" />
             <span>Dikunci · coba lagi {secondsLeft}s</span>
           </div>
         ) : error ? (
-          <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg border border-[#B85C5C]/30 bg-[#B85C5C]/12 dark:bg-[#B85C5C]/15 text-[11.5px] text-[#B85C5C] dark:text-[#D17878]">
+          <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg border border-[#B85C5C]/30 bg-[#B85C5C]/12 dark:bg-[#B85C5C]/15 text-[12px] text-[#A04848] dark:text-[#D17878]">
             <AlertCircle size={13} strokeWidth={1.7} className="shrink-0" />
             <span className="min-w-0">
               {error}
@@ -199,7 +237,7 @@ export default function Masuk() {
           </label>
           <Link
             to="/lupa-password"
-            className="text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors"
+            className="text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
           >
             Lupa kata sandi?
           </Link>

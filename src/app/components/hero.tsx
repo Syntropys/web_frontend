@@ -5,7 +5,10 @@ export function Hero() {
   const { profile } = useProfile();
   const dashboardTarget = profile.email ? "/dashboard" : "/masuk";
   return (
-    <section id="beranda" className="relative min-h-[88svh] lg:min-h-screen w-full overflow-hidden bg-[#0B1215]">
+    <section
+      id="beranda"
+      className="relative min-h-[88svh] lg:min-h-screen w-full overflow-hidden bg-[#0B1215]"
+    >
       <div className="absolute inset-0">
         <img
           src="/hero-desktop.webp"
@@ -27,13 +30,15 @@ export function Hero() {
         <div className="max-w-4xl">
           <div className="flex items-center gap-3 mb-6 sm:mb-8">
             <span className="h-px w-8 sm:w-10 bg-[#C9A24B]" />
-            <span className="font-mono text-[10px] sm:text-[11px] tracking-[0.2em] uppercase text-[#A07F2E] dark:text-[#C9A24B]">
+            <span className="font-mono text-[10px] sm:text-[11px] tracking-[0.2em] uppercase text-[#C9A24B]">
               Agri BI · Est. 2026
             </span>
           </div>
 
           <h1 className="font-serif text-[34px] sm:text-[52px] lg:text-[76px] leading-[1.05] lg:leading-[1.02] tracking-[-0.02em] text-[#E8E6DF]">
-            Pastikan Hasil Panen Padi <em className="italic text-[#A07F2E] dark:text-[#C9A24B]">Kalimantan</em> Anda Maksimal dengan Prediksi AI Presisi.
+            Pastikan Hasil Panen Padi{" "}
+            <em className="italic text-[#C9A24B]">Kalimantan</em> Anda Maksimal
+            dengan Prediksi AI Presisi.
           </h1>
 
           <p className="mt-6 sm:mt-8 max-w-2xl text-[14px] sm:text-[16px] leading-[1.7] text-[#B8BFB9]">
@@ -49,7 +54,12 @@ export function Hero() {
             >
               Masuk ke Dashboard
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M1 7h12m0 0L8 2m5 5l-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <path
+                  d="M1 7h12m0 0L8 2m5 5l-5 5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
               </svg>
             </Link>
             <Link

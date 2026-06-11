@@ -62,7 +62,7 @@ const seed: UserRow[] = [
 ];
 
 const roleTone: Record<Role, string> = {
-  Admin: "bg-[#C9A24B]/15 text-[#A07F2E] dark:text-[#C9A24B]",
+  Admin: "bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B]",
   Publik:
     "bg-[#2A3530]/8 dark:bg-[#E8E6DF]/8 text-[#5F6A64] dark:text-[#B8BFB9]",
 };
@@ -121,9 +121,9 @@ export default function PenggunaPage() {
 
   return (
     <DashboardLayout
-      pageTitle="Manajemen Pengguna"
+      pageTitle="Kelola Akun"
       eyebrow="Administrasi"
-      title="Manajemen Identitas & Akses"
+      title="Kelola Akun"
       description="Kelola akun, peran, dan akses pengguna sistem (RBAC)."
     >
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
@@ -154,7 +154,7 @@ export default function PenggunaPage() {
                   type="button"
                   onClick={() => setQuery("")}
                   aria-label="Hapus pencarian"
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-5 h-5 rounded text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-5 h-5 rounded text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
                 >
                   <XCircle size={14} strokeWidth={1.6} />
                 </button>
@@ -191,23 +191,23 @@ export default function PenggunaPage() {
                   <div className="text-[13px] text-[#2A3530] dark:text-[#E8E6DF] truncate">
                     {u.nama}
                   </div>
-                  <div className="text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] truncate">
+                  <div className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] truncate">
                     {u.email}
                   </div>
                 </div>
                 <span
-                  className={`inline-flex whitespace-nowrap px-2 py-0.5 rounded-full text-[11px] ${roleTone[u.role]}`}
+                  className={`inline-flex whitespace-nowrap px-2.5 py-0.5 rounded-full text-[12px] ${roleTone[u.role]}`}
                 >
                   {u.role}
                 </span>
               </div>
-              <div className="mt-2.5 pt-2.5 border-t border-[#2A3530]/12 dark:border-[#E8E6DF]/12 flex items-center justify-end text-[11px] text-[#5F6A64] dark:text-[#A8AFA9]">
+              <div className="mt-2.5 pt-2.5 border-t border-[#2A3530]/12 dark:border-[#E8E6DF]/12 flex items-center justify-end text-[12px] text-[#5F6A64] dark:text-[#A8AFA9]">
                 <span>{u.status}</span>
               </div>
               <div className="mt-2.5 flex items-center gap-2">
                 <button
                   onClick={() => toggleStatus(u.id)}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 h-10 rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[11px] text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 h-10 rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
                 >
                   {u.status === "Aktif" ? (
                     <Pause size={12} />
@@ -219,7 +219,7 @@ export default function PenggunaPage() {
                 <button
                   onClick={() => askDelete(u)}
                   aria-label="Hapus"
-                  className="w-10 h-10 inline-flex items-center justify-center rounded-md border border-[#B85C5C]/30 text-[#B85C5C] hover:bg-[#B85C5C]/8 transition-colors cursor-pointer"
+                  className="w-10 h-10 inline-flex items-center justify-center rounded-md border border-[#A04848]/30 text-[#A04848] hover:bg-[#A04848]/8 transition-colors cursor-pointer"
                 >
                   <Trash2 size={13} />
                 </button>
@@ -248,14 +248,14 @@ export default function PenggunaPage() {
                   <td className="px-3 py-3">
                     <div className="min-w-0">
                       <div className="truncate">{u.nama}</div>
-                      <div className="text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] truncate">
+                      <div className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] truncate">
                         {u.email}
                       </div>
                     </div>
                   </td>
                   <td className="px-3 py-3">
                     <span
-                      className={`inline-flex whitespace-nowrap px-2 py-0.5 rounded-full text-[11px] ${roleTone[u.role]}`}
+                      className={`inline-flex whitespace-nowrap px-2.5 py-0.5 rounded-full text-[12px] ${roleTone[u.role]}`}
                     >
                       {u.role}
                     </span>
@@ -265,11 +265,11 @@ export default function PenggunaPage() {
                       className={`inline-flex items-center gap-1.5 whitespace-nowrap text-[12px] ${
                         u.status === "Aktif"
                           ? "text-[#5A8A4E] dark:text-[#7A9A6E]"
-                          : "text-[#B85C5C] dark:text-[#D17878]"
+                          : "text-[#A04848] dark:text-[#D17878]"
                       }`}
                     >
                       <span
-                        className={`w-1.5 h-1.5 rounded-full ${u.status === "Aktif" ? "bg-[#7A9A6E]" : "bg-[#B85C5C]"}`}
+                        className={`w-1.5 h-1.5 rounded-full ${u.status === "Aktif" ? "bg-[#7A9A6E]" : "bg-[#A04848]"}`}
                       />
                       {u.status}
                     </span>
@@ -281,7 +281,7 @@ export default function PenggunaPage() {
                         aria-label={
                           u.status === "Aktif" ? "Tangguhkan" : "Aktifkan"
                         }
-                        className="w-8 h-8 inline-flex items-center justify-center rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+                        className="w-8 h-8 inline-flex items-center justify-center rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
                       >
                         {u.status === "Aktif" ? (
                           <Pause size={13} strokeWidth={1.7} />
@@ -292,7 +292,7 @@ export default function PenggunaPage() {
                       <button
                         onClick={() => askDelete(u)}
                         aria-label="Hapus"
-                        className="w-8 h-8 inline-flex items-center justify-center rounded-md border border-[#B85C5C]/30 text-[#B85C5C] hover:bg-[#B85C5C]/8 transition-colors cursor-pointer"
+                        className="w-8 h-8 inline-flex items-center justify-center rounded-md border border-[#A04848]/30 text-[#A04848] hover:bg-[#A04848]/8 transition-colors cursor-pointer"
                       >
                         <Trash2 size={13} strokeWidth={1.7} />
                       </button>
@@ -342,8 +342,8 @@ function StatCard({
   const toneMap = {
     neutral: "text-[#2A3530] dark:text-[#E8E6DF]",
     green: "text-[#5A8A4E] dark:text-[#7A9A6E]",
-    red: "text-[#B85C5C] dark:text-[#D17878]",
-    gold: "text-[#A07F2E] dark:text-[#C9A24B]",
+    red: "text-[#A04848] dark:text-[#D17878]",
+    gold: "text-[#8C6E26] dark:text-[#C9A24B]",
   };
   return (
     <div className="rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-white/40 dark:bg-white/[0.02] p-3.5">
@@ -463,7 +463,7 @@ function AddUserModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-[13px] text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-lg text-[13px] text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
             >
               Batal
             </button>
@@ -522,12 +522,12 @@ function FormField({
         aria-invalid={hasError || undefined}
         className={`w-full px-3 py-2.5 rounded-lg border bg-white/60 dark:bg-white/[0.03] text-[14px] text-[#2A3530] dark:text-[#E8E6DF] placeholder-[#5F6A64] dark:placeholder-[#A8AFA9] outline-none focus:ring-2 transition-colors ${
           hasError
-            ? "border-[#B85C5C]/55 focus:border-[#B85C5C] focus:ring-[#B85C5C]/20"
+            ? "border-[#A04848]/55 focus:border-[#A04848] focus:ring-[#A04848]/20"
             : "border-[#2A3530]/15 dark:border-[#E8E6DF]/15 focus:border-[#C9A24B] focus:ring-[#C9A24B]/20"
         }`}
       />
       {hasError && (
-        <span className="block mt-1.5 text-[11px] text-[#B85C5C] dark:text-[#D17878]">
+        <span className="block mt-1.5 text-[12px] text-[#A04848] dark:text-[#D17878]">
           {error}
         </span>
       )}
@@ -571,7 +571,7 @@ function ConfirmDeleteDialog({
         <div className="flex flex-col items-center text-center">
           <span
             aria-hidden
-            className="inline-flex w-11 h-11 rounded-full bg-[#B85C5C]/10 dark:bg-[#B85C5C]/15 text-[#B85C5C] dark:text-[#D17878] items-center justify-center ring-1 ring-[#B85C5C]/20 dark:ring-[#B85C5C]/25"
+            className="inline-flex w-11 h-11 rounded-full bg-[#A04848]/10 dark:bg-[#A04848]/15 text-[#A04848] dark:text-[#D17878] items-center justify-center ring-1 ring-[#A04848]/20 dark:ring-[#A04848]/25"
           >
             <AlertTriangle size={18} strokeWidth={1.7} />
           </span>
@@ -597,7 +597,7 @@ function ConfirmDeleteDialog({
           <button
             type="button"
             onClick={onConfirm}
-            className="inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg border border-[#B85C5C]/35 dark:border-[#B85C5C]/40 bg-transparent text-[#B85C5C] dark:text-[#D17878] text-[13px] hover:bg-[#B85C5C]/8 dark:hover:bg-[#B85C5C]/12 hover:border-[#B85C5C]/55 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#B85C5C]/40 focus-visible:ring-offset-[#EFEBE1] dark:focus-visible:ring-offset-[#0E1619]"
+            className="inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg border border-[#A04848]/35 dark:border-[#A04848]/40 bg-transparent text-[#A04848] dark:text-[#D17878] text-[13px] hover:bg-[#A04848]/8 dark:hover:bg-[#A04848]/12 hover:border-[#A04848]/55 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#A04848]/40 focus-visible:ring-offset-[#EFEBE1] dark:focus-visible:ring-offset-[#0E1619]"
           >
             <Trash2 size={13} strokeWidth={1.8} />
             Hapus
