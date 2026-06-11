@@ -11,9 +11,9 @@ type Strength = {
 };
 
 const STRENGTH_TEXT_CLASSES = [
-  "text-[#B85C5C] dark:text-[#D17878]",
-  "text-[#B85C5C] dark:text-[#D17878]",
-  "text-[#A07F2E] dark:text-[#C9A24B]",
+  "text-[#A04848] dark:text-[#D17878]",
+  "text-[#A04848] dark:text-[#D17878]",
+  "text-[#8C6E26] dark:text-[#C9A24B]",
   "text-[#5F7E55] dark:text-[#9CB892]",
   "text-[#4A7A40] dark:text-[#84B878]",
 ] as const;
@@ -26,8 +26,8 @@ function evaluateStrength(password: string): Strength {
   if (/[^A-Za-z0-9]/.test(password)) score++;
 
   const map: Record<number, Strength> = {
-    0: { score: 0, label: "Terlalu lemah", color: "#B85C5C" },
-    1: { score: 1, label: "Lemah", color: "#B85C5C" },
+    0: { score: 0, label: "Terlalu lemah", color: "#A04848" },
+    1: { score: 1, label: "Lemah", color: "#A04848" },
     2: { score: 2, label: "Cukup", color: "#C9A24B" },
     3: { score: 3, label: "Kuat", color: "#7A9A6E" },
     4: { score: 4, label: "Sangat kuat", color: "#5A8A4E" },
@@ -58,7 +58,7 @@ export default function ResetPassword() {
         footer={
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors"
+            className="inline-flex items-center gap-1.5 text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
           >
             <ArrowLeft size={14} strokeWidth={1.6} />
             Kembali ke beranda
@@ -67,7 +67,11 @@ export default function ResetPassword() {
       >
         <div className="space-y-4">
           <div className="flex items-start gap-3 p-4 rounded-xl border border-[#C9A24B]/30 bg-[#C9A24B]/12 dark:bg-[#C9A24B]/15 text-[#5F6A64] dark:text-[#B8BFB9]">
-            <CheckCircle2 size={18} strokeWidth={1.6} className="text-[#A07F2E] dark:text-[#C9A24B] shrink-0 mt-0.5" />
+            <CheckCircle2
+              size={18}
+              strokeWidth={1.6}
+              className="text-[#8C6E26] dark:text-[#C9A24B] shrink-0 mt-0.5"
+            />
             <p className="text-[13px] leading-relaxed">
               Demi keamanan, semua sesi aktif lainnya telah keluar otomatis.
               Silakan masuk kembali dengan kata sandi baru.
@@ -93,7 +97,7 @@ export default function ResetPassword() {
       footer={
         <Link
           to="/masuk"
-          className="inline-flex items-center gap-1.5 text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors"
+          className="inline-flex items-center gap-1.5 text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
         >
           <ArrowLeft size={14} strokeWidth={1.6} />
           Kembali ke halaman masuk
@@ -120,10 +124,18 @@ export default function ResetPassword() {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-                className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+                aria-label={
+                  showPassword
+                    ? "Sembunyikan kata sandi"
+                    : "Tampilkan kata sandi"
+                }
+                className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
               >
-                {showPassword ? <EyeOff size={16} strokeWidth={1.6} /> : <Eye size={16} strokeWidth={1.6} />}
+                {showPassword ? (
+                  <EyeOff size={16} strokeWidth={1.6} />
+                ) : (
+                  <Eye size={16} strokeWidth={1.6} />
+                )}
               </button>
             }
             required
@@ -139,18 +151,22 @@ export default function ResetPassword() {
                     className={`h-1 flex-1 rounded-full transition-colors ${
                       filled ? "" : "bg-[#2A3530]/15 dark:bg-[#E8E6DF]/12"
                     }`}
-                    style={filled ? { backgroundColor: strength.color } : undefined}
+                    style={
+                      filled ? { backgroundColor: strength.color } : undefined
+                    }
                   />
                 );
               })}
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-[#5F6A64] dark:text-[#A8AFA9]">
+              <span className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9]">
                 Kekuatan kata sandi
               </span>
               <span
-                className={`text-[11px] tracking-wide ${
-                  password ? STRENGTH_TEXT_CLASSES[strength.score] : "text-[#5F6A64] dark:text-[#A8AFA9]"
+                className={`text-[12px] tracking-wide ${
+                  password
+                    ? STRENGTH_TEXT_CLASSES[strength.score]
+                    : "text-[#5F6A64] dark:text-[#A8AFA9]"
                 }`}
               >
                 {strength.label}
@@ -170,10 +186,16 @@ export default function ResetPassword() {
             <button
               type="button"
               onClick={() => setShowConfirm((v) => !v)}
-              aria-label={showConfirm ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+              aria-label={
+                showConfirm ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"
+              }
+              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
             >
-              {showConfirm ? <EyeOff size={16} strokeWidth={1.6} /> : <Eye size={16} strokeWidth={1.6} />}
+              {showConfirm ? (
+                <EyeOff size={16} strokeWidth={1.6} />
+              ) : (
+                <Eye size={16} strokeWidth={1.6} />
+              )}
             </button>
           }
           error={mismatch ? "Konfirmasi kata sandi tidak cocok." : undefined}
