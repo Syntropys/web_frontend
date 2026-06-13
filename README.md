@@ -1,15 +1,15 @@
 # 🌾 Agrolytics Web Frontend
 
 ![Status](https://img.shields.io/badge/Repo_Status-Evolving-1F2937?style=flat-square)
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-1F2937?style=flat-square)](https://github.com/Syntropys/web-frontend/blob/main/LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-1F2937?style=flat-square)](https://github.com/Syntropys/web_frontend/blob/main/LICENSE)
 [![Lead Dev](https://img.shields.io/badge/Lead_Dev-@Zevhys-1F2937?style=flat-square)]()
 [![Dev](https://img.shields.io/badge/Dev-@rohidrivaldi-1F2937?style=flat-square)]()
 ![Created](https://img.shields.io/badge/Created-18--May--2026-1F2937?style=flat-square)
 ![Version](https://img.shields.io/badge/Version-v0.1.0--beta-1F2937?style=flat-square)
-![Repo Size](https://img.shields.io/github/repo-size/Syntropys/web-frontend?label=Repo%20Size&color=1F2937&style=flat-square)
-![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2FSyntropys%2Fweb-frontend&countColor=%231F2937&style=flat-square&labelStyle=none)
-[![Issues Welcome](https://img.shields.io/badge/Issues-Welcome-1F2937.svg?style=flat-square)](https://github.com/Syntropys/web-frontend/issues)
-[![Pull Requests Welcome](https://img.shields.io/badge/Pull%20Requests-Welcome-1F2937.svg?style=flat-square)](https://github.com/Syntropys/web-frontend/pulls)
+![Repo Size](https://img.shields.io/github/repo-size/Syntropys/web_frontend?label=Repo%20Size&color=1F2937&style=flat-square)
+![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2FSyntropys%2Fweb_frontend&countColor=%231F2937&style=flat-square&labelStyle=none)
+[![Issues Welcome](https://img.shields.io/badge/Issues-Welcome-1F2937.svg?style=flat-square)](https://github.com/Syntropys/web_frontend/issues)
+[![Pull Requests Welcome](https://img.shields.io/badge/Pull%20Requests-Welcome-1F2937.svg?style=flat-square)](https://github.com/Syntropys/web_frontend/pulls)
 
 This repository contains the user-facing web interface for our machine learning project. It acts as the final destination where our backend API and trained models come to life for the users. The main job of this frontend is to provide an intuitive, interactive experience—turning complex data predictions into clear visualizations and actionable insights.
 
