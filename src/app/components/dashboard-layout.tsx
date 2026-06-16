@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Link, NavLink } from "react-router";
+import { Link, NavLink, useNavigate } from "react-router";
 import {
   LayoutDashboard,
   CloudSun,
@@ -18,11 +18,11 @@ import {
   Users,
   DatabaseZap,
 } from "lucide-react";
-import { useTheme } from "../hooks/use-theme";
-import { useRole, clearSession } from "../hooks/use-role";
-import { useProfile } from "../hooks/use-profile";
+
+
+
 import { BrandMark } from "./brand-mark";
-import { Navigate, useLocation } from "react-router";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 const navItems = [
   { to: "/dashboard/ringkasan", label: "Ringkasan", icon: LayoutDashboard },
@@ -53,12 +53,12 @@ export function DashboardLayout({
   pageTitle: string;
   children: ReactNode;
 }) {
-  const { theme, toggle } = useTheme();
-  const { isAdmin } = useRole();
-  const { profile, initials } = useProfile();
-  const location = useLocation();
+  const { theme, toggle } = useThemeStore();
+  const { profile, isAdmin, isAuthenticated } = useAuthSession();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     document.title = pageTitle;
@@ -66,9 +66,7 @@ export function DashboardLayout({
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
   useEffect(() => {
@@ -79,16 +77,29 @@ export function DashboardLayout({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const handleLogout = () => {
-    clearSession();
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await authService.signOut()
+    } catch {
+      // ignore
+    } finally {
+      navigate("/masuk", { replace: true })
+    }
   };
 
-  if (!profile.email) {
-    return <Navigate to="/masuk" replace />;
-  }
-
-  if (!isAdmin && location.pathname.startsWith("/dashboard/admin")) {
-    return <Navigate to="/dashboard/ringkasan" replace />;
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#EFEBE1] dark:bg-[#0B1215]">
+        <div className="flex items-center gap-3 text-[#5F6A64] dark:text-[#B8BFB9]">
+          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <span className="text-sm font-medium">Memuat sesi…</span>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -101,7 +112,6 @@ export function DashboardLayout({
         <SidebarContent
           isAdmin={isAdmin}
           profile={profile}
-          initials={initials}
         />
       </aside>
 
@@ -122,8 +132,9 @@ export function DashboardLayout({
             <SidebarContent
               isAdmin={isAdmin}
               profile={profile}
-              initials={initials}
               onNavigate={() => setMobileOpen(false)}
+              onLogout={handleLogout}
+              loggingOut={loggingOut}
             />
           </aside>
         </div>
@@ -193,23 +204,23 @@ export function DashboardLayout({
 
             <span className="hidden sm:inline-block h-6 w-px bg-[#2A3530]/12 dark:bg-[#E8E6DF]/12 mx-0.5" />
 
-            <Link
-              to="/masuk"
+            <button
               onClick={handleLogout}
+              disabled={loggingOut}
               aria-label="Keluar"
-              className="hidden sm:inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-[#2A3530] text-[#EFEBE1] dark:bg-[#E8E6DF] dark:text-[#0B1215] text-[12px] hover:bg-[#3A4540] dark:hover:bg-[#D4D2CB] transition-colors cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-[#2A3530] text-[#EFEBE1] dark:bg-[#E8E6DF] dark:text-[#0B1215] text-[12px] hover:bg-[#3A4540] dark:hover:bg-[#D4D2CB] transition-colors cursor-pointer disabled:opacity-50"
             >
               <LogOut size={14} strokeWidth={1.6} />
-              Keluar
-            </Link>
-            <Link
-              to="/masuk"
+              {loggingOut ? '…' : 'Keluar'}
+            </button>
+            <button
               onClick={handleLogout}
+              disabled={loggingOut}
               aria-label="Keluar"
-              className="sm:hidden w-10 h-10 rounded-full bg-[#2A3530] text-[#EFEBE1] dark:bg-[#E8E6DF] dark:text-[#0B1215] flex items-center justify-center hover:bg-[#3A4540] dark:hover:bg-[#D4D2CB] transition-colors cursor-pointer"
+              className="sm:hidden w-10 h-10 rounded-full bg-[#2A3530] text-[#EFEBE1] dark:bg-[#E8E6DF] dark:text-[#0B1215] flex items-center justify-center hover:bg-[#3A4540] dark:hover:bg-[#D4D2CB] transition-colors cursor-pointer disabled:opacity-50"
             >
               <LogOut size={14} strokeWidth={1.6} />
-            </Link>
+            </button>
           </div>
         </header>
 
@@ -245,16 +256,20 @@ export function DashboardLayout({
 function SidebarContent({
   isAdmin,
   profile,
-  initials,
   onNavigate,
 }: {
-  isAdmin: boolean;
-  profile: { nama: string; email: string };
-  initials: string;
-  onNavigate?: () => void;
+  isAdmin: boolean
+  profile: { full_name?: string; email?: string } | null
+  onNavigate?: () => void
 }) {
-  const displayName = profile.nama || "Pengguna";
-  const roleLabel = isAdmin ? "Admin" : "Publik";
+  const displayName = profile?.full_name || profile?.email?.split('@')[0] || 'Pengguna'
+  const initials = displayName
+    .split(' ')
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase()
+  const roleLabel = isAdmin ? 'Admin' : 'Pengguna'
   return (
     <div className="flex flex-col h-full px-5 py-6 w-[260px] sm:w-[280px]">
       <Link
@@ -313,7 +328,7 @@ function SidebarContent({
             {displayName}
           </div>
           <div className="flex items-center gap-1.5 text-[10px] text-[#5F6A64] dark:text-[#A8AFA9]">
-            <span className="truncate">{profile.email || "—"}</span>
+            <span className="truncate">{profile?.email || "—"}</span>
             <span className="shrink-0 px-1.5 py-px rounded-full bg-[#C9A24B]/15 text-[#A07F2E] dark:text-[#C9A24B] uppercase tracking-wider">
               {roleLabel}
             </span>

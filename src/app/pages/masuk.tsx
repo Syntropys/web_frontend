@@ -1,148 +1,158 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router";
-import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  AlertCircle,
-  ShieldAlert,
-  Loader2,
-} from "lucide-react";
-import { AuthShell } from "../components/auth-shell";
-import {
-  Field,
-  PrimaryButton,
-  OrDivider,
-  GoogleButton,
-} from "../components/auth-fields";
-import { isAdminCredential, ADMIN_CREDENTIAL } from "../data/auth";
-import { LoginSchema, fieldErrors } from "../data/schemas";
-import { setStoredRole } from "../hooks/use-role";
-import {
-  saveProfile,
-  findAccount,
-  hashPassword,
-  useProfile,
-} from "../hooks/use-profile";
-import { usePrefetchDashboard } from "../hooks/use-prefetch-dashboard";
+import { useEffect, useRef, useState } from 'react'
+import { Link, Navigate, useNavigate, useLocation } from 'react-router'
+import { Mail, Lock, Eye, EyeOff, AlertCircle, ShieldAlert, Loader2 } from 'lucide-react'
+import { AuthShell } from '@/app/components/auth-shell'
+import { Field, PrimaryButton, OrDivider, GoogleButton } from '@/app/components/auth-fields'
+import { LoginSchema, fieldErrors } from '@/schemas'
+import { authService } from '@/services/auth'
+import { useAuthStore } from '@/stores/useAuthStore'
+import { profilesService } from '@/services/profiles'
 
-const MAX_ATTEMPTS = 5;
-const LOCK_DURATION_MS = 30_000;
-const SUBMIT_COOLDOWN_MS = 1200;
+const RATE_LIMIT_EDGE = 'https://mawewomqcdnsqnxmkjlq.supabase.co/functions/v1/login-rate-limit'
+const MAX_ATTEMPTS = 5
+const LOCK_DURATION_MS = 30_000
+const SUBMIT_COOLDOWN_MS = 1200
 
 export default function Masuk() {
-  const { profile } = useProfile();
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [fieldErr, setFieldErr] = useState<Record<string, string>>({});
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [failCount, setFailCount] = useState(0);
-  const [lockUntil, setLockUntil] = useState<number | null>(null);
-  const [now, setNow] = useState(Date.now());
-  const [submitting, setSubmitting] = useState(false);
-  const cooldownRef = useRef<number | null>(null);
-  const navigate = useNavigate();
-  usePrefetchDashboard();
+  const { session } = useAuthStore()
+  const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [fieldErr, setFieldErr] = useState<Record<string, string>>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [failCount, setFailCount] = useState(0)
+  const [lockUntil, setLockUntil] = useState<number | null>(null)
+  const [now, setNow] = useState(Date.now())
+  const [submitting, setSubmitting] = useState(false)
+  const cooldownRef = useRef<number | null>(null)
+  const navigate = useNavigate()
+  const location = useLocation()
+  const from = (location.state as { from?: Location })?.from?.pathname ?? '/dashboard'
 
   useEffect(() => {
-    if (lockUntil === null) return;
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, [lockUntil]);
+    if (lockUntil === null) return
+    const id = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(id)
+  }, [lockUntil])
 
   useEffect(() => {
     if (lockUntil !== null && Date.now() >= lockUntil) {
-      setLockUntil(null);
-      setFailCount(0);
-      setError("");
+      setLockUntil(null)
+      setFailCount(0)
+      setError('')
     }
-  }, [now, lockUntil]);
+  }, [now, lockUntil])
 
   useEffect(() => {
     return () => {
-      if (cooldownRef.current) window.clearTimeout(cooldownRef.current);
-    };
-  }, []);
+      if (cooldownRef.current) window.clearTimeout(cooldownRef.current)
+    }
+  }, [])
 
-  const secondsLeft = lockUntil
-    ? Math.max(0, Math.ceil((lockUntil - now) / 1000))
-    : 0;
-  const isLocked = lockUntil !== null && secondsLeft > 0;
-  const attemptsLeft = Math.max(0, MAX_ATTEMPTS - failCount);
+  const secondsLeft = lockUntil ? Math.max(0, Math.ceil((lockUntil - now) / 1000)) : 0
+  const isLocked = lockUntil !== null && secondsLeft > 0
+  const attemptsLeft = Math.max(0, MAX_ATTEMPTS - failCount)
+
+  const parsed = LoginSchema.safeParse({ email, password })
+  const errs = parsed.success ? {} : fieldErrors(parsed)
+  const isFormValid = parsed.success
+
+  const handleSignOut = async () => {
+    await authService.signOut()
+  }
 
   const startCooldown = () => {
-    setSubmitting(true);
-    cooldownRef.current = window.setTimeout(
-      () => setSubmitting(false),
-      SUBMIT_COOLDOWN_MS,
-    );
-  };
+    setSubmitting(true)
+    cooldownRef.current = window.setTimeout(() => setSubmitting(false), SUBMIT_COOLDOWN_MS)
+  }
 
   const registerFail = (message: string) => {
-    const next = failCount + 1;
-    setFailCount(next);
+    const next = failCount + 1
+    setFailCount(next)
     if (next >= MAX_ATTEMPTS) {
-      setLockUntil(Date.now() + LOCK_DURATION_MS);
-      setError("");
+      setLockUntil(Date.now() + LOCK_DURATION_MS)
+      setError('')
     } else {
-      setError(message);
+      setError(message)
     }
-  };
-
-  const parsed = LoginSchema.safeParse({ email, password });
-  const errs = parsed.success ? {} : fieldErrors(parsed);
-  const isFormValid = parsed.success;
+  }
 
   const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isLocked || submitting) return;
-    setTouched({ email: true, password: true });
+    e.preventDefault()
+    if (isLocked || submitting) return
+    setTouched({ email: true, password: true })
     if (!parsed.success) {
-      setFieldErr(errs);
-      return;
+      setFieldErr(errs)
+      return
     }
-    setError("");
-    setFieldErr({});
-    startCooldown();
+    setError('')
+    setFieldErr({})
+    startCooldown()
 
-    const cleanEmail = parsed.data.email;
-    const cleanPassword = parsed.data.password;
+    // OWASP A07: Rate-limit check via Edge Function first
+    try {
+      const edgeRes = await fetch(RATE_LIMIT_EDGE, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-email': parsed.data.email,
+        },
+        body: JSON.stringify({ email: parsed.data.email, password: parsed.data.password }),
+      })
 
-    if (isAdminCredential(cleanEmail, cleanPassword)) {
-      setStoredRole("admin");
-      saveProfile({
-        nama: ADMIN_CREDENTIAL.nama,
-        email: ADMIN_CREDENTIAL.email,
-        wilayah: ADMIN_CREDENTIAL.wilayah,
-      });
-      setFailCount(0);
-      navigate("/dashboard");
-      return;
-    }
+      const edgeData = await edgeRes.json()
 
-    const account = findAccount(cleanEmail);
-    if (account) {
-      const submittedHash = await hashPassword(cleanPassword);
-      if (submittedHash === account.passwordHash) {
-        saveProfile({
-          nama: account.nama,
-          email: account.email,
-          wilayah: account.wilayah,
-        });
-        setStoredRole("user");
-        setFailCount(0);
-        navigate("/dashboard");
-        return;
+      if (!edgeRes.ok || !edgeData.allowed) {
+        // Edge function blocked — show message and lock
+        const waitMs = edgeRes.headers.get('Retry-After')
+          ? Number(edgeRes.headers.get('Retry-After')) * 1000
+          : LOCK_DURATION_MS
+        setLockUntil(Date.now() + waitMs)
+        setError(edgeData.reason || 'Terlalu banyak percobaan.')
+        setSubmitting(false)
+        return
       }
+    } catch {
+      // Edge function unreachable — fall back to direct Supabase auth (degraded mode)
     }
 
-    registerFail("Email atau kata sandi salah");
-  };
+    // Proceed with Supabase auth
+    try {
+      const { data } = await authService.signInPassword({
+        email: parsed.data.email,
+        password: parsed.data.password,
+      })
 
-  if (profile.email) return <Navigate to="/dashboard" replace />;
+      if (data.session) {
+        try {
+          const prof = await profilesService.getById(data.session.user.id)
+          useAuthStore.getState().setProfile(prof)
+        } catch { /* non-fatal */ }
+        setFailCount(0)
+        navigate(from, { replace: true })
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan'
+      registerFail(msg.includes('Invalid login') || msg.includes('Invalid email')
+        ? 'Email atau kata sandi salah'
+        : msg)
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    if (submitting) return
+    setSubmitting(true)
+    try {
+      await authService.signInGoogle()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Gagal login dengan Google'
+      setError(msg)
+      setSubmitting(false)
+    }
+  }
+
+  if (session) return <Navigate to="/dashboard" replace />
 
   return (
     <AuthShell
@@ -152,11 +162,8 @@ export default function Masuk() {
       description="Gunakan email dan kata sandi akun Anda untuk melanjutkan."
       footer={
         <>
-          Belum punya akun?{" "}
-          <Link
-            to="/daftar"
-            className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
-          >
+          Belum punya akun?{' '}
+          <Link to="/daftar" className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors">
             Daftar sekarang
           </Link>
         </>
@@ -178,31 +185,23 @@ export default function Masuk() {
         />
         <Field
           label="Kata Sandi"
-          type={showPassword ? "text" : "password"}
+          type={showPassword ? 'text' : 'password'}
           placeholder="Masukkan kata sandi Anda"
           icon={<Lock size={16} strokeWidth={1.6} />}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           onBlur={() => setTouched((t) => ({ ...t, password: true }))}
-          error={
-            touched.password ? fieldErr.password || errs.password : undefined
-          }
+          error={touched.password ? fieldErr.password || errs.password : undefined}
           disabled={isLocked}
           autoComplete="current-password"
           trailing={
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              aria-label={
-                showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"
-              }
+              aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
               className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
             >
-              {showPassword ? (
-                <EyeOff size={16} strokeWidth={1.6} />
-              ) : (
-                <Eye size={16} strokeWidth={1.6} />
-              )}
+              {showPassword ? <EyeOff size={16} strokeWidth={1.6} /> : <Eye size={16} strokeWidth={1.6} />}
             </button>
           }
           required
@@ -231,14 +230,9 @@ export default function Masuk() {
               type="checkbox"
               className="w-3.5 h-3.5 rounded border-[#2A3530]/30 dark:border-[#E8E6DF]/30 accent-[#C9A24B]"
             />
-            <span className="text-[12px] text-[#5F6A64] dark:text-[#B8BFB9]">
-              Ingat saya
-            </span>
+            <span className="text-[12px] text-[#5F6A64] dark:text-[#B8BFB9]">Ingat saya</span>
           </label>
-          <Link
-            to="/lupa-password"
-            className="text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
-          >
+          <Link to="/lupa-password" className="text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors">
             Lupa kata sandi?
           </Link>
         </div>
@@ -251,13 +245,13 @@ export default function Masuk() {
                 Memproses…
               </span>
             ) : (
-              "Masuk"
+              'Masuk'
             )}
           </PrimaryButton>
           <OrDivider />
-          <GoogleButton>Masuk dengan Google</GoogleButton>
+          <GoogleButton onClick={handleGoogleSignIn}>Masuk dengan Google</GoogleButton>
         </div>
       </form>
     </AuthShell>
-  );
+  )
 }
