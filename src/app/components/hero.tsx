@@ -1,9 +1,9 @@
 import { Link } from "react-router";
-import { useProfile } from "../hooks/use-profile";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 export function Hero() {
-  const { profile } = useProfile();
-  const dashboardTarget = profile.email ? "/dashboard" : "/masuk";
+  const { profile } = useAuthSession();
+  const dashboardTarget = profile?.email ? "/dashboard" : "/masuk";
   return (
     <section
       id="beranda"

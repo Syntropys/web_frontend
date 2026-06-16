@@ -1,52 +1,65 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router";
-import { Lock, Eye, EyeOff, CheckCircle2, ArrowLeft } from "lucide-react";
-import { AuthShell } from "../components/auth-shell";
-import { Field, PrimaryButton } from "../components/auth-fields";
+import { useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router'
+import { Lock, Eye, EyeOff, CheckCircle2, ArrowLeft, AlertCircle, Loader2 } from 'lucide-react'
+import { AuthShell } from '../components/auth-shell'
+import { Field, PrimaryButton } from '../components/auth-fields'
+import { authService } from '@/services/auth'
 
-type Strength = {
-  score: 0 | 1 | 2 | 3 | 4;
-  label: string;
-  color: string;
-};
+type Strength = { score: 0 | 1 | 2 | 3 | 4; label: string; color: string }
 
 const STRENGTH_TEXT_CLASSES = [
-  "text-[#A04848] dark:text-[#D17878]",
-  "text-[#A04848] dark:text-[#D17878]",
-  "text-[#8C6E26] dark:text-[#C9A24B]",
-  "text-[#5F7E55] dark:text-[#9CB892]",
-  "text-[#4A7A40] dark:text-[#84B878]",
-] as const;
+  'text-[#A04848] dark:text-[#D17878]',
+  'text-[#A04848] dark:text-[#D17878]',
+  'text-[#8C6E26] dark:text-[#C9A24B]',
+  'text-[#5F7E55] dark:text-[#9CB892]',
+  'text-[#4A7A40] dark:text-[#84B878]',
+] as const
 
 function evaluateStrength(password: string): Strength {
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
-  if (/\d/.test(password)) score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
-
+  let score = 0
+  if (password.length >= 8) score++
+  if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++
+  if (/\d/.test(password)) score++
+  if (/[^A-Za-z0-9]/.test(password)) score++
+  if (!password) return { score: 0, label: '—', color: '#5F6A64' }
   const map: Record<number, Strength> = {
-    0: { score: 0, label: "Terlalu lemah", color: "#A04848" },
-    1: { score: 1, label: "Lemah", color: "#A04848" },
-    2: { score: 2, label: "Cukup", color: "#C9A24B" },
-    3: { score: 3, label: "Kuat", color: "#7A9A6E" },
-    4: { score: 4, label: "Sangat kuat", color: "#5A8A4E" },
-  };
-
-  if (!password) return { score: 0, label: "—", color: "#5F6A64" };
-  return map[score] as Strength;
+    0: { score: 0, label: 'Terlalu lemah', color: '#A04848' },
+    1: { score: 1, label: 'Lemah', color: '#A04848' },
+    2: { score: 2, label: 'Cukup', color: '#C9A24B' },
+    3: { score: 3, label: 'Kuat', color: '#7A9A6E' },
+    4: { score: 4, label: 'Sangat kuat', color: '#5A8A4E' },
+  }
+  return map[score] as Strength
 }
 
 export default function ResetPassword() {
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [params] = useSearchParams()
+  const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const strength = useMemo(() => evaluateStrength(password), [password]);
-  const mismatch = confirm.length > 0 && confirm !== password;
-  const canSubmit = password.length >= 8 && !mismatch;
+  const strength = useMemo(() => evaluateStrength(password), [password])
+  const mismatch = confirm.length > 0 && confirm !== password
+  const canSubmit = password.length >= 8 && !mismatch
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!canSubmit || loading) return
+    setLoading(true)
+    setError('')
+    try {
+      await authService.updatePassword(password)
+      setSuccess(true)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Gagal mengubah kata sandi')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (success) {
     return (
@@ -57,7 +70,7 @@ export default function ResetPassword() {
         description="Anda sekarang dapat masuk menggunakan kata sandi baru Anda."
         footer={
           <Link
-            to="/"
+            to="/masuk"
             className="inline-flex items-center gap-1.5 text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
           >
             <ArrowLeft size={14} strokeWidth={1.6} />
@@ -67,11 +80,7 @@ export default function ResetPassword() {
       >
         <div className="space-y-4">
           <div className="flex items-start gap-3 p-4 rounded-xl border border-[#C9A24B]/30 bg-[#C9A24B]/12 dark:bg-[#C9A24B]/15 text-[#5F6A64] dark:text-[#B8BFB9]">
-            <CheckCircle2
-              size={18}
-              strokeWidth={1.6}
-              className="text-[#8C6E26] dark:text-[#C9A24B] shrink-0 mt-0.5"
-            />
+            <CheckCircle2 size={18} strokeWidth={1.6} className="text-[#8C6E26] dark:text-[#C9A24B] shrink-0 mt-0.5" />
             <p className="text-[13px] leading-relaxed">
               Demi keamanan, semua sesi aktif lainnya telah keluar otomatis.
               Silakan masuk kembali dengan kata sandi baru.
@@ -85,7 +94,7 @@ export default function ResetPassword() {
           </Link>
         </div>
       </AuthShell>
-    );
+    )
   }
 
   return (
@@ -104,71 +113,50 @@ export default function ResetPassword() {
         </Link>
       }
     >
-      <form
-        className="space-y-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!canSubmit) return;
-          setSuccess(true);
-        }}
-      >
+      <form className="space-y-4" onSubmit={onSubmit}>
+        {error && (
+          <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg border border-[#B85C5C]/30 bg-[#B85C5C]/12 dark:bg-[#B85C5C]/15 text-[12px] text-[#A04848] dark:text-[#D17878]">
+            <AlertCircle size={13} strokeWidth={1.7} className="shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
         <div>
           <Field
             label="Kata Sandi Baru"
-            type={showPassword ? "text" : "password"}
+            type={showPassword ? 'text' : 'password'}
             placeholder="Minimal 8 karakter"
             icon={<Lock size={16} strokeWidth={1.6} />}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
             trailing={
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                aria-label={
-                  showPassword
-                    ? "Sembunyikan kata sandi"
-                    : "Tampilkan kata sandi"
-                }
+                aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
                 className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
               >
-                {showPassword ? (
-                  <EyeOff size={16} strokeWidth={1.6} />
-                ) : (
-                  <Eye size={16} strokeWidth={1.6} />
-                )}
+                {showPassword ? <EyeOff size={16} strokeWidth={1.6} /> : <Eye size={16} strokeWidth={1.6} />}
               </button>
             }
             required
           />
-
           <div className="mt-2.5 space-y-1.5">
             <div className="flex items-center gap-1.5">
               {[0, 1, 2, 3].map((i) => {
-                const filled = i < strength.score;
+                const filled = i < strength.score
                 return (
                   <span
                     key={i}
-                    className={`h-1 flex-1 rounded-full transition-colors ${
-                      filled ? "" : "bg-[#2A3530]/15 dark:bg-[#E8E6DF]/12"
-                    }`}
-                    style={
-                      filled ? { backgroundColor: strength.color } : undefined
-                    }
+                    className={`h-1 flex-1 rounded-full transition-colors ${filled ? '' : 'bg-[#2A3530]/15 dark:bg-[#E8E6DF]/12'}`}
+                    style={filled ? { backgroundColor: strength.color } : undefined}
                   />
-                );
+                )
               })}
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9]">
-                Kekuatan kata sandi
-              </span>
-              <span
-                className={`text-[12px] tracking-wide ${
-                  password
-                    ? STRENGTH_TEXT_CLASSES[strength.score]
-                    : "text-[#5F6A64] dark:text-[#A8AFA9]"
-                }`}
-              >
+              <span className="text-[12px] text-[#5F6A64] dark:text-[#A8BFB9]">Kekuatan kata sandi</span>
+              <span className={`text-[12px] tracking-wide ${password ? STRENGTH_TEXT_CLASSES[strength.score] : 'text-[#5F6A64] dark:text-[#A8AFA9]'}`}>
                 {strength.label}
               </span>
             </div>
@@ -177,37 +165,39 @@ export default function ResetPassword() {
 
         <Field
           label="Konfirmasi Kata Sandi"
-          type={showConfirm ? "text" : "password"}
+          type={showConfirm ? 'text' : 'password'}
           placeholder="Ulangi kata sandi baru"
           icon={<Lock size={16} strokeWidth={1.6} />}
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
+          autoComplete="new-password"
           trailing={
             <button
               type="button"
               onClick={() => setShowConfirm((v) => !v)}
-              aria-label={
-                showConfirm ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"
-              }
+              aria-label={showConfirm ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
               className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
             >
-              {showConfirm ? (
-                <EyeOff size={16} strokeWidth={1.6} />
-              ) : (
-                <Eye size={16} strokeWidth={1.6} />
-              )}
+              {showConfirm ? <EyeOff size={16} strokeWidth={1.6} /> : <Eye size={16} strokeWidth={1.6} />}
             </button>
           }
-          error={mismatch ? "Konfirmasi kata sandi tidak cocok." : undefined}
+          error={mismatch ? 'Konfirmasi kata sandi tidak cocok.' : undefined}
           required
         />
 
         <div className="pt-2">
-          <PrimaryButton disabled={!canSubmit} aria-disabled={!canSubmit}>
-            Simpan Kata Sandi Baru
+          <PrimaryButton disabled={!canSubmit || loading} aria-disabled={!canSubmit || loading}>
+            {loading ? (
+              <span className="inline-flex items-center justify-center gap-2">
+                <Loader2 size={14} strokeWidth={2} className="animate-spin" />
+                Menyimpan…
+              </span>
+            ) : (
+              'Simpan Kata Sandi Baru'
+            )}
           </PrimaryButton>
         </div>
       </form>
     </AuthShell>
-  );
+  )
 }

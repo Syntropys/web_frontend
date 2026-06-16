@@ -1,5 +1,11 @@
 packages:
   - '.'
 allowBuilds:
-  '@tailwindcss/oxide': true
-  esbuild: true
+  '@tailwindcss/oxide': set this to true or false
+  core-js: set this to true or false
+  esbuild: set this to true or false
+onlyBuiltDependencies:
+  - esbuild
+  - '@tailwindcss/oxide'
+  - core-js
+  - '@tailwindcss/vite'

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { useTheme } from "@/app/hooks/use-theme";
+import { useThemeStore } from "../../stores/useThemeStore";
 import { useActiveSection } from "@/app/hooks/use-active-section";
-import { useProfile } from "@/app/hooks/use-profile";
 import { BrandMark } from "@/app/components/brand-mark";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 const links = [
   { label: "Beranda", href: "#beranda", id: "beranda" },
@@ -13,11 +13,11 @@ const links = [
 ];
 
 export function Nav() {
-  const { profile } = useProfile();
-  const target = profile.email ? "/dashboard" : "/masuk";
-  const label = profile.email ? "Dashboard" : "Masuk";
+  const { profile } = useAuthSession();
+  const target = profile?.email ? "/dashboard" : "/masuk";
+  const label = profile?.email ? "Dashboard" : "Masuk";
 
-  const { theme, toggle } = useTheme();
+  const { theme, toggle } = useThemeStore();
   const [open, setOpen] = useState(false);
   const active = useActiveSection(links.map((l) => l.id));
 

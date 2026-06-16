@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { Link } from "react-router";
-import { useTheme } from "../hooks/use-theme";
+import { useThemeStore } from "../../stores/useThemeStore";
 import { BrandMark } from "./brand-mark";
 
 export function AuthShell({
@@ -18,7 +18,7 @@ export function AuthShell({
   children: ReactNode;
   footer: ReactNode;
 }) {
-  const { theme, toggle } = useTheme();
+  const { theme, toggle } = useThemeStore();
 
   useEffect(() => {
     document.title = pageTitle;

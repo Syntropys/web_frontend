@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { AddUserSchema, fieldErrors } from '@/schemas';
 import {
   Search,
   UserPlus,
@@ -10,7 +11,6 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { DashboardLayout } from "../../../components/dashboard-layout";
-import { AddUserSchema, fieldErrors } from "../../../data/schemas";
 
 type Role = "Admin" | "Publik";
 type Status = "Aktif" | "Ditangguhkan";
