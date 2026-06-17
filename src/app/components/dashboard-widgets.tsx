@@ -1,4 +1,4 @@
-import { memo, type ReactNode } from "react";
+import { memo, useState, useRef, useEffect, type ReactNode } from "react";
 import {
   CloudRain,
   Thermometer,
@@ -6,7 +6,9 @@ import {
   TrendingUp,
   AlertTriangle,
   UploadCloud,
+  Loader2,
 } from "lucide-react";
+import { diseaseService, type DiseasePredictionResponse } from "@/services/disease";
 
 function Card({
   title,
@@ -261,33 +263,232 @@ export function PriorityTableCard() {
     </Card>
   );
 }
-
 export function DiseaseDetectionCard() {
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [result, setResult] = useState<DiseasePredictionResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  const capitalizeClass = (className: string) => {
+    if (!className) return "Unknown";
+    return className
+      .split(/[-_]/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  const handleFile = async (selectedFile: File) => {
+    if (!selectedFile.type.startsWith("image/")) {
+      setError("File harus berupa gambar (PNG, JPG, atau JPEG).");
+      return;
+    }
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      setError("Ukuran file tidak boleh melebihi 5MB.");
+      return;
+    }
+
+    setFile(selectedFile);
+    setError(null);
+    setResult(null);
+    
+    const url = URL.createObjectURL(selectedFile);
+    setPreviewUrl(url);
+
+    setIsAnalyzing(true);
+    try {
+      const startTime = Date.now();
+      const response = await diseaseService.detectDisease(selectedFile);
+      const elapsed = Date.now() - startTime;
+      setResult({
+        ...response,
+        inference_time_ms: response.inference_time_ms || elapsed,
+      });
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Gagal melakukan deteksi penyakit.");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const onDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFile(e.target.files[0]);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleReset = () => {
+    setFile(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(null);
+    setResult(null);
+    setError(null);
+  };
+
   return (
     <Card title="Diagnosis Penyakit Cepat" eyebrow="Deteksi">
-      <div className="rounded-xl border-2 border-dashed border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/30 dark:bg-white/[0.04] px-4 py-8 flex flex-col items-center justify-center text-center">
-        <span className="inline-flex w-10 h-10 items-center justify-center rounded-full bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B] mb-3">
-          <UploadCloud size={18} strokeWidth={1.6} />
-        </span>
-        <p className="font-mono text-[12px] tracking-wider text-[#5F6A64] dark:text-[#A8AFA9]">
-          [ Area Drag & Drop Foto Daun ]
-        </p>
-        <p className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] mt-1.5">
-          PNG / JPG · maks. 5MB
-        </p>
-      </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9]">
-        <span>
-          Diagnosis:{" "}
-          <span className="text-[#2A3530] dark:text-[#E8E6DF]">
-            [ Menunggu Data ]
+      {/* Upload Zone & Preview Zone */}
+      {!previewUrl ? (
+        <div
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          onClick={triggerFileInput}
+          className={`rounded-xl border-2 border-dashed transition-all duration-200 cursor-pointer px-4 py-10 flex flex-col items-center justify-center text-center ${
+            isDragging
+              ? "border-[#C9A24B] bg-[#C9A24B]/5"
+              : "border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/30 dark:bg-white/[0.04] hover:border-[#C9A24B]/50"
+          }`}
+        >
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={onSelectFile}
+            accept="image/png, image/jpeg, image/jpg"
+            className="hidden"
+          />
+          <span className="inline-flex w-10 h-10 items-center justify-center rounded-full bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B] mb-3">
+            <UploadCloud size={18} strokeWidth={1.6} />
           </span>
-        </span>
-        <span>
-          Akurasi:{" "}
-          <span className="text-[#2A3530] dark:text-[#E8E6DF]">[ 0% ]</span>
-        </span>
-      </div>
+          <p className="font-serif text-[14px] text-[#2A3530] dark:text-[#E8E6DF] font-medium">
+            Tarik & taruh foto daun di sini
+          </p>
+          <p className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] mt-1">
+            atau klik untuk memilih file dari komputer Anda
+          </p>
+          <p className="text-[11px] text-[#5F6A64]/70 dark:text-[#A8AFA9]/50 mt-3 font-mono">
+            PNG / JPG · maks. 5MB
+          </p>
+        </div>
+      ) : (
+        <div className="relative rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#EFEBE1]/30 dark:bg-black/20 p-4 flex flex-col items-center justify-center min-h-[220px]">
+          {isAnalyzing ? (
+            <div className="absolute inset-0 bg-[#EFEBE1]/80 dark:bg-[#0E1619]/90 rounded-xl flex flex-col items-center justify-center z-10 backdrop-blur-sm">
+              <Loader2 className="animate-spin text-[#C9A24B] mb-3" size={32} />
+              <p className="text-[13px] font-medium text-[#2A3530] dark:text-[#E8E6DF] animate-pulse">
+                Menganalisis gambar...
+              </p>
+            </div>
+          ) : null}
+          <img
+            src={previewUrl}
+            alt="Paddy leaf preview"
+            className="max-h-[200px] w-auto rounded-lg object-contain shadow-md"
+          />
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && (
+        <div className="mt-4 p-3 rounded-lg border border-[#A04848]/20 bg-[#A04848]/5 text-[#A04848] dark:text-[#D17878] text-[12px] leading-relaxed">
+          {error}
+          <button
+            onClick={handleReset}
+            className="block mt-2 text-[#C9A24B] hover:underline font-medium focus:outline-none"
+          >
+            Coba File Lain
+          </button>
+        </div>
+      )}
+
+      {/* Output KPI & Action Button */}
+      {result && !error && !isAnalyzing && (
+        <div className="mt-4 space-y-4">
+          <div className="grid grid-cols-2 gap-4 border-t border-b border-[#2A3530]/10 dark:border-[#E8E6DF]/10 py-3 text-[12px]">
+            <div>
+              <p className="text-[#5F6A64] dark:text-[#A8AFA9] uppercase tracking-wider text-[10px]">
+                DIAGNOSIS
+              </p>
+              <p className="font-serif text-[18px] text-[#2A3530] dark:text-[#E8E6DF] font-medium mt-0.5">
+                {capitalizeClass(result.predicted_class)}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-[#5F6A64] dark:text-[#A8AFA9] uppercase tracking-wider text-[10px]">
+                AKURASI
+              </p>
+              <p className="font-mono text-[18px] text-[#7A9A6E] dark:text-[#84B878] font-semibold mt-0.5">
+                {(result.confidence * 100).toFixed(1)}%
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-between text-[11px] text-[#5F6A64]/80 dark:text-[#A8AFA9]/70 font-mono">
+            <span>Model: {result.model_used}</span>
+            <span>Waktu: {result.inference_time_ms}ms</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleReset}
+            className="w-full inline-flex items-center justify-center h-10 px-4 rounded-lg bg-[#C9A24B] text-[#2A1F08] text-[13px] hover:bg-[#D4B05E] transition-colors cursor-pointer font-medium focus:outline-none"
+          >
+            Analisis Ulang
+          </button>
+        </div>
+      )}
+
+      {/* Default placeholder state (waiting for input) */}
+      {!result && !error && !isAnalyzing && previewUrl && (
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={handleReset}
+            className="w-full inline-flex items-center justify-center h-10 px-4 rounded-lg border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#2A3530] dark:text-[#E8E6DF] text-[13px] hover:bg-[#2A3530]/5 dark:hover:bg-white/5 transition-colors cursor-pointer font-medium focus:outline-none"
+          >
+            Batal
+          </button>
+        </div>
+      )}
+
+      {!previewUrl && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9]">
+          <span>
+            Diagnosis:{" "}
+            <span className="text-[#2A3530] dark:text-[#E8E6DF]">
+              [ Menunggu Data ]
+            </span>
+          </span>
+          <span>
+            Akurasi:{" "}
+            <span className="text-[#2A3530] dark:text-[#E8E6DF]">[ 0% ]</span>
+          </span>
+        </div>
+      )}
     </Card>
   );
 }

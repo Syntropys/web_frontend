@@ -53,7 +53,16 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  server: { port: 5173, open: true },
+  server: {
+    port: 5173,
+    open: true,
+    proxy: {
+      "/api": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+      },
+    },
+  },
   resolve: {
     alias: {
       // Alias @ to the src directory
