@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { profilesService } from '@/services/profiles'
@@ -7,31 +7,54 @@ import type { Session } from '@supabase/supabase-js'
 export function useAuthSession() {
   const { session, user, profile, isLoading, setSession, setProfile, setLoading, reset } =
     useAuthStore()
-  const [initError, setInitError] = useState<string | null>(null)
+  const initRef = useRef(false)
 
-  // Bootstrap: load session + profile once on mount
   useEffect(() => {
+    if (initRef.current) return
+    initRef.current = true
+
     let cancelled = false
 
     async function bootstrap() {
+      const TIMEOUT_MS = 8000
+
+      const timeout = new Promise<null>((resolve) =>
+        setTimeout(() => resolve(null), TIMEOUT_MS)
+      )
+
       try {
-        const { data } = await supabase.auth.getSession()
+        const sessionResult = await Promise.race([
+          supabase.auth.getSession(),
+          timeout,
+        ])
+
         if (cancelled) return
 
-        const s: Session | null = data.session
-        setSession(s)
-
-        if (s?.user) {
-          try {
-            const prof = await profilesService.getById(s.user.id)
-            if (!cancelled) setProfile(prof)
-          } catch {
-            // profile may not exist yet (trigger race) — non-fatal
-            if (!cancelled) setProfile(null)
-          }
+        // Timeout or network failure — treat as no session
+        if (!sessionResult || !('data' in sessionResult)) {
+          reset()
+          return
         }
-      } catch (err) {
-        if (!cancelled) setInitError('Gagal memuat sesi')
+
+        const { data } = sessionResult
+        const s: Session | null = data?.session ?? null
+
+        // Session found in storage
+        if (s) {
+          setSession(s)
+          if (s?.user && !cancelled) {
+            try {
+              const prof = await profilesService.getById(s.user.id)
+              if (!cancelled) setProfile(prof)
+            } catch {
+              if (!cancelled) setProfile(null)
+            }
+          }
+        } else {
+          reset()
+        }
+      } catch {
+        if (!cancelled) reset()
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -40,17 +63,14 @@ export function useAuthSession() {
     setLoading(true)
     bootstrap()
 
-    // Listen for auth changes
-    const { data: sub } = supabase.auth.onAuthStateChange(async (event, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       if (cancelled) return
       setSession(s)
       if (s?.user) {
-        try {
-          const prof = await profilesService.getById(s.user.id)
-          if (!cancelled) setProfile(prof)
-        } catch {
-          if (!cancelled) setProfile(null)
-        }
+        profilesService
+          .getById(s.user.id)
+          .then((prof) => { if (!cancelled) setProfile(prof) })
+          .catch(() => { if (!cancelled) setProfile(null) })
       } else {
         if (!cancelled) setProfile(null)
       }
@@ -67,7 +87,6 @@ export function useAuthSession() {
     user,
     profile,
     isLoading,
-    initError,
     isAdmin: profile?.role === 'admin',
     isAuthenticated: !!session,
   }
