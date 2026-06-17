@@ -299,7 +299,7 @@ export const KalimantanMap = memo(function KalimantanMap({
           attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
           url={tileUrl}
         />
-        <MapController selectedBpsCode={selectedBpsCode} dbData={activeDbData} />
+        <MapController selectedBpsCode={selectedBpsCode} dbData={activeDbData} onSelectRegion={onSelectRegion} />
         {/* Render Regencies Layer (interactive choropleth) */}
         {kabGeoData && (
           <GeoJSON
@@ -324,6 +324,7 @@ export const KalimantanMap = memo(function KalimantanMap({
 function MapController({
   selectedBpsCode,
   dbData,
+  onSelectRegion,
 }: {
   selectedBpsCode: string | null;
   dbData: Map<string, {
@@ -334,14 +335,29 @@ function MapController({
     centroid_lat?: number | null;
     centroid_lng?: number | null;
   }>;
+  onSelectRegion?: (bpsCode: string | null) => void;
 }) {
   const map = useMap();
+  
+  useEffect(() => {
+    const handlePopupClose = () => {
+      if (onSelectRegion) {
+        onSelectRegion(null);
+      }
+    };
+    map.on("popupclose", handlePopupClose);
+    return () => {
+      map.off("popupclose", handlePopupClose);
+    };
+  }, [map, onSelectRegion]);
   
   useEffect(() => {
     if (!selectedBpsCode) return;
     const entry = dbData.get(selectedBpsCode);
     if (entry && entry.centroid_lat && entry.centroid_lng) {
-      map.setView([entry.centroid_lat, entry.centroid_lng], 8, { animate: true });
+      const currentZoom = map.getZoom();
+      const targetZoom = currentZoom && currentZoom > 6 ? currentZoom : 8;
+      map.setView([entry.centroid_lat, entry.centroid_lng], targetZoom, { animate: true });
       
       const priorityText = entry.cluster_label === 0 ? "Tinggi" : entry.cluster_label === 1 ? "Sedang" : "Rendah";
       const color = entry.cluster_label === 0 ? "#C9A24B" : entry.cluster_label === 1 ? "#7E8E78" : "#4B5651";
@@ -724,18 +740,18 @@ export function Peta() {
           <div className="h-px bg-[#2A3530]/12 dark:bg-[#E8E6DF]/12" />
 
           {/* Premium Locked AI Chatbot Teaser */}
-          <div className="p-3 rounded-lg bg-[#EFEBE1]/80 dark:bg-[#12201C]/20 border border-[#8C6E26]/15 dark:border-[#C9A24B]/15 flex items-center justify-between gap-3 text-[12px] relative overflow-hidden group shrink-0">
-            <div className="flex items-center gap-2 text-[#5F6A64] dark:text-[#A8AFA9] min-w-0 z-10">
-              <svg className="w-4 h-4 text-[#8C6E26] dark:text-[#C9A24B] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <div className="p-3 rounded-lg bg-[#EFEBE1]/80 dark:bg-[#12201C]/20 border border-[#8C6E26]/15 dark:border-[#C9A24B]/15 flex items-start sm:items-center justify-between gap-3 text-[12px] relative overflow-hidden group shrink-0">
+            <div className="flex items-start gap-2 text-[#5F6A64] dark:text-[#A8AFA9] min-w-0 z-10">
+              <svg className="w-4 h-4 text-[#8C6E26] dark:text-[#C9A24B] shrink-0 mt-0.5 sm:mt-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              <span className="truncate">
+              <span className="break-words">
                 Bandingkan yield Banjar vs Tabalong 2024 via <strong className="text-[#8C6E26] dark:text-[#C9A24B]">Asisten AI</strong>
               </span>
             </div>
             <Link
               to="/masuk"
-              className="px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider rounded bg-[#8C6E26] dark:bg-[#C9A24B] text-[#F7F3EA] dark:text-[#0F181B] font-semibold hover:bg-[#70581E] dark:hover:bg-[#D9B25B] transition-colors shrink-0 z-10"
+              className="px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider rounded bg-[#8C6E26] dark:bg-[#C9A24B] text-[#F7F3EA] dark:text-[#0F181B] font-semibold hover:bg-[#70581E] dark:hover:bg-[#D9B25B] transition-colors shrink-0 z-10 mt-0.5 sm:mt-0"
             >
               Masuk
             </Link>
