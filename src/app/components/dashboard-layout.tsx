@@ -24,6 +24,8 @@ import {
 
 import { BrandMark } from "./brand-mark";
 import { useAuthSession } from "@/hooks/useAuthSession";
+import { authService } from "@/services/auth";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 const navItems = [
   { to: "/dashboard/ringkasan", label: "Ringkasan", icon: LayoutDashboard },
@@ -55,7 +57,8 @@ export function DashboardLayout({
   children: ReactNode;
 }) {
   const { theme, toggle } = useThemeStore();
-  const { profile, isAdmin, isAuthenticated } = useAuthSession();
+  const { reset } = useAuthStore()
+  const { profile, isAdmin, isAuthenticated } = useAuthSession()
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -81,11 +84,12 @@ export function DashboardLayout({
   const handleLogout = async () => {
     setLoggingOut(true);
     try {
-      await authService.signOut()
+      await authService.signOut();
+      reset();
     } catch {
-      // ignore
+      reset();
     } finally {
-      navigate("/masuk", { replace: true })
+      navigate("/masuk", { replace: true });
     }
   };
 
