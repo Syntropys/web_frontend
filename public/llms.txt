@@ -1,0 +1,9 @@
+# Agrolytics - Smart Agricultural BI Kalimantan
+
+> Platform AI dan Business Intelligence untuk memprediksi produktivitas panen padi dan diagnosis penyakit tanaman secara instan berbasis data terintegrasi di Kalimantan.
+
+## Core Features
+
+- [Spatial Map Prediction](/dashboard) - Proyeksi produktivitas panen padi Kalimantan 2026.
+- [Disease Diagnosis](/dashboard/penyakit) - Deteksi penyakit daun padi instan menggunakan Computer Vision.
+- [Spatial Vulnerability Map](/dashboard/peta) - Sebaran prioritas kerentanan wilayah per kabupaten.
