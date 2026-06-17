@@ -7,7 +7,19 @@ const STORAGE_KEY = 'agrolytics-theme-v3'
 
 function readTheme(): Theme {
   if (typeof window === 'undefined') return 'light'
-  return (localStorage.getItem(STORAGE_KEY) as Theme) || 'light'
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (!stored) return 'light'
+  try {
+    const parsed = JSON.parse(stored)
+    if (parsed && parsed.state && (parsed.state.theme === 'dark' || parsed.state.theme === 'light')) {
+      return parsed.state.theme
+    }
+  } catch (e) {
+    if (stored === 'dark' || stored === 'light') {
+      return stored as Theme
+    }
+  }
+  return 'light'
 }
 
 function applyTheme(theme: Theme) {

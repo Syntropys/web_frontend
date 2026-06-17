@@ -355,9 +355,8 @@ function MapController({
     if (!selectedBpsCode) return;
     const entry = dbData.get(selectedBpsCode);
     if (entry && entry.centroid_lat && entry.centroid_lng) {
-      const currentZoom = map.getZoom();
-      const targetZoom = currentZoom && currentZoom > 6 ? currentZoom : 8;
-      map.setView([entry.centroid_lat, entry.centroid_lng], targetZoom, { animate: true });
+      const currentZoom = map.getZoom() || 6;
+      map.setView([entry.centroid_lat, entry.centroid_lng], currentZoom, { animate: true });
       
       const priorityText = entry.cluster_label === 0 ? "Tinggi" : entry.cluster_label === 1 ? "Sedang" : "Rendah";
       const color = entry.cluster_label === 0 ? "#C9A24B" : entry.cluster_label === 1 ? "#7E8E78" : "#4B5651";
