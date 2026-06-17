@@ -212,7 +212,7 @@ export const KalimantanMap = memo(function KalimantanMap({
   ];
 
   return (
-    <div className="h-[420px] w-full rounded-xl overflow-hidden border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F7F3EA] dark:bg-[#0F181B] relative z-0">
+    <div data-lenis-prevent className="h-[420px] w-full rounded-xl overflow-hidden border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F7F3EA] dark:bg-[#0F181B] relative z-0">
       <style>{`
         .custom-leaflet-popup .leaflet-popup-content-wrapper {
           background: ${theme === "dark" ? "rgba(15, 24, 27, 0.95)" : "rgba(247, 243, 234, 0.95)"} !important;
@@ -705,7 +705,7 @@ export function Peta() {
             </div>
 
             {/* Scrollable list */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1 scrollbar-custom min-h-0">
+            <div data-lenis-prevent className="flex-1 overflow-y-auto overflow-x-hidden pr-1 scrollbar-custom min-h-0">
               {displayedRegions.length > 0 ? (
                 displayedRegions.map((region) => {
                   const yieldText = region.predicted_yield 
