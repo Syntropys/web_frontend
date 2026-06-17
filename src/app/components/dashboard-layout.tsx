@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, useRef, type ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router";
 import { useThemeStore } from "@/stores/useThemeStore";
 import {
@@ -58,11 +58,18 @@ export function DashboardLayout({
 }) {
   const { theme, toggle } = useThemeStore();
   const { reset } = useAuthStore()
-  const { profile, isAdmin, isAuthenticated } = useAuthSession()
+  const { profile, isAdmin, isAuthenticated, isLoading } = useAuthSession()
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate("/masuk", { replace: true });
+    }
+  }, [isLoading, isAuthenticated, navigate]);
 
   useEffect(() => {
     document.title = pageTitle;
@@ -93,7 +100,7 @@ export function DashboardLayout({
     }
   };
 
-  if (!isAuthenticated) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#EFEBE1] dark:bg-[#0B1215]">
         <div className="flex items-center gap-3 text-[#5F6A64] dark:text-[#B8BFB9]">
@@ -105,6 +112,10 @@ export function DashboardLayout({
         </div>
       </div>
     );
+  }
+
+  if (!isAuthenticated) {
+    return null;
   }
 
   return (
@@ -210,16 +221,16 @@ export function DashboardLayout({
             <span className="hidden sm:inline-block h-6 w-px bg-[#2A3530]/12 dark:bg-[#E8E6DF]/12 mx-0.5" />
 
             <button
-              onClick={handleLogout}
+              onClick={() => setShowLogoutConfirm(true)}
               disabled={loggingOut}
               aria-label="Keluar"
               className="hidden sm:inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-[#2A3530] text-[#EFEBE1] dark:bg-[#E8E6DF] dark:text-[#0B1215] text-[12px] hover:bg-[#3A4540] dark:hover:bg-[#D4D2CB] transition-colors cursor-pointer disabled:opacity-50"
             >
               <LogOut size={14} strokeWidth={1.6} />
-              {loggingOut ? '…' : 'Keluar'}
+              Keluar
             </button>
             <button
-              onClick={handleLogout}
+              onClick={() => setShowLogoutConfirm(true)}
               disabled={loggingOut}
               aria-label="Keluar"
               className="sm:hidden w-10 h-10 rounded-full bg-[#2A3530] text-[#EFEBE1] dark:bg-[#E8E6DF] dark:text-[#0B1215] flex items-center justify-center hover:bg-[#3A4540] dark:hover:bg-[#D4D2CB] transition-colors cursor-pointer disabled:opacity-50"
@@ -253,6 +264,90 @@ export function DashboardLayout({
             © {new Date().getFullYear()} Agrolytics
           </div>
         </footer>
+        {showLogoutConfirm && (
+          <ConfirmLogoutDialog
+            onCancel={() => setShowLogoutConfirm(false)}
+            onConfirm={handleLogout}
+            loggingOut={loggingOut}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ConfirmLogoutDialog({
+  onCancel,
+  onConfirm,
+  loggingOut,
+}: {
+  onCancel: () => void;
+  onConfirm: () => void;
+  loggingOut: boolean;
+}) {
+  const cancelRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
+    window.addEventListener("keydown", onKey);
+    cancelRef.current?.focus();
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onCancel]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-[#0A0F11]/60 backdrop-blur-sm"
+        onClick={onCancel}
+      />
+      <div
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="confirm-logout-title"
+        aria-describedby="confirm-logout-desc"
+        className="relative w-full max-w-sm rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/10 bg-[#EFEBE1] dark:bg-[#0E1619] p-6 shadow-2xl shadow-black/30"
+      >
+        <div className="flex flex-col items-center text-center">
+          <span
+            aria-hidden
+            className="inline-flex w-11 h-11 rounded-full bg-[#A04848]/10 dark:bg-[#A04848]/15 text-[#A04848] dark:text-[#D17878] items-center justify-center ring-1 ring-[#A04848]/20 dark:ring-[#A04848]/25"
+          >
+            <LogOut size={18} strokeWidth={1.7} />
+          </span>
+          <h2
+            id="confirm-logout-title"
+            className="mt-4 font-serif text-[20px] leading-tight tracking-tight text-[#2A3530] dark:text-[#E8E6DF]"
+          >
+            Konfirmasi Keluar
+          </h2>
+          <p
+            id="confirm-logout-desc"
+            className="mt-2 text-[13px] leading-[1.65] text-[#5F6A64] dark:text-[#A8AFA9]"
+          >
+            Apakah Anda yakin ingin keluar dari sistem?
+          </p>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-2.5">
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={loggingOut}
+            className="inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg border border-[#A04848]/35 dark:border-[#A04848]/40 bg-transparent text-[#A04848] dark:text-[#D17878] text-[13px] hover:bg-[#A04848]/8 dark:hover:bg-[#A04848]/12 hover:border-[#A04848]/55 transition-colors cursor-pointer focus:outline-none disabled:opacity-50"
+          >
+            {loggingOut ? 'Keluar...' : 'Keluar'}
+          </button>
+          <button
+            ref={cancelRef}
+            type="button"
+            onClick={onCancel}
+            className="inline-flex items-center justify-center h-10 px-4 rounded-lg bg-[#C9A24B] text-[#2A1F08] text-[13px] hover:bg-[#D4B05E] transition-colors cursor-pointer focus:outline-none"
+          >
+            Batal
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -17,7 +17,7 @@ const emailSchema = z
 
 const passwordLoginSchema = z
   .string()
-  .min(6, 'Min. 6 karakter')
+  .min(8, 'Min. 8 karakter')
   .max(128, 'Terlalu panjang')
 
 const passwordStrongSchema = z
@@ -37,7 +37,11 @@ export const DaftarSchema = z.object({
   nama: namaSchema,
   email: emailSchema,
   password: passwordStrongSchema,
+  konfirmasiPassword: z.string().min(1, 'Konfirmasi kata sandi wajib diisi'),
   setuju: z.literal(true, { message: 'Anda harus menyetujui Syarat & Privasi' }),
+}).refine((data) => data.password === data.konfirmasiPassword, {
+  message: 'Kata sandi tidak cocok',
+  path: ['konfirmasiPassword'],
 })
 
 export const AddUserSchema = z.object({

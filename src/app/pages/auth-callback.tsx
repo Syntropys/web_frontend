@@ -29,7 +29,7 @@ export default function AuthCallback() {
       setSession(session)
 
       if (type === 'recovery') {
-        navigate('/dashboard?reset=success', { replace: true })
+        navigate('/reset-password', { replace: true })
       } else {
         navigate('/dashboard', { replace: true })
       }

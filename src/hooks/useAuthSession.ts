@@ -7,12 +7,8 @@ import type { Session } from '@supabase/supabase-js'
 export function useAuthSession() {
   const { session, user, profile, isLoading, setSession, setProfile, setLoading, reset } =
     useAuthStore()
-  const initRef = useRef(false)
 
   useEffect(() => {
-    if (initRef.current) return
-    initRef.current = true
-
     let cancelled = false
 
     async function bootstrap() {
@@ -41,13 +37,22 @@ export function useAuthSession() {
 
         // Session found in storage
         if (s) {
-          setSession(s)
-          if (s?.user && !cancelled) {
-            try {
-              const prof = await profilesService.getById(s.user.id)
-              if (!cancelled) setProfile(prof)
-            } catch {
-              if (!cancelled) setProfile(null)
+          try {
+            const prof = await profilesService.getById(s.user.id)
+            if (prof?.status === 'suspended') {
+              supabase.auth.signOut()
+              reset()
+              setLoading(false)
+              return
+            }
+            if (!cancelled) {
+              setSession(s)
+              setProfile(prof)
+            }
+          } catch {
+            if (!cancelled) {
+              setSession(s)
+              setProfile(null)
             }
           }
         } else {
@@ -63,16 +68,29 @@ export function useAuthSession() {
     setLoading(true)
     bootstrap()
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, s) => {
       if (cancelled) return
-      setSession(s)
-      if (s?.user) {
-        profilesService
-          .getById(s.user.id)
-          .then((prof) => { if (!cancelled) setProfile(prof) })
-          .catch(() => { if (!cancelled) setProfile(null) })
+      if (s) {
+        try {
+          const prof = await profilesService.getById(s.user.id)
+          if (prof?.status === 'suspended') {
+            supabase.auth.signOut()
+            reset()
+            setLoading(false)
+            return
+          }
+          if (!cancelled) {
+            setSession(s)
+            setProfile(prof)
+          }
+        } catch {
+          if (!cancelled) {
+            setSession(s)
+            setProfile(null)
+          }
+        }
       } else {
-        if (!cancelled) setProfile(null)
+        if (!cancelled) reset()
       }
     })
 

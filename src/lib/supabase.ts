@@ -10,6 +10,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
+const customStorage = {
+  getItem: (key: string): string | null => {
+    const localVal = localStorage.getItem(key)
+    if (localVal) return localVal
+    return sessionStorage.getItem(key)
+  },
+  setItem: (key: string, value: string): void => {
+    const rememberMe = localStorage.getItem('agrolytics_remember_me') !== 'false'
+    if (rememberMe) {
+      localStorage.setItem(key, value)
+    } else {
+      sessionStorage.setItem(key, value)
+    }
+  },
+  removeItem: (key: string): void => {
+    localStorage.removeItem(key)
+    sessionStorage.removeItem(key)
+  },
+}
+
 export const supabase = createClient<Database>(
   supabaseUrl || 'https://placeholder.supabase.co',
   supabaseAnonKey || 'placeholder',
@@ -18,6 +38,7 @@ export const supabase = createClient<Database>(
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
+      storage: customStorage,
     },
   },
 )

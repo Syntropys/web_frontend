@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AddUserSchema, fieldErrors } from '@/schemas';
+import { fieldErrors } from '@/schemas';
 import {
   Search,
   UserPlus,
@@ -9,10 +9,18 @@ import {
   X,
   XCircle,
   AlertTriangle,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
 } from "lucide-react";
 import { DashboardLayout } from "../../../components/dashboard-layout";
+import { supabase } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
+import { profilesService } from "@/services/profiles";
+import { useAuthStore } from "@/stores/useAuthStore";
 
-type Role = "Admin" | "Publik";
+type Role = "Admin" | "Pengguna";
 type Status = "Aktif" | "Ditangguhkan";
 
 type UserRow = {
@@ -23,56 +31,47 @@ type UserRow = {
   status: Status;
 };
 
-const seed: UserRow[] = [
-  {
-    id: "u-001",
-    nama: "Siti Aminah",
-    email: "siti.aminah@agrolytics.id",
-    role: "Admin",
-    status: "Aktif",
-  },
-  {
-    id: "u-002",
-    nama: "Budi Santoso",
-    email: "budi.s@email.com",
-    role: "Publik",
-    status: "Aktif",
-  },
-  {
-    id: "u-003",
-    nama: "Rahmat Hidayat",
-    email: "rahmat.h@email.com",
-    role: "Publik",
-    status: "Aktif",
-  },
-  {
-    id: "u-004",
-    nama: "Dewi Lestari",
-    email: "dewi.l@email.com",
-    role: "Publik",
-    status: "Ditangguhkan",
-  },
-  {
-    id: "u-005",
-    nama: "Andi Pratama",
-    email: "andi.p@email.com",
-    role: "Publik",
-    status: "Aktif",
-  },
-];
-
 const roleTone: Record<Role, string> = {
   Admin: "bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B]",
-  Publik:
+  Pengguna:
     "bg-[#2A3530]/8 dark:bg-[#E8E6DF]/8 text-[#5F6A64] dark:text-[#B8BFB9]",
 };
 
 export default function PenggunaPage() {
-  const [users, setUsers] = useState(seed);
+  const { profile } = useAuthStore();
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<"" | Role>("");
   const [showForm, setShowForm] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<UserRow | null>(null);
+
+  const mapDbUser = (p: any): UserRow => ({
+    id: p.id,
+    nama: p.full_name || p.email.split("@")[0],
+    email: p.email,
+    role: p.role === "admin" ? "Admin" : "Pengguna",
+    status: p.status === "suspended" ? "Ditangguhkan" : "Aktif",
+  });
+
+  const loadUsers = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const list = await profilesService.listUsers();
+      setUsers(list.map(mapDbUser));
+    } catch (err) {
+      console.error(err);
+      setError("Gagal memuat daftar pengguna.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
 
   const filtered = users.filter((u) => {
     const matchQ =
@@ -90,33 +89,58 @@ export default function PenggunaPage() {
     admin: users.filter((u) => u.role === "Admin").length,
   };
 
-  const toggleStatus = (id: string) =>
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === id
-          ? { ...u, status: u.status === "Aktif" ? "Ditangguhkan" : "Aktif" }
-          : u,
-      ),
-    );
+  const toggleStatus = async (id: string) => {
+    const user = users.find((u) => u.id === id);
+    if (!user) return;
+    if (user.role === "Admin") {
+      alert("Akun Admin tidak dapat ditangguhkan.");
+      return;
+    }
+    const newStatus = user.status === "Aktif" ? "suspended" : "active";
+    try {
+      const { error } = await supabase.rpc("admin_set_user_status", {
+        target_user: user.id,
+        new_status: newStatus,
+      });
+      if (error) throw error;
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === user.id
+            ? { ...u, status: newStatus === "suspended" ? "Ditangguhkan" : "Aktif" }
+            : u
+        )
+      );
+    } catch (err: any) {
+      alert(err.message || "Gagal mengubah status pengguna.");
+    }
+  };
 
   const askDelete = (user: UserRow) => setPendingDelete(user);
   const cancelDelete = () => setPendingDelete(null);
-  const confirmDelete = () => {
+  
+  const confirmDelete = async () => {
     if (!pendingDelete) return;
-    setUsers((prev) => prev.filter((u) => u.id !== pendingDelete.id));
-    setPendingDelete(null);
-  };
-
-  const addUser = (data: { nama: string; email: string; role: Role }) => {
-    setUsers((prev) => [
-      {
-        id: `u-${String(prev.length + 1).padStart(3, "0")}`,
-        ...data,
-        status: "Aktif",
-      },
-      ...prev,
-    ]);
-    setShowForm(false);
+    if (pendingDelete.id === profile?.id) {
+      alert("Anda tidak dapat menghapus akun Anda sendiri.");
+      setPendingDelete(null);
+      return;
+    }
+    if (pendingDelete.role === "Admin") {
+      alert("Akun Admin tidak dapat dihapus.");
+      setPendingDelete(null);
+      return;
+    }
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", pendingDelete.id);
+      if (error) throw error;
+      setUsers((prev) => prev.filter((u) => u.id !== pendingDelete.id));
+      setPendingDelete(null);
+    } catch (err: any) {
+      alert(err.message || "Gagal menghapus pengguna.");
+    }
   };
 
   return (
@@ -167,7 +191,7 @@ export default function PenggunaPage() {
             >
               <option value="">Semua Role</option>
               <option value="Admin">Admin</option>
-              <option value="Publik">Publik</option>
+              <option value="Pengguna">Pengguna</option>
             </select>
           </div>
           <button
@@ -179,142 +203,162 @@ export default function PenggunaPage() {
           </button>
         </div>
 
-        {/* Mobile cards */}
-        <div className="lg:hidden space-y-2.5">
-          {filtered.map((u) => (
-            <div
-              key={u.id}
-              className="rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/8 bg-white/30 dark:bg-white/[0.02] p-3.5"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-[13px] text-[#2A3530] dark:text-[#E8E6DF] truncate">
-                    {u.nama}
-                  </div>
-                  <div className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] truncate">
-                    {u.email}
-                  </div>
-                </div>
-                <span
-                  className={`inline-flex whitespace-nowrap px-2.5 py-0.5 rounded-full text-[12px] ${roleTone[u.role]}`}
-                >
-                  {u.role}
-                </span>
-              </div>
-              <div className="mt-2.5 pt-2.5 border-t border-[#2A3530]/12 dark:border-[#E8E6DF]/12 flex items-center justify-end text-[12px] text-[#5F6A64] dark:text-[#A8AFA9]">
-                <span>{u.status}</span>
-              </div>
-              <div className="mt-2.5 flex items-center gap-2">
-                <button
-                  onClick={() => toggleStatus(u.id)}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 h-10 rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
-                >
-                  {u.status === "Aktif" ? (
-                    <Pause size={12} />
-                  ) : (
-                    <ShieldCheck size={12} />
-                  )}
-                  {u.status === "Aktif" ? "Tangguhkan" : "Aktifkan"}
-                </button>
-                <button
-                  onClick={() => askDelete(u)}
-                  aria-label="Hapus"
-                  className="w-10 h-10 inline-flex items-center justify-center rounded-md border border-[#A04848]/30 text-[#A04848] hover:bg-[#A04848]/8 transition-colors cursor-pointer"
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Desktop table */}
-        <div className="hidden lg:block">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="text-[11px] uppercase tracking-wider text-[#5F6A64] dark:text-[#A8AFA9]">
-                <th className="px-3 py-2 font-normal">Pengguna</th>
-                <th className="px-3 py-2 font-normal">Role</th>
-                <th className="px-3 py-2 font-normal">Status</th>
-                <th className="px-3 py-2 font-normal text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="text-[13px] text-[#2A3530] dark:text-[#E8E6DF]">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-12 text-[#5F6A64] dark:text-[#A8AFA9] gap-2.5">
+            <Loader2 size={20} className="animate-spin text-[#C9A24B]" />
+            <span className="text-[13px]">Memuat data pengguna…</span>
+          </div>
+        ) : error ? (
+          <div className="text-center py-10 text-[13px] text-[#A04848] dark:text-[#D17878]">
+            {error}
+          </div>
+        ) : (
+          <>
+            {/* Mobile cards */}
+            <div className="lg:hidden space-y-2.5">
               {filtered.map((u) => (
-                <tr
+                <div
                   key={u.id}
-                  className="border-t border-[#2A3530]/15 dark:border-[#E8E6DF]/8"
+                  className="rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/8 bg-white/30 dark:bg-white/[0.02] p-3.5"
                 >
-                  <td className="px-3 py-3">
+                  <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="truncate">{u.nama}</div>
+                      <div className="text-[13px] text-[#2A3530] dark:text-[#E8E6DF] truncate">
+                        {u.nama}
+                      </div>
                       <div className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] truncate">
                         {u.email}
                       </div>
                     </div>
-                  </td>
-                  <td className="px-3 py-3">
                     <span
                       className={`inline-flex whitespace-nowrap px-2.5 py-0.5 rounded-full text-[12px] ${roleTone[u.role]}`}
                     >
                       {u.role}
                     </span>
-                  </td>
-                  <td className="px-3 py-3">
-                    <span
-                      className={`inline-flex items-center gap-1.5 whitespace-nowrap text-[12px] ${
-                        u.status === "Aktif"
-                          ? "text-[#5A8A4E] dark:text-[#7A9A6E]"
-                          : "text-[#A04848] dark:text-[#D17878]"
-                      }`}
+                  </div>
+                  <div className="mt-2.5 pt-2.5 border-t border-[#2A3530]/12 dark:border-[#E8E6DF]/12 flex items-center justify-end text-[12px] text-[#5F6A64] dark:text-[#A8AFA9]">
+                    <span>{u.status}</span>
+                  </div>
+                  <div className="mt-2.5 flex items-center gap-2">
+                    <button
+                      onClick={() => toggleStatus(u.id)}
+                      disabled={u.role === "Admin"}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 h-10 rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-[#5F6A64]"
                     >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${u.status === "Aktif" ? "bg-[#7A9A6E]" : "bg-[#A04848]"}`}
-                      />
-                      {u.status}
-                    </span>
-                  </td>
-                  <td className="px-3 py-3">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        onClick={() => toggleStatus(u.id)}
-                        aria-label={
-                          u.status === "Aktif" ? "Tangguhkan" : "Aktifkan"
-                        }
-                        className="w-8 h-8 inline-flex items-center justify-center rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
-                      >
-                        {u.status === "Aktif" ? (
-                          <Pause size={13} strokeWidth={1.7} />
-                        ) : (
-                          <ShieldCheck size={13} strokeWidth={1.7} />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => askDelete(u)}
-                        aria-label="Hapus"
-                        className="w-8 h-8 inline-flex items-center justify-center rounded-md border border-[#A04848]/30 text-[#A04848] hover:bg-[#A04848]/8 transition-colors cursor-pointer"
-                      >
-                        <Trash2 size={13} strokeWidth={1.7} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                      {u.status === "Aktif" ? (
+                        <Pause size={12} />
+                      ) : (
+                        <ShieldCheck size={12} />
+                      )}
+                      {u.status === "Aktif" ? "Tangguhkan" : "Aktifkan"}
+                    </button>
+                    <button
+                      onClick={() => askDelete(u)}
+                      disabled={u.role === "Admin" || u.id === profile?.id}
+                      aria-label="Hapus"
+                      className="w-10 h-10 inline-flex items-center justify-center rounded-md border border-[#A04848]/30 text-[#A04848] hover:bg-[#A04848]/8 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
 
-        {filtered.length === 0 && (
-          <div className="text-center py-10 text-[12px] text-[#5F6A64] dark:text-[#A8AFA9]">
-            Tidak ada pengguna yang cocok dengan filter.
-          </div>
+            {/* Desktop table */}
+            <div className="hidden lg:block">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="text-[11px] uppercase tracking-wider text-[#5F6A64] dark:text-[#A8AFA9]">
+                    <th className="px-3 py-2 font-normal">Pengguna</th>
+                    <th className="px-3 py-2 font-normal">Role</th>
+                    <th className="px-3 py-2 font-normal">Status</th>
+                    <th className="px-3 py-2 font-normal text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px] text-[#2A3530] dark:text-[#E8E6DF]">
+                  {filtered.map((u) => (
+                    <tr
+                      key={u.id}
+                      className="border-t border-[#2A3530]/15 dark:border-[#E8E6DF]/8"
+                    >
+                      <td className="px-3 py-3">
+                        <div className="min-w-0">
+                          <div className="truncate">{u.nama}</div>
+                          <div className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] truncate">
+                            {u.email}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3">
+                        <span
+                          className={`inline-flex whitespace-nowrap px-2.5 py-0.5 rounded-full text-[12px] ${roleTone[u.role]}`}
+                        >
+                          {u.role}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3">
+                        <span
+                          className={`inline-flex items-center gap-1.5 whitespace-nowrap text-[12px] ${
+                            u.status === "Aktif"
+                              ? "text-[#5A8A4E] dark:text-[#7A9A6E]"
+                              : "text-[#A04848] dark:text-[#D17878]"
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${u.status === "Aktif" ? "bg-[#7A9A6E]" : "bg-[#A04848]"}`}
+                          />
+                          {u.status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => toggleStatus(u.id)}
+                            disabled={u.role === "Admin"}
+                            aria-label={
+                              u.status === "Aktif" ? "Tangguhkan" : "Aktifkan"
+                            }
+                            className="w-8 h-8 inline-flex items-center justify-center rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            {u.status === "Aktif" ? (
+                              <Pause size={13} strokeWidth={1.7} />
+                            ) : (
+                              <ShieldCheck size={13} strokeWidth={1.7} />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => askDelete(u)}
+                            disabled={u.role === "Admin" || u.id === profile?.id}
+                            aria-label="Hapus"
+                            className="w-8 h-8 inline-flex items-center justify-center rounded-md border border-[#A04848]/30 text-[#A04848] hover:bg-[#A04848]/8 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            <Trash2 size={13} strokeWidth={1.7} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {filtered.length === 0 && (
+              <div className="text-center py-10 text-[12px] text-[#5F6A64] dark:text-[#A8AFA9]">
+                Tidak ada pengguna yang cocok dengan filter.
+              </div>
+            )}
+          </>
         )}
       </section>
 
       {showForm && (
         <AddUserModal
           onClose={() => setShowForm(false)}
-          onSubmit={addUser}
+          onSuccess={() => {
+            setShowForm(false);
+            loadUsers();
+          }}
           existingEmails={users.map((u) => u.email.toLowerCase())}
         />
       )}
@@ -361,27 +405,81 @@ function StatCard({
 
 function AddUserModal({
   onClose,
-  onSubmit,
+  onSuccess,
   existingEmails,
 }: {
   onClose: () => void;
-  onSubmit: (data: { nama: string; email: string; role: Role }) => void;
+  onSuccess: () => void;
   existingEmails: string[];
 }) {
   const [nama, setNama] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<Role>("Publik");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
 
-  const parsed = AddUserSchema.safeParse({ nama, email, role });
-  const errs: Record<string, string> = parsed.success
-    ? {}
-    : fieldErrors(parsed);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmailValid = emailRegex.test(email);
+  const isNameValid = nama.trim().length >= 3;
+  const isPasswordValid = password.length >= 8;
+
   const isDuplicate = existingEmails.includes(email.trim().toLowerCase());
-  if (isDuplicate) errs.email = "Email sudah terdaftar";
-  const isValid = parsed.success && !isDuplicate;
+  
+  const errs: Record<string, string> = {};
+  if (touched.nama && !isNameValid) errs.nama = "Nama minimal 3 karakter";
+  if (touched.email) {
+    if (!email) errs.email = "Wajib diisi";
+    else if (!isEmailValid) errs.email = "Format email salah";
+    else if (isDuplicate) errs.email = "Email sudah terdaftar";
+  }
+  if (touched.password && !isPasswordValid) errs.password = "Kata sandi minimal 8 karakter";
+
+  const isValid = isNameValid && isEmailValid && !isDuplicate && isPasswordValid;
 
   const onBlur = (f: string) => setTouched((t) => ({ ...t, [f]: true }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setTouched({ nama: true, email: true, password: true });
+    if (!isValid || submitting) return;
+    setSubmitting(true);
+    setFormError("");
+
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+      
+      const tempClient = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+        },
+      });
+
+      const { data: authData, error: authError } = await tempClient.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            full_name: nama.trim(),
+          },
+        },
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("Gagal membuat kredensial pengguna.");
+
+      onSuccess();
+    } catch (err: any) {
+      console.error(err);
+      setFormError(err.message || "Gagal menambahkan pengguna.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -393,12 +491,12 @@ function AddUserModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-[#0A0F11]/60 backdrop-blur-sm" onClick={onClose} />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-user-title"
-        className="relative w-full max-w-md rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#EFEBE1] dark:bg-[#0E1619] p-5 sm:p-6"
+        className="relative w-full max-w-md rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#EFEBE1] dark:bg-[#0E1619] p-5 sm:p-6 shadow-2xl"
       >
         <div className="flex items-center justify-between mb-4">
           <h2
@@ -415,15 +513,15 @@ function AddUserModal({
             <X size={14} strokeWidth={1.7} />
           </button>
         </div>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setTouched({ nama: true, email: true });
-            if (!isValid || !parsed.success) return;
-            onSubmit(parsed.data);
-          }}
-          className="space-y-3"
-        >
+        
+        {formError && (
+          <div className="mb-4 flex items-center gap-2 px-2.5 py-2 rounded-lg border border-[#B85C5C]/30 bg-[#B85C5C]/12 dark:bg-[#B85C5C]/15 text-[12px] text-[#A04848] dark:text-[#D17878]">
+            <AlertTriangle size={13} strokeWidth={1.7} className="shrink-0" />
+            <span className="min-w-0">{formError}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-3">
           <FormField
             label="Nama Lengkap"
             value={nama}
@@ -431,7 +529,7 @@ function AddUserModal({
             onBlur={() => onBlur("nama")}
             placeholder="Mis. Budi Santoso"
             maxLength={80}
-            error={touched.nama ? errs.nama : undefined}
+            error={errs.nama}
             required
             autoFocus
           />
@@ -443,22 +541,31 @@ function AddUserModal({
             type="email"
             placeholder="nama@email.com"
             maxLength={120}
-            error={touched.email ? errs.email : undefined}
+            error={errs.email}
             required
           />
-          <div>
-            <label className="block text-[12px] text-[#4A5550] dark:text-[#B8BFB9] mb-1.5">
-              Role
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as Role)}
-              className="w-full px-3 py-2.5 rounded-lg border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/60 dark:bg-white/[0.03] text-[14px] text-[#2A3530] dark:text-[#E8E6DF] outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-[#C9A24B]/20 transition-colors cursor-pointer"
+          
+          <div className="relative">
+            <FormField
+              label="Kata Sandi"
+              value={password}
+              onChange={setPassword}
+              onBlur={() => onBlur("password")}
+              type={showPassword ? "text" : "password"}
+              placeholder="Minimal 8 karakter"
+              maxLength={128}
+              error={errs.password}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-[38px] w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
             >
-              <option value="Admin">Admin</option>
-              <option value="Publik">Publik</option>
-            </select>
+              {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
           </div>
+
           <div className="flex items-center justify-end gap-2 pt-2">
             <button
               type="button"
@@ -469,10 +576,17 @@ function AddUserModal({
             </button>
             <button
               type="submit"
-              disabled={!isValid}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#C9A24B] text-[#2A1F08] text-[13px] hover:bg-[#D4B05E] transition-colors cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed disabled:hover:bg-[#C9A24B]"
+              disabled={!isValid || submitting}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#C9A24B] text-[#2A1F08] text-[13px] hover:bg-[#D4B05E] transition-colors cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
             >
-              Simpan
+              {submitting ? (
+                <>
+                  <Loader2 size={13} className="animate-spin" />
+                  Menyimpan…
+                </>
+              ) : (
+                "Simpan"
+              )}
             </button>
           </div>
         </form>

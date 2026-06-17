@@ -17,11 +17,19 @@ export default function Masuk() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(true)
   const [error, setError] = useState('')
   const [fieldErr, setFieldErr] = useState<Record<string, string>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
-  const [failCount, setFailCount] = useState(0)
-  const [lockUntil, setLockUntil] = useState<number | null>(null)
+  const [failCount, setFailCount] = useState<number>(() => {
+    if (typeof window === 'undefined') return 0
+    return Number(localStorage.getItem('agrolytics_login_fail_count') || 0)
+  })
+  const [lockUntil, setLockUntil] = useState<number | null>(() => {
+    if (typeof window === 'undefined') return null
+    const val = localStorage.getItem('agrolytics_login_lock_until')
+    return val ? Number(val) : null
+  })
   const [now, setNow] = useState(Date.now())
   const [submitting, setSubmitting] = useState(false)
   const cooldownRef = useRef<number | null>(null)
@@ -40,6 +48,8 @@ export default function Masuk() {
       setLockUntil(null)
       setFailCount(0)
       setError('')
+      localStorage.removeItem('agrolytics_login_lock_until')
+      localStorage.setItem('agrolytics_login_fail_count', '0')
     }
   }, [now, lockUntil])
 
@@ -69,8 +79,11 @@ export default function Masuk() {
   const registerFail = (message: string) => {
     const next = failCount + 1
     setFailCount(next)
+    localStorage.setItem('agrolytics_login_fail_count', next.toString())
     if (next >= MAX_ATTEMPTS) {
-      setLockUntil(Date.now() + LOCK_DURATION_MS)
+      const until = Date.now() + LOCK_DURATION_MS
+      setLockUntil(until)
+      localStorage.setItem('agrolytics_login_lock_until', until.toString())
       setError('')
     } else {
       setError(message)
@@ -89,6 +102,9 @@ export default function Masuk() {
     setFieldErr({})
     startCooldown()
 
+    // Persist rememberMe preference for Supabase dynamic storage
+    localStorage.setItem('agrolytics_remember_me', rememberMe.toString())
+
     // Proceed with Supabase auth
     try {
       const { user, session } = await authService.signInPassword({
@@ -99,9 +115,21 @@ export default function Masuk() {
       if (session) {
         try {
           const prof = await profilesService.getById(session.user.id)
+          if (prof?.status === 'suspended') {
+            await authService.signOut()
+            useAuthStore.getState().reset()
+            throw new Error('Akun Anda ditangguhkan. Silakan hubungi administrator.')
+          }
           useAuthStore.getState().setProfile(prof)
-        } catch { /* non-fatal */ }
+        } catch (err) {
+          if (err instanceof Error && err.message.includes('ditangguhkan')) {
+            throw err
+          }
+          /* non-fatal */
+        }
         setFailCount(0)
+        localStorage.setItem('agrolytics_login_fail_count', '0')
+        localStorage.removeItem('agrolytics_login_lock_until')
         navigate(from, { replace: true })
       }
     } catch (err: unknown) {
@@ -200,6 +228,8 @@ export default function Masuk() {
           <label className="inline-flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
               className="w-3.5 h-3.5 rounded border-[#2A3530]/30 dark:border-[#E8E6DF]/30 accent-[#C9A24B]"
             />
             <span className="text-[12px] text-[#5F6A64] dark:text-[#B8BFB9]">Ingat saya</span>

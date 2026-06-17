@@ -22,14 +22,18 @@ export default function Daftar() {
   const [nama, setNama] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [konfirmasiPassword, setKonfirmasiPassword] = useState('')
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [setuju, setSetuju] = useState(false)
+  const [showTermsModal, setShowTermsModal] = useState(false)
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [serverError, setServerError] = useState('')
   const [success, setSuccess] = useState(false)
 
-  const parsed = DaftarSchema.safeParse({ nama, email, password, setuju })
+  const parsed = DaftarSchema.safeParse({ nama, email, password, konfirmasiPassword, setuju })
   const liveErrs = parsed.success ? {} : fieldErrors(parsed)
   const isFormValid = parsed.success
   const strength = passwordStrength(password)
@@ -37,10 +41,12 @@ export default function Daftar() {
   const debouncedNama = useDebouncedValue(nama, 400)
   const debouncedEmail = useDebouncedValue(email, 400)
   const debouncedPassword = useDebouncedValue(password, 400)
+  const debouncedConfirmPassword = useDebouncedValue(konfirmasiPassword, 400)
   const debouncedParsed = DaftarSchema.safeParse({
     nama: debouncedNama,
     email: debouncedEmail,
     password: debouncedPassword,
+    konfirmasiPassword: debouncedConfirmPassword,
     setuju,
   })
   const debouncedErrs = debouncedParsed.success ? {} : fieldErrors(debouncedParsed)
@@ -63,7 +69,7 @@ export default function Daftar() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitAttempted(true)
-    setTouched({ nama: true, email: true, password: true, setuju: true })
+    setTouched({ nama: true, email: true, password: true, konfirmasiPassword: true, setuju: true })
     if (!parsed.success || submitting) return
     setSubmitting(true)
     setServerError('')
@@ -206,6 +212,30 @@ export default function Daftar() {
           )}
         </div>
 
+        <Field
+          label="Konfirmasi Kata Sandi"
+          type={showConfirmPassword ? 'text' : 'password'}
+          placeholder="Ulangi kata sandi Anda"
+          icon={<Lock size={16} strokeWidth={1.6} />}
+          value={konfirmasiPassword}
+          onChange={(e) => setKonfirmasiPassword(e.target.value)}
+          onBlur={() => onBlur('konfirmasiPassword')}
+          error={touched.konfirmasiPassword ? errs.konfirmasiPassword : undefined}
+          autoComplete="new-password"
+          maxLength={128}
+          trailing={
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((v) => !v)}
+              aria-label={showConfirmPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+            >
+              {showConfirmPassword ? <EyeOff size={16} strokeWidth={1.6} /> : <Eye size={16} strokeWidth={1.6} />}
+            </button>
+          }
+          required
+        />
+
         <div className="pt-1">
           <label className="flex items-start gap-2 cursor-pointer">
             <input
@@ -216,9 +246,21 @@ export default function Daftar() {
             />
             <span className="text-[12px] leading-[1.6] text-[#5F6A64] dark:text-[#B8BFB9]">
               Setuju dengan{' '}
-              <a href="#" className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors">Syarat</a>
+              <a
+                href="#"
+                onClick={(e) => { e.preventDefault(); setShowTermsModal(true) }}
+                className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
+              >
+                Syarat
+              </a>
               {' '}&{' '}
-              <a href="#" className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors">Privasi</a>.
+              <a
+                href="#"
+                onClick={(e) => { e.preventDefault(); setShowPrivacyModal(true) }}
+                className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
+              >
+                Privasi
+              </a>.
             </span>
           </label>
           {touched.setuju && errs.setuju && (
@@ -247,6 +289,52 @@ export default function Daftar() {
           <GoogleButton onClick={handleGoogleSignUp}>Daftar dengan Google</GoogleButton>
         </div>
       </form>
+
+      {showTermsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#0A0F11]/60 backdrop-blur-sm" onClick={() => setShowTermsModal(false)} />
+          <div className="relative w-full max-w-lg rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#EFEBE1] dark:bg-[#0E1619] p-6 text-[#2A3530] dark:text-[#E8E6DF] shadow-2xl">
+            <h3 className="font-serif text-[18px] mb-4 border-b border-[#2A3530]/10 pb-2">Syarat & Ketentuan Layanan</h3>
+            <div className="max-h-[300px] overflow-y-auto pr-2 text-[13px] leading-[1.6] space-y-3 scrollbar-thin">
+              <p>Selamat datang di Agrolytics. Dengan menggunakan platform kami, Anda setuju untuk terikat oleh syarat berikut:</p>
+              <p><strong>1. Penggunaan Layanan:</strong> Anda bertanggung jawab penuh atas keamanan kredensial akun Anda dan semua aktivitas yang dilakukan di bawah akun tersebut.</p>
+              <p><strong>2. Keakuratan Data:</strong> Platform ini menyajikan analisis berbasis data historis pertanian dan model AI iklim. Hasil prediksi tidak dapat dijamin 100% mutlak dan ditujukan sebagai alat pendukung keputusan.</p>
+              <p><strong>3. Batasan Hak Cipta:</strong> Seluruh materi, desain, algoritma, dan konten visual adalah milik Agrolytics dan tidak boleh disebarluaskan tanpa izin tertulis.</p>
+            </div>
+            <div className="mt-5 flex justify-end">
+              <button
+                onClick={() => setShowTermsModal(false)}
+                className="px-4 py-2 bg-[#C9A24B] text-[#2A1F08] text-[13px] rounded-lg hover:bg-[#D4B05E] transition-colors font-medium cursor-pointer"
+              >
+                Saya Mengerti
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPrivacyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#0A0F11]/60 backdrop-blur-sm" onClick={() => setShowPrivacyModal(false)} />
+          <div className="relative w-full max-w-lg rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#EFEBE1] dark:bg-[#0E1619] p-6 text-[#2A3530] dark:text-[#E8E6DF] shadow-2xl">
+            <h3 className="font-serif text-[18px] mb-4 border-b border-[#2A3530]/10 pb-2">Kebijakan Privasi</h3>
+            <div className="max-h-[300px] overflow-y-auto pr-2 text-[13px] leading-[1.6] space-y-3 scrollbar-thin">
+              <p>Agrolytics sangat menghargai privasi data Anda. Kebijakan ini menjelaskan bagaimana kami mengelola data Anda:</p>
+              <p><strong>1. Pengumpulan Data:</strong> Kami mengumpulkan informasi dasar pendaftaran seperti nama, alamat email, dan data login untuk menyediakan akses platform.</p>
+              <p><strong>2. Keamanan Data:</strong> Kami menerapkan enkripsi dan sistem keamanan berstandar tinggi untuk mencegah akses tidak sah pada data profil Anda.</p>
+              <p><strong>3. Berbagi Informasi:</strong> Data Anda bersifat rahasia dan tidak akan diperjualbelikan kepada pihak ketiga manapun.</p>
+            </div>
+            <div className="mt-5 flex justify-end">
+              <button
+                onClick={() => setShowPrivacyModal(false)}
+                className="px-4 py-2 bg-[#C9A24B] text-[#2A1F08] text-[13px] rounded-lg hover:bg-[#D4B05E] transition-colors font-medium cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthShell>
   )
 }
