@@ -303,7 +303,7 @@ export const KalimantanMap = memo(function KalimantanMap({
         {/* Render Regencies Layer (interactive choropleth) */}
         {kabGeoData && (
           <GeoJSON
-            key={theme + "-kabupaten-" + (kabGeoData ? "loaded" : "empty")}
+            key={theme + "-kabupaten-" + activeDbData.size + "-" + (kabGeoData ? "loaded" : "empty")}
             data={kabGeoData}
             onEachFeature={onEachRegencyFeature}
           />
