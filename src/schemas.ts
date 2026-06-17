@@ -10,10 +10,10 @@ const namaSchema = z
 const emailSchema = z
   .string()
   .trim()
-  .toLowerCase()
   .min(1, 'Wajib diisi')
   .email('Format email salah')
   .max(120, 'Terlalu panjang')
+  .transform(v => v.toLowerCase())
 
 const passwordLoginSchema = z
   .string()
@@ -50,12 +50,12 @@ export type LoginInput = z.infer<typeof LoginSchema>
 export type DaftarInput = z.infer<typeof DaftarSchema>
 export type AddUserInput = z.infer<typeof AddUserSchema>
 
-export function fieldErrors<T extends z.ZodType>(
-  result: z.SafeParseReturnType<unknown, z.infer<T>>,
+export function fieldErrors(
+  result: { success: boolean; error?: { issues: Array<{ path: Array<unknown>; message: string }> } },
 ): Record<string, string> {
   if (result.success) return {} as Record<string, string>
   const errs: Record<string, string> = {}
-  for (const issue of result.error.issues) {
+  for (const issue of result.error!.issues) {
     const key = issue.path[0]?.toString() ?? '_'
     if (!errs[key]) errs[key] = issue.message
   }
