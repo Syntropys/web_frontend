@@ -113,6 +113,7 @@ export default function Masuk() {
       })
 
       if (session) {
+        useAuthStore.getState().setSession(session)
         try {
           const prof = await profilesService.getById(session.user.id)
           if (prof?.status === 'suspended') {
