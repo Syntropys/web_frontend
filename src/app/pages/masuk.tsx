@@ -91,14 +91,14 @@ export default function Masuk() {
 
     // Proceed with Supabase auth
     try {
-      const { data } = await authService.signInPassword({
+      const { user, session } = await authService.signInPassword({
         email: parsed.data.email,
         password: parsed.data.password,
       })
 
-      if (data.session) {
+      if (session) {
         try {
-          const prof = await profilesService.getById(data.session.user.id)
+          const prof = await profilesService.getById(session.user.id)
           useAuthStore.getState().setProfile(prof)
         } catch { /* non-fatal */ }
         setFailCount(0)
