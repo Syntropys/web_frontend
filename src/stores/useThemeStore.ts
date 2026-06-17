@@ -3,11 +3,11 @@ import { persist } from 'zustand/middleware'
 
 type Theme = 'dark' | 'light'
 
-const STORAGE_KEY = 'agrolytics-theme-v2'
+const STORAGE_KEY = 'agrolytics-theme-v3'
 
 function readTheme(): Theme {
-  if (typeof window === 'undefined') return 'dark'
-  return (localStorage.getItem(STORAGE_KEY) as Theme) || 'dark'
+  if (typeof window === 'undefined') return 'light'
+  return (localStorage.getItem(STORAGE_KEY) as Theme) || 'light'
 }
 
 function applyTheme(theme: Theme) {
