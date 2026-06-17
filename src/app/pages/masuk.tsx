@@ -8,7 +8,6 @@ import { authService } from '@/services/auth'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { profilesService } from '@/services/profiles'
 
-const RATE_LIMIT_EDGE = 'https://mawewomqcdnsqnxmkjlq.supabase.co/functions/v1/login-rate-limit'
 const MAX_ATTEMPTS = 5
 const LOCK_DURATION_MS = 30_000
 const SUBMIT_COOLDOWN_MS = 1200
@@ -89,33 +88,6 @@ export default function Masuk() {
     setError('')
     setFieldErr({})
     startCooldown()
-
-    // OWASP A07: Rate-limit check via Edge Function first
-    try {
-      const edgeRes = await fetch(RATE_LIMIT_EDGE, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-email': parsed.data.email,
-        },
-        body: JSON.stringify({ email: parsed.data.email, password: parsed.data.password }),
-      })
-
-      const edgeData = await edgeRes.json()
-
-      if (!edgeRes.ok || !edgeData.allowed) {
-        // Edge function blocked — show message and lock
-        const waitMs = edgeRes.headers.get('Retry-After')
-          ? Number(edgeRes.headers.get('Retry-After')) * 1000
-          : LOCK_DURATION_MS
-        setLockUntil(Date.now() + waitMs)
-        setError(edgeData.reason || 'Terlalu banyak percobaan.')
-        setSubmitting(false)
-        return
-      }
-    } catch {
-      // Edge function unreachable — fall back to direct Supabase auth (degraded mode)
-    }
 
     // Proceed with Supabase auth
     try {
