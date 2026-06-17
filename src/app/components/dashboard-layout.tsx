@@ -18,6 +18,8 @@ import {
   Home,
   Users,
   DatabaseZap,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 
@@ -121,14 +123,28 @@ export function DashboardLayout({
   return (
     <div className="min-h-screen w-full bg-[#EFEBE1] text-[#2A3530] dark:bg-[#0B1215] dark:text-[#E8E6DF] transition-colors">
       <aside
-        className={`hidden lg:flex fixed inset-y-0 left-0 flex-col border-r border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#E8E3D7]/60 dark:bg-[#0E1619]/60 backdrop-blur-xl transition-all duration-300 ${
-          sidebarOpen ? "w-[260px]" : "w-0 overflow-hidden border-r-0"
+        className={`hidden lg:flex fixed inset-y-0 left-0 flex-col border-r border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#E8E3D7]/60 dark:bg-[#0E1619]/60 backdrop-blur-xl transition-all duration-300 z-40 ${
+          sidebarOpen ? "w-[280px]" : "w-[76px]"
         }`}
       >
         <SidebarContent
           isAdmin={isAdmin}
           profile={profile}
+          isCollapsed={!sidebarOpen}
         />
+        
+        {/* Floating Toggle Button centered on the right border */}
+        <button
+          onClick={() => setSidebarOpen((v) => !v)}
+          aria-label={sidebarOpen ? "Tutup sidebar" : "Buka sidebar"}
+          className="absolute top-5 -right-3 w-6 h-6 rounded-full border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-[#E8E3D7] dark:bg-[#0E1619] flex items-center justify-center text-[#5F6A64] dark:text-[#E8E6DF] hover:border-[#C9A24B] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] shadow-sm cursor-pointer transition-all duration-300 z-50"
+        >
+          {sidebarOpen ? (
+            <ChevronLeft size={12} strokeWidth={2.2} />
+          ) : (
+            <ChevronRight size={12} strokeWidth={2.2} />
+          )}
+        </button>
       </aside>
 
       {mobileOpen && (
@@ -148,6 +164,7 @@ export function DashboardLayout({
             <SidebarContent
               isAdmin={isAdmin}
               profile={profile}
+              isCollapsed={false}
               onNavigate={() => setMobileOpen(false)}
               onLogout={handleLogout}
               loggingOut={loggingOut}
@@ -157,7 +174,7 @@ export function DashboardLayout({
       )}
 
       <div
-        className={`min-h-screen flex flex-col transition-all duration-300 ${sidebarOpen ? "lg:pl-[260px]" : "lg:pl-0"}`}
+        className={`min-h-screen flex flex-col transition-all duration-300 ${sidebarOpen ? "lg:pl-[280px]" : "lg:pl-[76px]"}`}
       >
         <header className="sticky top-0 z-30 px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 border-b border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#EFEBE1]/85 dark:bg-[#0B1215]/80 backdrop-blur-xl">
           <div className="flex items-center gap-3">
@@ -168,19 +185,9 @@ export function DashboardLayout({
             >
               <Menu size={16} strokeWidth={1.6} />
             </button>
-            <button
-              onClick={() => setSidebarOpen((v) => !v)}
-              aria-label={sidebarOpen ? "Tutup sidebar" : "Buka sidebar"}
-              className="hidden lg:flex w-9 h-9 rounded-full border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 items-center justify-center text-[#5F6A64] dark:text-[#E8E6DF] hover:border-[#C9A24B] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
-            >
-              {sidebarOpen ? (
-                <X size={16} strokeWidth={1.6} />
-              ) : (
-                <Menu size={16} strokeWidth={1.6} />
-              )}
-            </button>
-            {!sidebarOpen && (
-              <Link to="/" className="hidden lg:flex items-center gap-2">
+            {/* Always show brand/logo on desktop header if sidebar is collapsed, or on mobile */}
+            {(!sidebarOpen || mobileOpen) && (
+              <Link to="/" className="flex items-center gap-2">
                 <BrandMark size={22} className="text-[#C9A24B]" />
                 <span className="font-serif text-[18px] tracking-tight">
                   Agrolytics
@@ -357,10 +364,12 @@ function SidebarContent({
   isAdmin,
   profile,
   onNavigate,
+  isCollapsed,
 }: {
   isAdmin: boolean
   profile: { full_name?: string; email?: string } | null
   onNavigate?: () => void
+  isCollapsed: boolean
 }) {
   const displayName = profile?.full_name || profile?.email?.split('@')[0] || 'Pengguna'
   const initials = displayName
@@ -371,44 +380,52 @@ function SidebarContent({
     .toUpperCase()
   const roleLabel = isAdmin ? 'Admin' : 'Pengguna'
   return (
-    <div className="flex flex-col h-full px-5 py-6 w-[260px] sm:w-[280px]">
+    <div className={`flex flex-col h-full py-6 w-full ${isCollapsed ? 'px-2' : 'px-5'}`}>
       <Link
         to="/"
         onClick={onNavigate}
-        className="flex items-center gap-2.5 mb-6 shrink-0"
+        className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-2.5'} mb-6 shrink-0`}
       >
-        <span className="relative inline-flex w-8 h-8 items-center justify-center rounded-lg bg-[#C9A24B]/15">
+        <span className="relative inline-flex w-8 h-8 shrink-0 items-center justify-center rounded-lg bg-[#C9A24B]/15">
           <BrandMark size={18} className="text-[#C9A24B]" />
           <span className="absolute inset-0 rounded-lg ring-1 ring-[#C9A24B]/30" />
         </span>
-        <span className="font-serif text-[18px] tracking-tight text-[#2A3530] dark:text-[#E8E6DF] whitespace-nowrap">
-          Agrolytics
-        </span>
+        {!isCollapsed && (
+          <span className="font-serif text-[18px] tracking-tight text-[#2A3530] dark:text-[#E8E6DF] whitespace-nowrap">
+            Agrolytics
+          </span>
+        )}
       </Link>
 
       <div className="h-px w-full bg-gradient-to-r from-transparent via-[#2A3530]/12 dark:via-[#E8E6DF]/12 to-transparent mb-4" />
 
-      <nav className="flex-1 overflow-y-auto -mx-2 px-2">
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden -mx-2 px-2">
         <ul className="space-y-0.5">
           {navItems.map((item) => (
             <li key={item.to}>
-              <SidebarLink {...item} onClick={onNavigate} />
+              <SidebarLink {...item} onClick={onNavigate} isCollapsed={isCollapsed} />
             </li>
           ))}
         </ul>
 
         {isAdmin && (
           <>
-            <div className="mt-5 mb-2 px-3 flex items-center gap-2">
-              <span className="font-mono text-[9px] tracking-[0.22em] uppercase text-[#A07F2E] dark:text-[#C9A24B]">
-                Administrasi
-              </span>
-              <span className="h-px flex-1 bg-[#2A3530]/12 dark:bg-[#E8E6DF]/12" />
+            <div className={`mt-5 mb-2 flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-2 px-3'}`}>
+              {!isCollapsed ? (
+                <>
+                  <span className="font-mono text-[9px] tracking-[0.22em] uppercase text-[#A07F2E] dark:text-[#C9A24B]">
+                    Administrasi
+                  </span>
+                  <span className="h-px flex-1 bg-[#2A3530]/12 dark:bg-[#E8E6DF]/12" />
+                </>
+              ) : (
+                <span className="h-px w-6 bg-[#2A3530]/12 dark:bg-[#E8E6DF]/12" />
+              )}
             </div>
             <ul className="space-y-0.5">
               {adminNavItems.map((item) => (
                 <li key={item.to}>
-                  <SidebarLink {...item} onClick={onNavigate} />
+                  <SidebarLink {...item} onClick={onNavigate} isCollapsed={isCollapsed} />
                 </li>
               ))}
             </ul>
@@ -416,24 +433,26 @@ function SidebarContent({
         )}
       </nav>
 
-      <div className="mt-4 pt-4 border-t border-[#2A3530]/12 dark:border-[#E8E6DF]/12 flex items-center gap-2.5 shrink-0">
+      <div className={`mt-4 pt-4 border-t border-[#2A3530]/12 dark:border-[#E8E6DF]/12 flex items-center ${isCollapsed ? 'justify-center' : 'gap-2.5'} shrink-0`}>
         <span
           aria-hidden
           className="inline-flex w-9 h-9 shrink-0 rounded-full bg-[#C9A24B] text-[#2A1F08] items-center justify-center font-serif text-[13px] ring-1 ring-[#C9A24B]/30"
         >
           {initials}
         </span>
-        <div className="min-w-0 flex-1">
-          <div className="text-[13px] text-[#2A3530] dark:text-[#E8E6DF] truncate">
-            {displayName}
+        {!isCollapsed && (
+          <div className="min-w-0 flex-1">
+            <div className="text-[13px] text-[#2A3530] dark:text-[#E8E6DF] truncate">
+              {displayName}
+            </div>
+            <div className="flex items-center gap-1.5 text-[10px] text-[#5F6A64] dark:text-[#A8AFA9]">
+              <span className="truncate">{profile?.email || "—"}</span>
+              <span className="shrink-0 px-1.5 py-px rounded-full bg-[#C9A24B]/15 text-[#A07F2E] dark:text-[#C9A24B] uppercase tracking-wider">
+                {roleLabel}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] text-[#5F6A64] dark:text-[#A8AFA9]">
-            <span className="truncate">{profile?.email || "—"}</span>
-            <span className="shrink-0 px-1.5 py-px rounded-full bg-[#C9A24B]/15 text-[#A07F2E] dark:text-[#C9A24B] uppercase tracking-wider">
-              {roleLabel}
-            </span>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -444,18 +463,21 @@ function SidebarLink({
   label,
   icon: Icon,
   onClick,
+  isCollapsed,
 }: {
   to: string;
   label: string;
   icon: typeof CloudSun;
   onClick?: () => void;
+  isCollapsed: boolean;
 }) {
   return (
     <NavLink
       to={to}
       onClick={onClick}
+      title={isCollapsed ? label : undefined}
       className={({ isActive }) =>
-        `group relative flex items-center gap-3 mx-2.5 pl-3 pr-3 py-2 rounded-lg text-[13px] transition-all duration-200 whitespace-nowrap ${
+        `group relative flex items-center ${isCollapsed ? 'justify-center px-0 py-2.5 mx-1' : 'gap-3 mx-2.5 pl-3 pr-3 py-2'} rounded-lg text-[13px] transition-all duration-200 whitespace-nowrap ${
           isActive
             ? "bg-[#C9A24B]/12 text-[#A07F2E] dark:text-[#C9A24B]"
             : "text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#2A3530] dark:hover:text-[#E8E6DF] hover:bg-[#2A3530]/8 dark:hover:bg-[#E8E6DF]/8"
@@ -470,7 +492,7 @@ function SidebarLink({
             }`}
           />
           <span
-            className={`inline-flex w-7 h-7 items-center justify-center rounded-md transition-colors ${
+            className={`inline-flex w-7 h-7 shrink-0 items-center justify-center rounded-md transition-colors ${
               isActive
                 ? "bg-[#C9A24B]/18 text-[#A07F2E] dark:text-[#C9A24B]"
                 : "bg-[#2A3530]/4 dark:bg-[#E8E6DF]/4 text-[#5F6A64] dark:text-[#B8BFB9] group-hover:text-[#A07F2E] dark:hover:text-[#C9A24B]"
@@ -478,7 +500,7 @@ function SidebarLink({
           >
             <Icon size={14} strokeWidth={1.7} />
           </span>
-          <span className="flex-1">{label}</span>
+          {!isCollapsed && <span className="flex-1">{label}</span>}
         </>
       )}
     </NavLink>
