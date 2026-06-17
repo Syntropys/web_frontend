@@ -9,6 +9,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { diseaseService, type DiseasePredictionResponse } from "@/services/disease";
+import { KalimantanMap } from "./peta";
+import { supabase } from "@/lib/supabase";
 
 function Card({
   title,
@@ -118,12 +120,36 @@ const Sparkline = memo(function Sparkline() {
 });
 
 export function PredictionKpiCard() {
+  const [totalProd, setTotalProd] = useState<string>("2.306.722");
+
+  useEffect(() => {
+    async function fetchProduction() {
+      try {
+        const { data, error } = await supabase
+          .from("predictions")
+          .select("predicted_prod_ton")
+          .eq("target_year", 2026)
+          .eq("model_name", "lstm");
+        if (error) throw error;
+        if (data) {
+          const total = data.reduce((sum, p) => sum + Number(p.predicted_prod_ton || 0), 0);
+          if (total > 0) {
+            setTotalProd(Math.round(total).toLocaleString("id-ID"));
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching dynamic yield projection:", err);
+      }
+    }
+    fetchProduction();
+  }, []);
+
   return (
     <Card title="Proyeksi Produksi (LSTM)" eyebrow="Prediksi">
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="font-serif tracking-tight text-[26px] text-[#2A3530] dark:text-[#E8E6DF] leading-none">
-            [ 2.450.000 ]
+            {totalProd}
           </p>
           <p className="text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] mt-1">
             Ton
@@ -142,6 +168,26 @@ export function PredictionKpiCard() {
 }
 
 export function RiskKpiCard() {
+  const [highRiskCount, setHighRiskCount] = useState<number>(19);
+
+  useEffect(() => {
+    async function fetchRiskCount() {
+      try {
+        const { data, error } = await supabase
+          .from("cluster_assignments")
+          .select("cluster_label")
+          .eq("cluster_label", 0);
+        if (error) throw error;
+        if (data) {
+          setHighRiskCount(data.length);
+        }
+      } catch (err) {
+        console.error("Error fetching dynamic risk count:", err);
+      }
+    }
+    fetchRiskCount();
+  }, []);
+
   return (
     <Card title="Status Wilayah" eyebrow="Risiko">
       <div className="flex items-center gap-4">
@@ -150,7 +196,7 @@ export function RiskKpiCard() {
         </span>
         <div>
           <p className="font-serif tracking-tight text-[22px] text-[#2A3530] dark:text-[#E8E6DF] leading-none">
-            [ 12 Kabupaten ]
+            {highRiskCount} Kabupaten
           </p>
           <p className="text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] mt-1.5">
             Risiko Tinggi
@@ -164,10 +210,8 @@ export function RiskKpiCard() {
 export function SpatialMapCard() {
   return (
     <Card title="Distribusi Kerentanan Spasial" eyebrow="Peta">
-      <div className="aspect-[16/9] w-full rounded-xl bg-[#F7F3EA] dark:bg-black/40 border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 flex items-center justify-center">
-        <p className="font-mono text-[12px] tracking-wider text-[#5F6A64] dark:text-[#A8AFA9]">
-          [ Placeholder Peta Interaktif Leaflet.js ]
-        </p>
+      <div className="w-full">
+        <KalimantanMap />
       </div>
     </Card>
   );

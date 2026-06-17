@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { useState, useEffect, useMemo } from "react";
 import {
   CloudSun,
   LineChart,
@@ -9,6 +10,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { DashboardLayout } from "../../components/dashboard-layout";
+import { supabase } from "@/lib/supabase";
 
 type SummaryItem = {
   to: string;
@@ -22,69 +24,6 @@ type SummaryItem = {
   wide?: boolean;
 };
 
-const items: SummaryItem[] = [
-  {
-    to: "/dashboard/iklim",
-    eyebrow: "Iklim",
-    title: "Rata-Rata Iklim",
-    icon: CloudSun,
-    metric: "28",
-    unit: "°C",
-    caption: "Suhu · Hujan 150 mm · Lembap 80%",
-    tone: "gold",
-  },
-  {
-    to: "/dashboard/prediksi",
-    eyebrow: "Prediksi Produksi",
-    title: "Proyeksi Panen",
-    icon: LineChart,
-    metric: "2.450.000",
-    unit: "ton",
-    caption: "Model LSTM · +4,2% vs musim lalu",
-    tone: "green",
-  },
-  {
-    to: "/dashboard/risiko",
-    eyebrow: "Status Risiko",
-    title: "Wilayah Risiko Tinggi",
-    icon: ShieldAlert,
-    metric: "12",
-    unit: "kabupaten",
-    caption: "Indeks kerentanan spasial",
-    tone: "red",
-  },
-  {
-    to: "/dashboard/peta",
-    eyebrow: "Peta Spasial",
-    title: "Cakupan Pemetaan",
-    icon: Map,
-    metric: "56",
-    unit: "kabupaten",
-    caption: "Total wilayah Kalimantan",
-    tone: "neutral",
-  },
-  {
-    to: "/dashboard/tren",
-    eyebrow: "Tren Historis",
-    title: "Tren Produksi",
-    icon: TrendingUp,
-    metric: "+4,2",
-    unit: "%",
-    caption: "BPS 2018–2025 vs Prediksi LSTM",
-    tone: "green",
-  },
-  {
-    to: "/dashboard/prioritas",
-    eyebrow: "Rekomendasi",
-    title: "Aksi Prioritas",
-    icon: ListChecks,
-    metric: "3",
-    unit: "wilayah",
-    caption: "2 Tinggi · 1 Sedang",
-    tone: "gold",
-  },
-];
-
 const toneClasses: Record<SummaryItem["tone"], string> = {
   gold: "bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B]",
   green: "bg-[#7A9A6E]/15 text-[#5A8A4E] dark:text-[#7A9A6E]",
@@ -94,6 +33,120 @@ const toneClasses: Record<SummaryItem["tone"], string> = {
 };
 
 export default function RingkasanPage() {
+  const [metrics, setMetrics] = useState({
+    totalProd: "2.306.722",
+    highRiskCount: "19",
+    priorityCount: "38",
+    priorityCaption: "19 Tinggi · 19 Sedang",
+  });
+
+  useEffect(() => {
+    async function fetchSummaryMetrics() {
+      try {
+        const [predictionsRes, clustersRes] = await Promise.all([
+          supabase.from("predictions").select("predicted_prod_ton").eq("target_year", 2026).eq("model_name", "lstm"),
+          supabase.from("cluster_assignments").select("cluster_label")
+        ]);
+
+        if (predictionsRes.error) throw predictionsRes.error;
+        if (clustersRes.error) throw clustersRes.error;
+
+        const predictions = predictionsRes.data || [];
+        const clusters = clustersRes.data || [];
+
+        // Sum predicted production
+        const total = predictions.reduce(
+          (acc, p) => acc + Number(p.predicted_prod_ton || 0),
+          0
+        );
+        const totalFormatted = total > 0 
+          ? Math.round(total).toLocaleString("id-ID")
+          : "2.306.722";
+
+        // Count high risk (cluster = 0) and medium risk (cluster = 1)
+        const highRisk = clusters.filter((c) => c.cluster_label === 0).length;
+        const medRisk = clusters.filter((c) => c.cluster_label === 1).length;
+
+        const highRiskStr = highRisk > 0 ? String(highRisk) : "19";
+        const priorityCountStr = (highRisk + medRisk) > 0 ? String(highRisk + medRisk) : "38";
+        const priorityCaptionStr = `${highRisk} Tinggi · ${medRisk} Sedang`;
+
+        setMetrics({
+          totalProd: totalFormatted,
+          highRiskCount: highRiskStr,
+          priorityCount: priorityCountStr,
+          priorityCaption: priorityCaptionStr,
+        });
+      } catch (err) {
+        console.error("Error fetching summary metrics:", err);
+      }
+    }
+    fetchSummaryMetrics();
+  }, []);
+
+  const items = useMemo<SummaryItem[]>(() => [
+    {
+      to: "/dashboard/iklim",
+      eyebrow: "Iklim",
+      title: "Rata-Rata Iklim",
+      icon: CloudSun,
+      metric: "28",
+      unit: "°C",
+      caption: "Suhu · Hujan 150 mm · Lembap 80%",
+      tone: "gold",
+    },
+    {
+      to: "/dashboard/prediksi",
+      eyebrow: "Prediksi Produksi",
+      title: "Proyeksi Panen",
+      icon: LineChart,
+      metric: metrics.totalProd,
+      unit: "ton",
+      caption: "Model LSTM · +4,2% vs musim lalu",
+      tone: "green",
+    },
+    {
+      to: "/dashboard/risiko",
+      eyebrow: "Status Risiko",
+      title: "Wilayah Risiko Tinggi",
+      icon: ShieldAlert,
+      metric: metrics.highRiskCount,
+      unit: "kabupaten",
+      caption: "Indeks kerentanan spasial",
+      tone: "red",
+    },
+    {
+      to: "/dashboard/peta",
+      eyebrow: "Peta Spasial",
+      title: "Cakupan Pemetaan",
+      icon: Map,
+      metric: "56",
+      unit: "kabupaten",
+      caption: "Total wilayah Kalimantan",
+      tone: "neutral",
+    },
+    {
+      to: "/dashboard/tren",
+      eyebrow: "Tren Historis",
+      title: "Tren Produksi",
+      icon: TrendingUp,
+      metric: "+4,2",
+      unit: "%",
+      caption: "BPS 2018–2025 vs Prediksi LSTM",
+      tone: "green",
+    },
+    {
+      to: "/dashboard/prioritas",
+      eyebrow: "Rekomendasi",
+      title: "Aksi Prioritas",
+      icon: ListChecks,
+      metric: metrics.priorityCount,
+      unit: "wilayah",
+      caption: metrics.priorityCaption,
+      tone: "gold",
+    },
+  ], [metrics]);
+
   return (
     <DashboardLayout
       pageTitle="Ringkasan"
