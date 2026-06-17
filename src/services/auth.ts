@@ -1,4 +1,4 @@
-import type { SignInPasswordCredentials, SignUpPasswordCredentials } from '@supabase/supabase-js'
+import type { SignInWithPasswordCredentials, SignUpWithPasswordCredentials } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 
 export interface SignUpInput {
@@ -32,10 +32,28 @@ export const authService = {
     const { data, error } = await supabase.auth.signInWithPassword({
       email: input.email,
       password: input.password,
-      options: { captchaToken: input.captchaToken },
     })
+
+    // Supabase server may return flat response { access_token, user, ... }
+    // instead of nested { data: { session, user } }
     if (error) throw error
-    return data
+    if (!data) throw new Error('Respon server kosong')
+    if (!data.session) {
+      // Try to reconstruct session from flat response (Supabase v2 server compat)
+      if (data.user && data.expires_at && data.expires_in) {
+        const session = {
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          expires_in: data.expires_in,
+          expires_at: data.expires_at,
+          token_type: data.token_type || 'bearer',
+          user: data.user,
+        }
+        return { user: data.user, session }
+      }
+      throw new Error('Sesi tidak dibuat server')
+    }
+    return { user: data.user, session: data.session }
   },
 
   async signInGoogle() {
