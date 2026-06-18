@@ -7,7 +7,7 @@ export default function PrioritasPage() {
       pageTitle="Rekomendasi Prioritas"
       eyebrow="Rekomendasi"
       title="Rekomendasi Prioritas"
-      description="Daftar wilayah prioritas berdasarkan estimasi produksi dan tingkat risiko."
+      description="Daftar wilayah prioritas berdasarkan estimasi produksi XGBoost 2026 dan tingkat risiko klaster."
     >
       <PriorityTableCard />
     </DashboardLayout>

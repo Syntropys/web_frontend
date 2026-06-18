@@ -6,8 +6,8 @@ export default function PrediksiPage() {
     <DashboardLayout
       pageTitle="Prediksi Produksi"
       eyebrow="Prediksi"
-      title="Proyeksi Produksi (LSTM)"
-      description="Estimasi produksi padi berbasis model LSTM dengan tren musiman."
+      title="Proyeksi Produksi (XGBoost)"
+      description="Estimasi produksi padi berbasis model XGBoost dengan tren musiman. Model terbaik dengan R²=0.986."
     >
       <PredictionKpiCard />
     </DashboardLayout>

@@ -412,7 +412,7 @@ const cards = [
     n: "i.",
     tag: "Forecasting",
     title: "Predictive Analytics",
-    copy: "Model ensemble XGBoost + LSTM memproyeksikan produktivitas panen 2026 hingga tingkat kabupaten.",
+    copy: "Tiga model prediksi (XGBoost, Random Forest, Linear Regression) memproyeksikan produktivitas panen 2026 hingga tingkat kabupaten.",
     visual: <PredictiveChart />,
     meta: "Proyeksi 2026 · ton/ha",
   },
@@ -430,7 +430,7 @@ const cards = [
     title: "Deteksi Penyakit Instan",
     copy: "Computer vision berbasis CNN mendiagnosis penyakit daun padi langsung dari kamera ponsel lapangan.",
     visual: <ScanSnippet />,
-    meta: "On-device · ResNet-50",
+    meta: "On-device · MobileNetV2 / CNN",
   },
 ];
 

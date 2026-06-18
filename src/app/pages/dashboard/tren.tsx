@@ -6,8 +6,8 @@ export default function TrenPage() {
     <DashboardLayout
       pageTitle="Tren Historis"
       eyebrow="Tren"
-      title="Historis BPS vs Prediksi LSTM"
-      description="Perbandingan produksi historis BPS dengan proyeksi model LSTM."
+      title="Historis BPS vs Prediksi XGBoost"
+      description="Perbandingan produksi historis BPS dengan proyeksi model XGBoost (best model, R²=0.986)."
     >
       <TrendChartCard />
     </DashboardLayout>

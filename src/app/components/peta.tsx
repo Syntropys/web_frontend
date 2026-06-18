@@ -64,7 +64,7 @@ export const KalimantanMap = memo(function KalimantanMap({
         const [regionsRes, clustersRes, predictionsRes] = await Promise.all([
           supabase.from("regions").select("id, bps_code, name, province, centroid_lat, centroid_lng"),
           supabase.from("cluster_assignments").select("region_id, cluster_label"),
-          supabase.from("predictions").select("region_id, predicted_yield").eq("target_year", 2026).eq("model_name", "lstm")
+          supabase.from("predictions").select("region_id, predicted_yield").eq("target_year", 2026).eq("model_name", "xgboost").eq("model_version", "v1-real")
         ]);
 
         if (regionsRes.error) throw regionsRes.error;
@@ -466,7 +466,7 @@ export function Peta() {
         const [regionsRes, clustersRes, predictionsRes] = await Promise.all([
           supabase.from("regions").select("id, bps_code, name, province, centroid_lat, centroid_lng"),
           supabase.from("cluster_assignments").select("region_id, cluster_label"),
-          supabase.from("predictions").select("region_id, predicted_yield").eq("target_year", 2026).eq("model_name", "lstm")
+          supabase.from("predictions").select("region_id, predicted_yield").eq("target_year", 2026).eq("model_name", "xgboost").eq("model_version", "v1-real")
         ]);
 
         if (regionsRes.error) throw regionsRes.error;
@@ -675,7 +675,7 @@ export function Peta() {
 
           <div className="flex-1 flex flex-col min-h-0">
             <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#5F6A64] dark:text-[#A8AFA9] mb-3">
-              Sorotan Wilayah (LSTM 2026)
+              Sorotan Wilayah (XGBoost 2026)
             </div>
             
             {/* Search Bar */}

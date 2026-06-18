@@ -12,6 +12,8 @@ const MAX_ATTEMPTS = 5
 const LOCK_DURATION_MS = 30_000
 const SUBMIT_COOLDOWN_MS = 1200
 
+import { Turnstile } from '@marsidev/react-turnstile'
+
 export default function Masuk() {
   const { session } = useAuthStore()
   const [showPassword, setShowPassword] = useState(false)
@@ -32,6 +34,7 @@ export default function Masuk() {
   })
   const [now, setNow] = useState(Date.now())
   const [submitting, setSubmitting] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const cooldownRef = useRef<number | null>(null)
   const navigate = useNavigate()
   const location = useLocation()
@@ -58,10 +61,6 @@ export default function Masuk() {
       if (cooldownRef.current) window.clearTimeout(cooldownRef.current)
     }
   }, [])
-
-  const secondsLeft = lockUntil ? Math.max(0, Math.ceil((lockUntil - now) / 1000)) : 0
-  const isLocked = lockUntil !== null && secondsLeft > 0
-  const attemptsLeft = Math.max(0, MAX_ATTEMPTS - failCount)
 
   const parsed = LoginSchema.safeParse({ email, password })
   const errs = parsed.success ? {} : fieldErrors(parsed)

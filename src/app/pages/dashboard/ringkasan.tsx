@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { DashboardLayout } from "../../components/dashboard-layout";
 import { supabase } from "@/lib/supabase";
+import { DateRangeAndExportToolbar } from "../../components/date-range-export-toolbar";
 
 type SummaryItem = {
   to: string;
@@ -33,39 +34,69 @@ const toneClasses: Record<SummaryItem["tone"], string> = {
 };
 
 export default function RingkasanPage() {
+  const [yearRange, setYearRange] = useState({ start: 2018, end: 2026 });
   const [metrics, setMetrics] = useState({
     totalProd: "2.306.722",
     highRiskCount: "19",
     priorityCount: "38",
     priorityCaption: "19 Tinggi · 19 Sedang",
+    avgRain: "150",
+    avgTemp: "28",
+    avgHumid: "80",
   });
+
+  useEffect(() => {
+    const handleRangeChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ startYear: number; endYear: number }>;
+      setYearRange({ start: customEvent.detail.startYear, end: customEvent.detail.endYear });
+    };
+    window.addEventListener("agrolytics_year_range_changed", handleRangeChange);
+    return () => window.removeEventListener("agrolytics_year_range_changed", handleRangeChange);
+  }, []);
 
   useEffect(() => {
     async function fetchSummaryMetrics() {
       try {
-        const [predictionsRes, clustersRes] = await Promise.all([
-          supabase.from("predictions").select("predicted_prod_ton").eq("target_year", 2026).eq("model_name", "lstm"),
-          supabase.from("cluster_assignments").select("cluster_label")
-        ]);
+        // Fetch production
+        const { data: prodData } = await supabase
+          .from("production_history")
+          .select("production_ton")
+          .gte("year", yearRange.start)
+          .lte("year", yearRange.end);
 
-        if (predictionsRes.error) throw predictionsRes.error;
-        if (clustersRes.error) throw clustersRes.error;
+        // Fetch weather
+        const { data: weatherData } = await supabase
+          .from("weather_history")
+          .select("rainfall_mm, temp_avg_c, humidity_pct")
+          .gte("year", yearRange.start)
+          .lte("year", yearRange.end);
 
-        const predictions = predictionsRes.data || [];
-        const clusters = clustersRes.data || [];
+        // Fetch clusters
+        const { data: clusters } = await supabase.from("cluster_assignments").select("cluster_label");
 
-        // Sum predicted production
-        const total = predictions.reduce(
-          (acc, p) => acc + Number(p.predicted_prod_ton || 0),
-          0
-        );
+        // Sum production
+        const total = prodData?.reduce((acc, p) => acc + Number(p.production_ton || 0), 0) || 0;
         const totalFormatted = total > 0 
           ? Math.round(total).toLocaleString("id-ID")
           : "2.306.722";
 
-        // Count high risk (cluster = 0) and medium risk (cluster = 1)
-        const highRisk = clusters.filter((c) => c.cluster_label === 0).length;
-        const medRisk = clusters.filter((c) => c.cluster_label === 1).length;
+        // Calculate weather averages
+        let rainSum = 0, tempSum = 0, humidSum = 0;
+        const weatherLen = weatherData?.length || 0;
+        if (weatherLen > 0) {
+          weatherData?.forEach((w) => {
+            rainSum += Number(w.rainfall_mm || 0);
+            tempSum += Number(w.temp_avg_c || 0);
+            humidSum += Number(w.humidity_pct || 0);
+          });
+        }
+        const avgRain = weatherLen > 0 ? Math.round(rainSum / weatherLen).toString() : "150";
+        const avgTemp = weatherLen > 0 ? Math.round(tempSum / weatherLen).toString() : "28";
+        const avgHumid = weatherLen > 0 ? Math.round(humidSum / weatherLen).toString() : "80";
+
+        // Count risk and priority
+        const highRisk = clusters?.filter((c) => c.cluster_label === 0).length || 0;
+        const medRisk = clusters?.filter((c) => c.cluster_label === 1).length || 0;
 
         const highRiskStr = highRisk > 0 ? String(highRisk) : "19";
         const priorityCountStr = (highRisk + medRisk) > 0 ? String(highRisk + medRisk) : "38";
@@ -76,13 +107,16 @@ export default function RingkasanPage() {
           highRiskCount: highRiskStr,
           priorityCount: priorityCountStr,
           priorityCaption: priorityCaptionStr,
+          avgRain,
+          avgTemp,
+          avgHumid,
         });
       } catch (err) {
         console.error("Error fetching summary metrics:", err);
       }
     }
     fetchSummaryMetrics();
-  }, []);
+  }, [yearRange]);
 
   const items = useMemo<SummaryItem[]>(() => [
     {
@@ -90,9 +124,9 @@ export default function RingkasanPage() {
       eyebrow: "Iklim",
       title: "Rata-Rata Iklim",
       icon: CloudSun,
-      metric: "28",
+      metric: metrics.avgTemp,
       unit: "°C",
-      caption: "Suhu · Hujan 150 mm · Lembap 80%",
+      caption: `Suhu · Hujan ${metrics.avgRain} mm · Lembap ${metrics.avgHumid}%`,
       tone: "gold",
     },
     {
@@ -102,7 +136,7 @@ export default function RingkasanPage() {
       icon: LineChart,
       metric: metrics.totalProd,
       unit: "ton",
-      caption: "Model LSTM · +4,2% vs musim lalu",
+      caption: `XGBoost & BPS (${yearRange.start}–${yearRange.end})`,
       tone: "green",
     },
     {
@@ -132,7 +166,7 @@ export default function RingkasanPage() {
       icon: TrendingUp,
       metric: "+4,2",
       unit: "%",
-      caption: "BPS 2018–2025 vs Prediksi LSTM",
+      caption: "BPS 2018–2025 vs Prediksi XGBoost",
       tone: "green",
     },
     {
@@ -145,7 +179,7 @@ export default function RingkasanPage() {
       caption: metrics.priorityCaption,
       tone: "gold",
     },
-  ], [metrics]);
+  ], [metrics, yearRange]);
 
   return (
     <DashboardLayout
@@ -153,6 +187,7 @@ export default function RingkasanPage() {
       eyebrow="Ringkasan"
       title="Ringkasan Keseluruhan"
       description="Cuplikan indikator kunci dari seluruh modul intelijen panen."
+      toolbar={<DateRangeAndExportToolbar />}
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
         {items.map((it) => (

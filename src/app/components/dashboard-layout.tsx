@@ -28,6 +28,7 @@ import { BrandMark } from "./brand-mark";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { authService } from "@/services/auth";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { AiChatbotOverlay } from "./ai-chatbot-overlay";
 
 const navItems = [
   { to: "/dashboard/ringkasan", label: "Ringkasan", icon: LayoutDashboard },
@@ -50,6 +51,7 @@ export function DashboardLayout({
   eyebrow,
   description,
   pageTitle,
+  toolbar,
   children,
 }: {
   title: string;
@@ -57,6 +59,7 @@ export function DashboardLayout({
   description?: string;
   pageTitle: string;
   children: ReactNode;
+  toolbar?: ReactNode;
 }) {
   const { theme, toggle } = useThemeStore();
   const { reset } = useAuthStore()
@@ -254,14 +257,20 @@ export function DashboardLayout({
             </span>
             <span className="h-px w-8 bg-[#C9A24B]/40" />
           </div>
-          <h1 className="font-serif text-[26px] sm:text-[30px] leading-[1.15] tracking-[-0.01em] text-[#2A3530] dark:text-[#E8E6DF]">
-            {title}
-          </h1>
-          {description && (
-            <p className="mt-2 text-[13px] sm:text-[14px] text-[#5F6A64] dark:text-[#B8BFB9]">
-              {description}
-            </p>
-          )}
+          
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="font-serif text-[26px] sm:text-[30px] leading-[1.15] tracking-[-0.01em] text-[#2A3530] dark:text-[#E8E6DF]">
+                {title}
+              </h1>
+              {description && (
+                <p className="mt-2 text-[13px] sm:text-[14px] text-[#5F6A64] dark:text-[#B8BFB9]">
+                  {description}
+                </p>
+              )}
+            </div>
+            {toolbar && <div className="shrink-0 flex items-center gap-3">{toolbar}</div>}
+          </div>
 
           <div className="mt-8">{children}</div>
         </main>
@@ -278,6 +287,8 @@ export function DashboardLayout({
             loggingOut={loggingOut}
           />
         )}
+        {/* Chatbot — hanya muncul saat sudah login (dashboard only) */}
+        <AiChatbotOverlay />
       </div>
     </div>
   );

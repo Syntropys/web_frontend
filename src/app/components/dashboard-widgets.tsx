@@ -64,10 +64,66 @@ const climateKpiItems = [
 ];
 
 export function ClimateKpiCard() {
+  const [climate, setClimate] = useState({ rain: "150 mm", temp: "28°C", humid: "80%" });
+  const [yearRange, setYearRange] = useState({ start: 2018, end: 2026 });
+
+  useEffect(() => {
+    const handleRangeChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ startYear: number; endYear: number }>;
+      setYearRange({ start: customEvent.detail.startYear, end: customEvent.detail.endYear });
+    };
+    window.addEventListener("agrolytics_year_range_changed", handleRangeChange);
+    return () => window.removeEventListener("agrolytics_year_range_changed", handleRangeChange);
+  }, []);
+
+  useEffect(() => {
+    async function fetchClimate() {
+      try {
+        const { data } = await supabase
+          .from("weather_history")
+          .select("rainfall_mm, temp_avg_c, humidity_pct")
+          .gte("year", yearRange.start)
+          .lte("year", yearRange.end);
+
+        if (data && data.length > 0) {
+          const rain = Math.round(data.reduce((acc, w) => acc + (w.rainfall_mm || 0), 0) / data.length);
+          const temp = Math.round(data.reduce((acc, w) => acc + (w.temp_avg_c || 0), 0) / data.length);
+          const humid = Math.round(data.reduce((acc, w) => acc + (w.humidity_pct || 0), 0) / data.length);
+          setClimate({
+            rain: `${rain} mm`,
+            temp: `${temp}°C`,
+            humid: `${humid}%`,
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    fetchClimate();
+  }, [yearRange]);
+
+  const items = [
+    {
+      icon: <CloudRain size={16} strokeWidth={1.6} />,
+      value: climate.rain,
+      label: "Curah Hujan",
+    },
+    {
+      icon: <Droplets size={16} strokeWidth={1.6} />,
+      value: climate.temp,
+      label: "Suhu Rata-rata",
+    },
+    {
+      icon: <Thermometer size={16} strokeWidth={1.6} />,
+      value: climate.humid,
+      label: "Kelembapan",
+    },
+  ];
+
   return (
     <Card title="Rata-Rata Iklim (NASA POWER)" eyebrow="Iklim">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {climateKpiItems.map((it) => (
+        {items.map((it) => (
           <div
             key={it.label}
             className="rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-white/40 dark:bg-white/[0.04] p-3 flex sm:block items-center gap-3"
@@ -129,7 +185,8 @@ export function PredictionKpiCard() {
           .from("predictions")
           .select("predicted_prod_ton")
           .eq("target_year", 2026)
-          .eq("model_name", "lstm");
+          .eq("model_name", "xgboost")
+          .eq("model_version", "v1-real");
         if (error) throw error;
         if (data) {
           const total = data.reduce((sum, p) => sum + Number(p.predicted_prod_ton || 0), 0);
@@ -145,7 +202,7 @@ export function PredictionKpiCard() {
   }, []);
 
   return (
-    <Card title="Proyeksi Produksi (LSTM)" eyebrow="Prediksi">
+    <Card title="Proyeksi Produksi (XGBoost)" eyebrow="Prediksi">
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="font-serif tracking-tight text-[26px] text-[#2A3530] dark:text-[#E8E6DF] leading-none">
@@ -217,25 +274,65 @@ export function SpatialMapCard() {
   );
 }
 
+import { TrendChart } from "./trend-chart";
+
 export function TrendChartCard() {
   return (
-    <Card title="Historis BPS vs Prediksi LSTM" eyebrow="Tren">
-      <div className="aspect-[16/9] w-full rounded-xl border border-dashed border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/30 dark:bg-white/[0.04] flex items-center justify-center">
-        <p className="font-mono text-[12px] tracking-wider text-[#5F6A64] dark:text-[#A8AFA9]">
-          [ Placeholder Grafik Garis Chart.js ]
-        </p>
+    <Card title="Historis BPS vs Prediksi XGBoost" eyebrow="Tren">
+      <div className="w-full">
+        <TrendChart />
       </div>
     </Card>
   );
 }
 
-const priorityRows = [
-  { wilayah: "Kab. Alpha", kategori: "Tinggi", estimasi: "14.500" },
-  { wilayah: "Kab. Beta", kategori: "Sedang", estimasi: "9.820" },
-  { wilayah: "Kab. Gamma", kategori: "Tinggi", estimasi: "12.140" },
-];
-
 export function PriorityTableCard() {
+  const [priorityRows, setPriorityRows] = useState<Array<{ wilayah: string; kategori: string; estimasi: string }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadPriorities() {
+      try {
+        setLoading(true);
+        const [regionsRes, predictionsRes, clustersRes] = await Promise.all([
+          supabase.from("regions").select("id, name"),
+          supabase.from("predictions").select("region_id, predicted_prod_ton").eq("target_year", 2026).eq("model_name", "xgboost").eq("model_version", "v1-real"),
+          supabase.from("cluster_assignments").select("region_id, cluster_label")
+        ]);
+
+        const regions = regionsRes.data || [];
+        const predictions = predictionsRes.data || [];
+        const clusters = clustersRes.data || [];
+
+        const rows = predictions.map((p) => {
+          const reg = regions.find((r) => r.id === p.region_id);
+          const cl = clusters.find((c) => c.region_id === p.region_id);
+          const label = cl?.cluster_label === 0 ? "Tinggi" : cl?.cluster_label === 1 ? "Sedang" : "Rendah";
+          return {
+            wilayah: reg?.name || "Kabupaten",
+            kategori: label,
+            estimasi: p.predicted_prod_ton ? Math.round(p.predicted_prod_ton).toLocaleString("id-ID") : "0"
+          };
+        });
+
+        // Filter high/medium priority and sort
+        const filtered = rows
+          .filter((r) => r.kategori === "Tinggi" || r.kategori === "Sedang")
+          .sort((a, b) => {
+            if (a.kategori === b.kategori) return 0;
+            return a.kategori === "Tinggi" ? -1 : 1;
+          });
+
+        setPriorityRows(filtered.slice(0, 10));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadPriorities();
+  }, []);
+
   const badge = (k: string) =>
     k === "Tinggi"
       ? "bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B]"
