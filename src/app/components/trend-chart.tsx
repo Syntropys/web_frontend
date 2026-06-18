@@ -77,12 +77,12 @@ export function TrendChart() {
             {
               label: "Historis BPS (Ton)",
               data: bpsDataset,
-              borderColor: "#8C6E26",
+              borderColor: "#735A1E",
               backgroundColor: "rgba(140, 110, 38, 0.1)",
               borderWidth: 2.5,
               tension: 0.3,
               fill: true,
-              pointBackgroundColor: "#8C6E26",
+              pointBackgroundColor: "#735A1E",
             },
             {
               label: "Prediksi XGBoost (Ton)",

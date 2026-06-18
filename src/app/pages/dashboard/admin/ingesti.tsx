@@ -308,7 +308,7 @@ export default function IngestiPage() {
       {/* Info Banner untuk Mode AI */}
       {source === "Model AI (JSON)" && (
         <div className="mb-4 rounded-xl border border-[#C9A24B]/25 bg-[#C9A24B]/8 p-3.5 flex gap-3">
-          <FileJson size={16} className="text-[#8C6E26] dark:text-[#C9A24B] shrink-0 mt-0.5" strokeWidth={1.7} />
+          <FileJson size={16} className="text-[#735A1E] dark:text-[#C9A24B] shrink-0 mt-0.5" strokeWidth={1.7} />
           <div className="text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] leading-relaxed">
             <span className="font-medium text-[#2A3530] dark:text-[#E8E6DF]">Mode Model AI:</span>{" "}
             Upload file JSON dari <code className="font-mono bg-black/5 dark:bg-white/5 px-1 rounded">ai_models/supabase_ready/</code>.
@@ -342,7 +342,7 @@ export default function IngestiPage() {
             </div>
             <div className="rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/8 bg-white/30 dark:bg-white/[0.02] p-3.5">
               <div className="flex items-center gap-2 mb-2.5">
-                <Database size={14} strokeWidth={1.7} className="text-[#8C6E26] dark:text-[#C9A24B]" />
+                <Database size={14} strokeWidth={1.7} className="text-[#735A1E] dark:text-[#C9A24B]" />
                 <span className="text-[12px] uppercase tracking-wider text-[#5F6A64] dark:text-[#A8AFA9]">
                   Target Supabase
                 </span>
@@ -397,12 +397,12 @@ export default function IngestiPage() {
                   : "border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/30 dark:bg-white/[0.02] hover:border-[#C9A24B]/60"
               }`}
             >
-              <span className="inline-flex w-12 h-12 items-center justify-center rounded-full bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B] mb-3">
+              <span className="inline-flex w-12 h-12 items-center justify-center rounded-full bg-[#C9A24B]/15 text-[#735A1E] dark:text-[#C9A24B] mb-3">
                 <UploadCloud size={20} strokeWidth={1.6} />
               </span>
               <p className="text-[13px] text-[#2A3530] dark:text-[#E8E6DF]">
                 Seret file ke sini atau{" "}
-                <span className="text-[#8C6E26] dark:text-[#C9A24B]">klik untuk pilih</span>
+                <span className="text-[#735A1E] dark:text-[#C9A24B]">klik untuk pilih</span>
               </p>
               <p className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] mt-1.5">
                 {schema.ext.join(", ")} · maks. 50 MB
@@ -445,7 +445,7 @@ export default function IngestiPage() {
                   <div className="mt-3 pt-3 border-t border-[#2A3530]/10 dark:border-[#E8E6DF]/8 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2">
                     <button
                       onClick={() => setStaged(null)}
-                      className="px-4 py-2 rounded-lg text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+                      className="px-4 py-2 rounded-lg text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
                     >
                       Batal
                     </button>
@@ -476,7 +476,7 @@ export default function IngestiPage() {
       <section className="rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-white/40 dark:bg-white/[0.02] p-4 sm:p-5">
         <header className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3">
-            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#8C6E26] dark:text-[#C9A24B]">
+            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#735A1E] dark:text-[#C9A24B]">
               Riwayat
             </span>
             <span className="h-px w-6 bg-[#C9A24B]/40" />
@@ -555,7 +555,7 @@ function StatusIcon({ status }: { status: IngestStatus }) {
     );
   if (status === "warning")
     return (
-      <span className={`${base} bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B]`}>
+      <span className={`${base} bg-[#C9A24B]/15 text-[#735A1E] dark:text-[#C9A24B]`}>
         <AlertTriangle size={15} strokeWidth={1.8} />
       </span>
     );

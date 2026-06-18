@@ -17,7 +17,7 @@ interface RegionData {
 }
 
 const CLUSTER_META = [
-  { label: "Tinggi",  color: "#C9A24B", bg: "bg-[#C9A24B]/15", text: "text-[#8C6E26] dark:text-[#C9A24B]", border: "border-[#C9A24B]/30" },
+  { label: "Tinggi",  color: "#C9A24B", bg: "bg-[#C9A24B]/15", text: "text-[#735A1E] dark:text-[#C9A24B]", border: "border-[#C9A24B]/30" },
   { label: "Sedang",  color: "#7E8E78", bg: "bg-[#7E8E78]/15",  text: "text-[#4A6050] dark:text-[#9AB090]", border: "border-[#7E8E78]/30" },
   { label: "Rendah",  color: "#5A6A60", bg: "bg-[#5A6A60]/15",  text: "text-[#3D4F45] dark:text-[#8FA095]", border: "border-[#5A6A60]/30" },
 ];
@@ -269,7 +269,7 @@ export default function PetaPage() {
       toolbar={
         <div className="flex items-center gap-2">
           {/* Year badge — fixed 2026, future-ready */}
-          <div className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#C9A24B]/40 bg-[#C9A24B]/8 text-[#8C6E26] dark:text-[#C9A24B] text-[12px] font-mono">
+          <div className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#C9A24B]/40 bg-[#C9A24B]/8 text-[#735A1E] dark:text-[#C9A24B] text-[12px] font-mono">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             Proyeksi {selectedYear}
           </div>
@@ -279,7 +279,7 @@ export default function PetaPage() {
             <button
               id="peta-export-btn"
               onClick={() => setExportOpen((v) => !v)}
-              className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer bg-white/40 dark:bg-white/[0.03]"
+              className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer bg-white/40 dark:bg-white/[0.03]"
             >
               <Download size={13} strokeWidth={1.6} />
               Ekspor
@@ -289,7 +289,7 @@ export default function PetaPage() {
               <div className="absolute right-0 top-11 z-50 w-44 rounded-xl border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 bg-[#F7F4EE] dark:bg-[#0E1619] shadow-xl overflow-hidden">
                 <button
                   onClick={exportCSV}
-                  className="w-full flex items-center gap-2.5 px-4 py-3 text-[12px] text-[#2A3530] dark:text-[#E8E6DF] hover:bg-[#C9A24B]/8 hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-4 py-3 text-[12px] text-[#2A3530] dark:text-[#E8E6DF] hover:bg-[#C9A24B]/8 hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors text-left cursor-pointer"
                 >
                   <Download size={13} strokeWidth={1.6} />
                   Unduh CSV
@@ -360,7 +360,7 @@ export default function PetaPage() {
           <div className="rounded-xl border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 overflow-hidden">
             <button
               onClick={() => setShowKmeansPng(!showKmeansPng)}
-              className="w-full flex items-center justify-between px-4 py-3 bg-white/40 dark:bg-white/[0.03] text-[12px] font-mono uppercase tracking-wider text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
+              className="w-full flex items-center justify-between px-4 py-3 bg-white/40 dark:bg-white/[0.03] text-[12px] font-mono uppercase tracking-wider text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors"
             >
               <span className="flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -378,7 +378,7 @@ export default function PetaPage() {
             {showKmeansPng && (
               <div className="px-4 pb-4 pt-2 bg-white/30 dark:bg-white/[0.02]">
                 <p className="text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] mb-3">
-                  Hasil segmentasi kabupaten menggunakan <strong className="text-[#8C6E26] dark:text-[#C9A24B]">K-Means (k=3)</strong> dari model <code>kmeans_segmentation_kalimantan.pkl</code>.
+                  Hasil segmentasi kabupaten menggunakan <strong className="text-[#735A1E] dark:text-[#C9A24B]">K-Means (k=3)</strong> dari model <code>kmeans_segmentation_kalimantan.pkl</code>.
                   Feature: produksi, luas panen, produktivitas, curah hujan (dinormalisasi).
                 </p>
                 <img
@@ -409,10 +409,10 @@ export default function PetaPage() {
                 placeholder="Cari kabupaten / kota…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 rounded-lg border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F7F3EA] dark:bg-[#0B1215] text-[#2A3530] dark:text-[#E8E6DF] placeholder-[#5F6A64]/50 dark:placeholder-[#A8AFA9]/50 text-[12px] focus:outline-none focus:border-[#8C6E26] dark:focus:border-[#C9A24B] transition-colors"
+                className="w-full pl-9 pr-8 py-2 rounded-lg border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F7F3EA] dark:bg-[#0B1215] text-[#2A3530] dark:text-[#E8E6DF] placeholder-[#5F6A64]/50 dark:placeholder-[#A8AFA9]/50 text-[12px] focus:outline-none focus:border-[#735A1E] dark:focus:border-[#C9A24B] transition-colors"
               />
               {searchQuery && (
-                <button onClick={() => setSearchQuery("")} className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#5F6A64] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors">
+                <button onClick={() => setSearchQuery("")} className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#5F6A64] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors">
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -436,8 +436,8 @@ export default function PetaPage() {
                       onClick={() => setFilterProvince(fullName)}
                       className={`px-2.5 py-1 rounded-lg text-[11px] font-mono border transition-all ${
                         active
-                          ? "bg-[#8C6E26] dark:bg-[#C9A24B] text-[#F7F3EA] dark:text-[#0F181B] border-transparent font-semibold"
-                          : "border-[#2A3530]/15 dark:border-[#E8E6DF]/12 text-[#5F6A64] dark:text-[#A8AFA9] hover:border-[#8C6E26] dark:hover:border-[#C9A24B]"
+                          ? "bg-[#735A1E] dark:bg-[#C9A24B] text-[#F7F3EA] dark:text-[#0F181B] border-transparent font-semibold"
+                          : "border-[#2A3530]/15 dark:border-[#E8E6DF]/12 text-[#5F6A64] dark:text-[#A8AFA9] hover:border-[#735A1E] dark:hover:border-[#C9A24B]"
                       }`}
                     >
                       {label}
@@ -466,7 +466,7 @@ export default function PetaPage() {
               <select
                 value={sortMode}
                 onChange={(e) => setSortMode(e.target.value as any)}
-                className="text-[11px] font-mono border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 rounded-lg px-2 py-1 bg-[#F7F3EA] dark:bg-[#0B1215] text-[#5F6A64] dark:text-[#A8AFA9] focus:outline-none focus:border-[#8C6E26] dark:focus:border-[#C9A24B]"
+                className="text-[11px] font-mono border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 rounded-lg px-2 py-1 bg-[#F7F3EA] dark:bg-[#0B1215] text-[#5F6A64] dark:text-[#A8AFA9] focus:outline-none focus:border-[#735A1E] dark:focus:border-[#C9A24B]"
               >
                 <option value="cluster">↑ Prioritas</option>
                 <option value="yield">↓ Yield</option>
@@ -483,7 +483,7 @@ export default function PetaPage() {
             {(filterProvince !== "Semua" || filterCluster !== null || searchQuery) && (
               <button
                 onClick={() => { setFilterProvince("Semua"); setFilterCluster(null); setSearchQuery(""); }}
-                className="font-mono text-[11px] text-[#8C6E26] dark:text-[#C9A24B] hover:underline transition-colors"
+                className="font-mono text-[11px] text-[#735A1E] dark:text-[#C9A24B] hover:underline transition-colors"
               >
                 Reset filter
               </button>
@@ -569,8 +569,8 @@ export default function PetaPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
               </svg>
               <span>
-                Warna peta menunjukkan kluster <strong className="text-[#8C6E26] dark:text-[#C9A24B]">K-Means (k=3)</strong> berdasarkan produktivitas dan curah hujan.
-                Klik kabupaten di peta atau di tabel untuk melihat detail. Prediksi yield dari model <strong className="text-[#8C6E26] dark:text-[#C9A24B]">XGBoost</strong> tahun 2026.
+                Warna peta menunjukkan kluster <strong className="text-[#735A1E] dark:text-[#C9A24B]">K-Means (k=3)</strong> berdasarkan produktivitas dan curah hujan.
+                Klik kabupaten di peta atau di tabel untuk melihat detail. Prediksi yield dari model <strong className="text-[#735A1E] dark:text-[#C9A24B]">XGBoost</strong> tahun 2026.
               </span>
             </div>
           </div>

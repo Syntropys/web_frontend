@@ -180,7 +180,7 @@ export default function TrenPage() {
                     className={`px-3 py-1 rounded-full text-[12px] font-medium transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                       active
                         ? "shadow-sm"
-                        : "border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#5F6A64] dark:text-[#A8AFA9] hover:border-[#C9A24B] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] bg-white/50 dark:bg-white/[0.04]"
+                        : "border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#5F6A64] dark:text-[#A8AFA9] hover:border-[#C9A24B] hover:text-[#735A1E] dark:hover:text-[#C9A24B] bg-white/50 dark:bg-white/[0.04]"
                     }`}
                   >
                     {r.name}

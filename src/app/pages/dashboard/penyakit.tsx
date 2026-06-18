@@ -59,9 +59,9 @@ const DISEASE_QUICK_REFS = [
     emoji: "🟤",
     icon: Leaf,
     severity: "Sedang",
-    color: "#8C6E26",
-    bg: "bg-[#8C6E26]/8",
-    border: "border-[#8C6E26]/20",
+    color: "#735A1E",
+    bg: "bg-[#735A1E]/8",
+    border: "border-[#735A1E]/20",
     desc: "Bercak coklat oval dengan tepi kuning pada daun, biasanya akibat kekurangan nutrisi.",
   },
   {
@@ -129,7 +129,7 @@ export default function PenyakitPage() {
           {isConfigured ? (
             <Wifi size={14} className="mt-0.5 shrink-0 text-[#7A9A6E] dark:text-[#84B878]" />
           ) : (
-            <WifiOff size={14} className="mt-0.5 shrink-0 text-[#8C6E26] dark:text-[#C9A24B]" />
+            <WifiOff size={14} className="mt-0.5 shrink-0 text-[#735A1E] dark:text-[#C9A24B]" />
           )}
           <div>
             <p className="text-[12px] font-medium text-[#2A3530] dark:text-[#E8E6DF]">
@@ -159,7 +159,7 @@ export default function PenyakitPage() {
               <div className="flex items-center gap-2 mb-3">
                 <Microscope
                   size={14}
-                  className="text-[#8C6E26] dark:text-[#C9A24B]"
+                  className="text-[#735A1E] dark:text-[#C9A24B]"
                   strokeWidth={1.7}
                 />
                 <p className="text-[12px] font-medium text-[#2A3530] dark:text-[#E8E6DF]">
@@ -174,7 +174,7 @@ export default function PenyakitPage() {
                   { step: "4", text: "Hasil diagnosis ditampilkan beserta gejala dan rekomendasi penanganan" },
                 ].map((item) => (
                   <li key={item.step} className="flex items-start gap-2.5">
-                    <span className="shrink-0 w-5 h-5 rounded-full bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B] text-[10px] font-mono font-bold flex items-center justify-center">
+                    <span className="shrink-0 w-5 h-5 rounded-full bg-[#C9A24B]/15 text-[#735A1E] dark:text-[#C9A24B] text-[10px] font-mono font-bold flex items-center justify-center">
                       {item.step}
                     </span>
                     <span className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] leading-relaxed">
@@ -190,7 +190,7 @@ export default function PenyakitPage() {
               <div className="flex items-center gap-2 mb-3">
                 <Info
                   size={14}
-                  className="text-[#8C6E26] dark:text-[#C9A24B]"
+                  className="text-[#735A1E] dark:text-[#C9A24B]"
                   strokeWidth={1.7}
                 />
                 <p className="text-[12px] font-medium text-[#2A3530] dark:text-[#E8E6DF]">

@@ -26,7 +26,7 @@ type SummaryItem = {
 };
 
 const toneClasses: Record<SummaryItem["tone"], string> = {
-  gold: "bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B]",
+  gold: "bg-[#C9A24B]/15 text-[#735A1E] dark:text-[#C9A24B]",
   green: "bg-[#7A9A6E]/15 text-[#5A8A4E] dark:text-[#7A9A6E]",
   red: "bg-[#A04848]/15 text-[#A04848] dark:text-[#D17878]",
   neutral:
@@ -244,7 +244,7 @@ function SummaryCard({ item }: { item: SummaryItem }) {
             <Icon size={16} strokeWidth={1.7} />
           </span>
           <div className="min-w-0">
-            <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#8C6E26] dark:text-[#C9A24B] truncate">
+            <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#735A1E] dark:text-[#C9A24B] truncate">
               {item.eyebrow}
             </div>
             <div className="text-[13px] text-[#2A3530] dark:text-[#E8E6DF] truncate">
@@ -255,7 +255,7 @@ function SummaryCard({ item }: { item: SummaryItem }) {
         <ArrowUpRight
           size={16}
           strokeWidth={1.6}
-          className="shrink-0 text-[#5F6A64] dark:text-[#A8AFA9] group-hover:text-[#8C6E26] dark:group-hover:text-[#C9A24B] transition-colors"
+          className="shrink-0 text-[#5F6A64] dark:text-[#A8AFA9] group-hover:text-[#735A1E] dark:group-hover:text-[#C9A24B] transition-colors"
         />
       </div>
 

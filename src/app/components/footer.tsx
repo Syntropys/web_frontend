@@ -38,7 +38,7 @@ export function Footer() {
             className="group inline-flex items-center gap-2 mb-5"
           >
             <BrandMark size={22} className="text-[#C9A24B]" />
-            <span className="font-serif text-[20px] tracking-tight text-[#2A3530] dark:text-[#E8E6DF] transition-colors group-hover:text-[#8C6E26] dark:group-hover:text-[#C9A24B]">
+            <span className="font-serif text-[20px] tracking-tight text-[#2A3530] dark:text-[#E8E6DF] transition-colors group-hover:text-[#735A1E] dark:group-hover:text-[#C9A24B]">
               Agrolytics
             </span>
           </Link>
@@ -59,7 +59,7 @@ export function Footer() {
                 <li key={l.label}>
                   <Link
                     to={l.to}
-                    className="text-[13px] text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
+                    className="text-[13px] text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors"
                   >
                     {l.label}
                   </Link>

@@ -322,7 +322,7 @@ export function DateRangeAndExportToolbar() {
           onClick={() => setIsOpen(!isOpen)}
           className="inline-flex items-center gap-2 h-9 px-3.5 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/60 dark:bg-white/[0.04] text-[13px] hover:border-[#C9A24B] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-all cursor-pointer font-medium text-[#2A3530] dark:text-[#E8E6DF]"
         >
-          <Calendar size={13} className="text-[#8C6E26] dark:text-[#C9A24B] shrink-0" />
+          <Calendar size={13} className="text-[#735A1E] dark:text-[#C9A24B] shrink-0" />
           <span>{startYear} – {endYear}</span>
           <ChevronDown size={11} className="opacity-50" />
         </button>
@@ -385,7 +385,7 @@ export function DateRangeAndExportToolbar() {
           {isExporting ? (
             <Loader2 size={13} className="animate-spin text-[#C9A24B]" />
           ) : (
-            <Download size={13} className="text-[#8C6E26] dark:text-[#C9A24B] shrink-0" />
+            <Download size={13} className="text-[#735A1E] dark:text-[#C9A24B] shrink-0" />
           )}
           <span>{isExporting ? "Mengekspor…" : "Ekspor"}</span>
           <ChevronDown size={11} className="opacity-50" />
@@ -402,12 +402,12 @@ export function DateRangeAndExportToolbar() {
                 <button
                   key={btn.format}
                   onClick={() => { btn.onClick(); setExportOpen(false); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] text-[#2A3530] dark:text-[#E8E6DF] hover:bg-[#C9A24B]/10 dark:hover:bg-[#C9A24B]/10 hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-all cursor-pointer text-left"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] text-[#2A3530] dark:text-[#E8E6DF] hover:bg-[#C9A24B]/10 dark:hover:bg-[#C9A24B]/10 hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-all cursor-pointer text-left"
                 >
                   <Icon size={14} className="shrink-0 opacity-70" />
                   {btn.title}
                   {btn.format === "zip" && (
-                    <span className="ml-auto text-[9px] bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B] px-1.5 py-0.5 rounded font-mono uppercase">Bundle</span>
+                    <span className="ml-auto text-[9px] bg-[#C9A24B]/15 text-[#735A1E] dark:text-[#C9A24B] px-1.5 py-0.5 rounded font-mono uppercase">Bundle</span>
                   )}
                 </button>
               );

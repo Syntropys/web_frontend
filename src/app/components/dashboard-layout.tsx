@@ -244,8 +244,8 @@ export function DashboardLayout({
               title={chatbotOn ? "Matikan AI Chatbot" : "Aktifkan AI Chatbot"}
               className={`w-10 h-10 sm:w-9 sm:h-9 rounded-full border flex items-center justify-center transition-colors cursor-pointer ${
                 chatbotOn
-                  ? "border-[#C9A24B]/50 bg-[#C9A24B]/10 text-[#8C6E26] dark:text-[#C9A24B] hover:bg-[#C9A24B]/20"
-                  : "border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#5F6A64]/40 dark:text-[#E8E6DF]/30 hover:border-[#C9A24B]/40 hover:text-[#8C6E26]"
+                  ? "border-[#C9A24B]/50 bg-[#C9A24B]/10 text-[#735A1E] dark:text-[#C9A24B] hover:bg-[#C9A24B]/20"
+                  : "border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#5F6A64]/40 dark:text-[#E8E6DF]/30 hover:border-[#C9A24B]/40 hover:text-[#735A1E]"
               }`}
             >
               <Sparkles size={15} strokeWidth={1.6} />

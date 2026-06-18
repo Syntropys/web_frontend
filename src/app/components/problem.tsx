@@ -36,7 +36,7 @@ export function Problem() {
       <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 mb-12 sm:mb-20">
         <div className="lg:col-span-5">
           <div className="flex items-center gap-3 mb-8 sm:mb-12">
-            <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-[#8C6E26] dark:text-[#C9A24B]">
+            <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-[#735A1E] dark:text-[#C9A24B]">
               02
             </span>
             <span className="h-px w-10 bg-[#C9A24B]/40" />
@@ -47,7 +47,7 @@ export function Problem() {
           <Reveal>
             <h2 className="font-serif text-[32px] sm:text-[40px] lg:text-[58px] leading-[1.05] lg:leading-[1.03] tracking-[-0.02em] text-[#2A3530] dark:text-[#E8E6DF]">
               Mengubah ketidakpastian menjadi{" "}
-              <em className="italic text-[#8C6E26] dark:text-[#C9A24B]">
+              <em className="italic text-[#735A1E] dark:text-[#C9A24B]">
                 keputusan strategis
               </em>
               .
@@ -80,12 +80,12 @@ export function Problem() {
                 <span className="font-serif text-[72px] sm:text-[88px] lg:text-[104px] leading-[0.9] tracking-[-0.04em] text-[#2A3530] dark:text-[#E8E6DF]">
                   {m.value}
                 </span>
-                <span className="font-serif italic text-[18px] sm:text-[20px] text-[#8C6E26] dark:text-[#C9A24B]">
+                <span className="font-serif italic text-[18px] sm:text-[20px] text-[#735A1E] dark:text-[#C9A24B]">
                   {m.unit}
                 </span>
               </div>
 
-              <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#8C6E26] dark:text-[#C9A24B] mb-3 sm:mb-4">
+              <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#735A1E] dark:text-[#C9A24B] mb-3 sm:mb-4">
                 {m.label}
               </div>
               <p className="text-[13px] leading-[1.7] text-[#5F6A64] dark:text-[#A8AFA9] max-w-xs">

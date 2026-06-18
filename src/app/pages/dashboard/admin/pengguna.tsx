@@ -32,7 +32,7 @@ type UserRow = {
 };
 
 const roleTone: Record<Role, string> = {
-  Admin: "bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B]",
+  Admin: "bg-[#C9A24B]/15 text-[#735A1E] dark:text-[#C9A24B]",
   Pengguna:
     "bg-[#2A3530]/8 dark:bg-[#E8E6DF]/8 text-[#5F6A64] dark:text-[#B8BFB9]",
 };
@@ -178,7 +178,7 @@ export default function PenggunaPage() {
                   type="button"
                   onClick={() => setQuery("")}
                   aria-label="Hapus pencarian"
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-5 h-5 rounded text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-5 h-5 rounded text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
                 >
                   <XCircle size={14} strokeWidth={1.6} />
                 </button>
@@ -243,7 +243,7 @@ export default function PenggunaPage() {
                     <button
                       onClick={() => toggleStatus(u.id)}
                       disabled={u.role === "Admin"}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 h-10 rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-[#5F6A64]"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 h-10 rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-[#5F6A64]"
                     >
                       {u.status === "Aktif" ? (
                         <Pause size={12} />
@@ -319,7 +319,7 @@ export default function PenggunaPage() {
                             aria-label={
                               u.status === "Aktif" ? "Tangguhkan" : "Aktifkan"
                             }
-                            className="w-8 h-8 inline-flex items-center justify-center rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="w-8 h-8 inline-flex items-center justify-center rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                           >
                             {u.status === "Aktif" ? (
                               <Pause size={13} strokeWidth={1.7} />
@@ -387,7 +387,7 @@ function StatCard({
     neutral: "text-[#2A3530] dark:text-[#E8E6DF]",
     green: "text-[#5A8A4E] dark:text-[#7A9A6E]",
     red: "text-[#A04848] dark:text-[#D17878]",
-    gold: "text-[#8C6E26] dark:text-[#C9A24B]",
+    gold: "text-[#735A1E] dark:text-[#C9A24B]",
   };
   return (
     <div className="rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-white/40 dark:bg-white/[0.02] p-3.5">
@@ -560,7 +560,7 @@ function AddUserModal({
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-[38px] w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+              className="absolute right-3 top-[38px] w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
             >
               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
@@ -570,7 +570,7 @@ function AddUserModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-[13px] text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-lg text-[13px] text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
             >
               Batal
             </button>

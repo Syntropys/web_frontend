@@ -10,7 +10,7 @@ type Strength = { score: 0 | 1 | 2 | 3 | 4; label: string; color: string }
 const STRENGTH_TEXT_CLASSES = [
   'text-[#A04848] dark:text-[#D17878]',
   'text-[#A04848] dark:text-[#D17878]',
-  'text-[#8C6E26] dark:text-[#C9A24B]',
+  'text-[#735A1E] dark:text-[#C9A24B]',
   'text-[#5F7E55] dark:text-[#9CB892]',
   'text-[#4A7A40] dark:text-[#84B878]',
 ] as const
@@ -71,7 +71,7 @@ export default function ResetPassword() {
         footer={
           <Link
             to="/masuk"
-            className="inline-flex items-center gap-1.5 text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
+            className="inline-flex items-center gap-1.5 text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors"
           >
             <ArrowLeft size={14} strokeWidth={1.6} />
             Kembali ke beranda
@@ -80,7 +80,7 @@ export default function ResetPassword() {
       >
         <div className="space-y-4">
           <div className="flex items-start gap-3 p-4 rounded-xl border border-[#C9A24B]/30 bg-[#C9A24B]/12 dark:bg-[#C9A24B]/15 text-[#5F6A64] dark:text-[#B8BFB9]">
-            <CheckCircle2 size={18} strokeWidth={1.6} className="text-[#8C6E26] dark:text-[#C9A24B] shrink-0 mt-0.5" />
+            <CheckCircle2 size={18} strokeWidth={1.6} className="text-[#735A1E] dark:text-[#C9A24B] shrink-0 mt-0.5" />
             <p className="text-[13px] leading-relaxed">
               Demi keamanan, semua sesi aktif lainnya telah keluar otomatis.
               Silakan masuk kembali dengan kata sandi baru.
@@ -106,7 +106,7 @@ export default function ResetPassword() {
       footer={
         <Link
           to="/masuk"
-          className="inline-flex items-center gap-1.5 text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
+          className="inline-flex items-center gap-1.5 text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors"
         >
           <ArrowLeft size={14} strokeWidth={1.6} />
           Kembali ke halaman masuk
@@ -134,7 +134,7 @@ export default function ResetPassword() {
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
-                className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+                className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
               >
                 {showPassword ? <EyeOff size={16} strokeWidth={1.6} /> : <Eye size={16} strokeWidth={1.6} />}
               </button>
@@ -176,7 +176,7 @@ export default function ResetPassword() {
               type="button"
               onClick={() => setShowConfirm((v) => !v)}
               aria-label={showConfirm ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
-              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
             >
               {showConfirm ? <EyeOff size={16} strokeWidth={1.6} /> : <Eye size={16} strokeWidth={1.6} />}
             </button>

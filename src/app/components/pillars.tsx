@@ -5,7 +5,7 @@ import { Reveal } from "@/app/components/reveal";
 function SectionLabel({ index, label }: { index: string; label: string }) {
   return (
     <div className="flex items-center gap-3 mb-12">
-      <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-[#8C6E26] dark:text-[#C9A24B]">
+      <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-[#735A1E] dark:text-[#C9A24B]">
         {index}
       </span>
       <span className="h-px w-10 bg-[#C9A24B]/40" />
@@ -139,7 +139,7 @@ const MapSnippet = memo(function MapSnippet() {
       <div className="absolute top-2 right-2 flex flex-col gap-1 text-[8px] font-mono text-right pointer-events-none z-10 select-none">
         <div className="flex items-center gap-1.5 justify-end">
           <span className="w-1.5 h-1.5 rounded-full bg-[#C9A24B] animate-pulse" />
-          <span className="text-[#8C6E26] dark:text-[#C9A24B] font-semibold">Live Monitor</span>
+          <span className="text-[#735A1E] dark:text-[#C9A24B] font-semibold">Live Monitor</span>
         </div>
         <div className="text-[#5F6A64] dark:text-[#A8AFA9]">5 Wilayah Analisis</div>
       </div>
@@ -295,7 +295,7 @@ const ScanSnippet = memo(function ScanSnippet() {
       >
         <div className="font-mono text-[7px] tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] uppercase">DETEKSI</div>
         <div className="h-px w-8 bg-[#2A3530]/15 dark:bg-[#E8E6DF]/15 my-0.5" />
-        <div className="font-serif text-[10px] sm:text-[12px] font-semibold text-[#8C6E26] dark:text-[#C9A24B] whitespace-nowrap">Blast (P. oryzae)</div>
+        <div className="font-serif text-[10px] sm:text-[12px] font-semibold text-[#735A1E] dark:text-[#C9A24B] whitespace-nowrap">Blast (P. oryzae)</div>
         <div className="font-mono text-[7px] text-[#5F6A64] dark:text-[#A8AFA9] mt-0.5">CONF · 0.91</div>
       </motion.div>
 
@@ -446,7 +446,7 @@ export function Pillars() {
           <Reveal>
             <h2 className="font-serif text-[32px] sm:text-[40px] lg:text-[52px] leading-[1.05] tracking-[-0.02em] text-[#2A3530] dark:text-[#E8E6DF]">
               Satu platform, tiga{" "}
-              <em className="italic text-[#8C6E26] dark:text-[#C9A24B]">
+              <em className="italic text-[#735A1E] dark:text-[#C9A24B]">
                 disiplin
               </em>{" "}
               kecerdasan.
@@ -467,7 +467,7 @@ export function Pillars() {
           <Reveal key={c.title} delay={idx * 120} className="h-full">
             <article className="group relative h-full bg-[#F7F3EA] dark:bg-[#0F181B] p-6 sm:p-8 lg:p-10 flex flex-col gap-6 sm:gap-8 transition-all hover:bg-[#FAF5E8] dark:hover:bg-[#152226] hover:shadow-lg hover:shadow-[#2A3530]/5 dark:hover:shadow-[#000000]/30 cursor-pointer">
               <div className="flex items-center justify-between">
-                <span className="font-serif italic text-[20px] text-[#8C6E26] dark:text-[#C9A24B]">
+                <span className="font-serif italic text-[20px] text-[#735A1E] dark:text-[#C9A24B]">
                   {c.n}
                 </span>
                 <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#5F6A64] dark:text-[#A8AFA9]">
@@ -485,7 +485,7 @@ export function Pillars() {
               </div>
 
               <div className="mt-auto">
-                <h3 className="mb-3 font-serif text-[22px] sm:text-[26px] leading-tight tracking-tight text-[#2A3530] dark:text-[#E8E6DF] transition-colors group-hover:text-[#8C6E26] dark:group-hover:text-[#C9A24B]">
+                <h3 className="mb-3 font-serif text-[22px] sm:text-[26px] leading-tight tracking-tight text-[#2A3530] dark:text-[#E8E6DF] transition-colors group-hover:text-[#735A1E] dark:group-hover:text-[#C9A24B]">
                   {c.title}
                 </h3>
                 <p className="text-[13px] sm:text-[14px] leading-[1.7] text-[#4A5550] dark:text-[#B8BFB9]">

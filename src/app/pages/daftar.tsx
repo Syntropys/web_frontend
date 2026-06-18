@@ -11,7 +11,7 @@ import { useDebouncedValue } from '@/app/hooks/use-debounced-value'
 const STRENGTH_COLORS = ['#A04848', '#C9A24B', '#7A9A6E', '#5A8A4E'] as const
 const STRENGTH_TEXT_CLASSES = [
   'text-[#A04848] dark:text-[#D17878]',
-  'text-[#8C6E26] dark:text-[#C9A24B]',
+  'text-[#735A1E] dark:text-[#C9A24B]',
   'text-[#5F7E55] dark:text-[#9CB892]',
   'text-[#4A7A40] dark:text-[#84B878]',
 ] as const
@@ -105,7 +105,7 @@ export default function Daftar() {
         footer={
           <>
             Sudah punya akun?{' '}
-            <Link to="/masuk" className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors">
+            <Link to="/masuk" className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors">
               Masuk di sini
             </Link>
           </>
@@ -132,7 +132,7 @@ export default function Daftar() {
       footer={
         <>
           Sudah memiliki akun?{' '}
-          <Link to="/masuk" className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors">
+          <Link to="/masuk" className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors">
             Masuk di sini
           </Link>
         </>
@@ -182,7 +182,7 @@ export default function Daftar() {
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
-                className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+                className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
               >
                 {showPassword ? <EyeOff size={16} strokeWidth={1.6} /> : <Eye size={16} strokeWidth={1.6} />}
               </button>
@@ -228,7 +228,7 @@ export default function Daftar() {
               type="button"
               onClick={() => setShowConfirmPassword((v) => !v)}
               aria-label={showConfirmPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
-              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
             >
               {showConfirmPassword ? <EyeOff size={16} strokeWidth={1.6} /> : <Eye size={16} strokeWidth={1.6} />}
             </button>
@@ -249,7 +249,7 @@ export default function Daftar() {
               <a
                 href="#"
                 onClick={(e) => { e.preventDefault(); setShowTermsModal(true) }}
-                className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
+                className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors"
               >
                 Syarat
               </a>
@@ -257,7 +257,7 @@ export default function Daftar() {
               <a
                 href="#"
                 onClick={(e) => { e.preventDefault(); setShowPrivacyModal(true) }}
-                className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
+                className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors"
               >
                 Privasi
               </a>.

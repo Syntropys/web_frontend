@@ -201,7 +201,7 @@ export const KalimantanMap = memo(function KalimantanMap({
     fillColor: "transparent",
     fillOpacity: 0,
     weight: 2.2,
-    color: theme === "dark" ? "#C9A24B" : "#8C6E26",
+    color: theme === "dark" ? "#C9A24B" : "#735A1E",
     opacity: 0.65,
     interactive: false,
   };
@@ -410,7 +410,7 @@ function RegionRow({
       onClick={onClick}
       className={`group flex items-center justify-between py-3 px-2 -mx-2 rounded-md border-b border-[#2A3530]/15 dark:border-[#E8E6DF]/12 last:border-b-0 cursor-pointer transition-colors ${
         isActive
-          ? "bg-[#8C6E26]/10 dark:bg-[#C9A24B]/10 border-l-2 border-l-[#8C6E26] dark:border-l-[#C9A24B]"
+          ? "bg-[#735A1E]/10 dark:bg-[#C9A24B]/10 border-l-2 border-l-[#735A1E] dark:border-l-[#C9A24B]"
           : "hover:bg-[#2A3530]/4 dark:hover:bg-[#E8E6DF]/4"
       }`}
     >
@@ -424,8 +424,8 @@ function RegionRow({
           <div
             className={`font-serif text-[15px] truncate transition-colors ${
               isActive
-                ? "text-[#8C6E26] dark:text-[#C9A24B] font-semibold"
-                : "text-[#2A3530] dark:text-[#E8E6DF] group-hover:text-[#8C6E26] dark:group-hover:text-[#C9A24B]"
+                ? "text-[#735A1E] dark:text-[#C9A24B] font-semibold"
+                : "text-[#2A3530] dark:text-[#E8E6DF] group-hover:text-[#735A1E] dark:group-hover:text-[#C9A24B]"
             }`}
           >
             {name}
@@ -438,8 +438,8 @@ function RegionRow({
       <div
         className={`font-mono text-[12px] shrink-0 ml-3 transition-colors ${
           isActive
-            ? "text-[#8C6E26] dark:text-[#C9A24B] font-semibold"
-            : "text-[#4A5550] dark:text-[#B8BFB9] group-hover:text-[#8C6E26] dark:group-hover:text-[#C9A24B]"
+            ? "text-[#735A1E] dark:text-[#C9A24B] font-semibold"
+            : "text-[#4A5550] dark:text-[#B8BFB9] group-hover:text-[#735A1E] dark:group-hover:text-[#C9A24B]"
         }`}
       >
         {value}
@@ -596,7 +596,7 @@ export function Peta() {
       <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 mb-12 sm:mb-16">
         <div className="lg:col-span-5">
           <div className="flex items-center gap-3 mb-8 sm:mb-12">
-            <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-[#8C6E26] dark:text-[#C9A24B]">
+            <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-[#735A1E] dark:text-[#C9A24B]">
               03
             </span>
             <span className="h-px w-10 bg-[#C9A24B]/40" />
@@ -607,7 +607,7 @@ export function Peta() {
           <Reveal>
             <h2 className="font-serif text-[32px] sm:text-[40px] lg:text-[52px] leading-[1.05] tracking-[-0.02em] text-[#2A3530] dark:text-[#E8E6DF]">
               Lanskap prioritas{" "}
-              <em className="italic text-[#8C6E26] dark:text-[#C9A24B]">
+              <em className="italic text-[#735A1E] dark:text-[#C9A24B]">
                 Kalimantan
               </em>
               , dalam satu pandangan.
@@ -690,12 +690,12 @@ export function Peta() {
                 placeholder="Cari kabupaten atau provinsi..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-1.5 rounded-lg border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F7F3EA] dark:bg-[#0F181B] text-[#2A3530] dark:text-[#E8E6DF] placeholder-[#5F6A64]/50 dark:placeholder-[#A8AFA9]/50 text-[13px] focus:outline-none focus:border-[#8C6E26] dark:focus:border-[#C9A24B] transition-colors"
+                className="w-full pl-9 pr-8 py-1.5 rounded-lg border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F7F3EA] dark:bg-[#0F181B] text-[#2A3530] dark:text-[#E8E6DF] placeholder-[#5F6A64]/50 dark:placeholder-[#A8AFA9]/50 text-[13px] focus:outline-none focus:border-[#735A1E] dark:focus:border-[#C9A24B] transition-colors"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -739,18 +739,18 @@ export function Peta() {
           <div className="h-px bg-[#2A3530]/12 dark:bg-[#E8E6DF]/12" />
 
           {/* Premium Locked AI Chatbot Teaser */}
-          <div className="p-3 rounded-lg bg-[#EFEBE1]/80 dark:bg-[#12201C]/20 border border-[#8C6E26]/15 dark:border-[#C9A24B]/15 flex items-start sm:items-center justify-between gap-3 text-[12px] relative overflow-hidden group shrink-0">
+          <div className="p-3 rounded-lg bg-[#EFEBE1]/80 dark:bg-[#12201C]/20 border border-[#735A1E]/15 dark:border-[#C9A24B]/15 flex items-start sm:items-center justify-between gap-3 text-[12px] relative overflow-hidden group shrink-0">
             <div className="flex items-start gap-2 text-[#5F6A64] dark:text-[#A8AFA9] min-w-0 z-10">
-              <svg className="w-4 h-4 text-[#8C6E26] dark:text-[#C9A24B] shrink-0 mt-0.5 sm:mt-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <svg className="w-4 h-4 text-[#735A1E] dark:text-[#C9A24B] shrink-0 mt-0.5 sm:mt-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
               <span className="break-words">
-                Bandingkan yield Banjar vs Tabalong 2024 via <strong className="text-[#8C6E26] dark:text-[#C9A24B]">Asisten AI</strong>
+                Bandingkan yield Banjar vs Tabalong 2024 via <strong className="text-[#735A1E] dark:text-[#C9A24B]">Asisten AI</strong>
               </span>
             </div>
             <Link
               to="/masuk"
-              className="px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider rounded bg-[#8C6E26] dark:bg-[#C9A24B] text-[#F7F3EA] dark:text-[#0F181B] font-semibold hover:bg-[#70581E] dark:hover:bg-[#D9B25B] transition-colors shrink-0 z-10 mt-0.5 sm:mt-0"
+              className="px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider rounded bg-[#735A1E] dark:bg-[#C9A24B] text-[#F7F3EA] dark:text-[#0F181B] font-semibold hover:bg-[#70581E] dark:hover:bg-[#D9B25B] transition-colors shrink-0 z-10 mt-0.5 sm:mt-0"
             >
               Masuk
             </Link>

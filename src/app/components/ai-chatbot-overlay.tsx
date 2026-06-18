@@ -539,7 +539,7 @@ export function AiChatbotOverlay() {
                   <button
                     key={s}
                     onClick={() => handleSend(s)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#2A3530]/6 dark:bg-[#E8E6DF]/6 hover:bg-[#C9A24B]/12 dark:hover:bg-[#C9A24B]/12 hover:text-[#8C6E26] dark:hover:text-[#C9A24B] text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] border border-[#2A3530]/8 dark:border-[#E8E6DF]/8 hover:border-[#C9A24B]/30 transition-all cursor-pointer whitespace-nowrap"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#2A3530]/6 dark:bg-[#E8E6DF]/6 hover:bg-[#C9A24B]/12 dark:hover:bg-[#C9A24B]/12 hover:text-[#735A1E] dark:hover:text-[#C9A24B] text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] border border-[#2A3530]/8 dark:border-[#E8E6DF]/8 hover:border-[#C9A24B]/30 transition-all cursor-pointer whitespace-nowrap"
                   >
                     <ChevronRight size={10} />
                     {s}

@@ -106,7 +106,7 @@ export default function PrioritasPage() {
       title="Rekomendasi Wilayah Prioritas"
       description="Daftar wilayah prioritas berdasarkan estimasi produksi XGBoost 2026 dan tingkat risiko klaster. Tindakan intervensi diprioritaskan untuk klaster risiko tinggi."
       toolbar={
-        <div className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#C9A24B]/40 bg-[#C9A24B]/8 text-[#8C6E26] dark:text-[#C9A24B] text-[12px] font-mono">
+        <div className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#C9A24B]/40 bg-[#C9A24B]/8 text-[#735A1E] dark:text-[#C9A24B] text-[12px] font-mono">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           Proyeksi 2026
         </div>
@@ -142,7 +142,7 @@ export default function PrioritasPage() {
 
         {/* Context info */}
         <div className="rounded-xl border border-[#C9A24B]/20 bg-[#C9A24B]/5 px-4 py-3 flex items-start gap-2.5">
-          <Info size={14} className="text-[#8C6E26] dark:text-[#C9A24B] mt-0.5 shrink-0" />
+          <Info size={14} className="text-[#735A1E] dark:text-[#C9A24B] mt-0.5 shrink-0" />
           <p className="text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] leading-relaxed">
             Prioritas berdasarkan <strong className="text-[#2A3530] dark:text-[#E8E6DF]">model XGBoost (R²=0.986)</strong> untuk tahun 2026 dan klaster risiko dari K-Means. 
             Wilayah &quot;Intervensi Segera&quot; memiliki prediksi rendah DAN indeks kerentanan tinggi — butuh perhatian kebijakan pertanian prioritas.
@@ -310,8 +310,8 @@ export default function PrioritasPage() {
             <div className="flex items-center justify-between px-4 py-3 border-t border-[#2A3530]/8 dark:border-[#E8E6DF]/8">
               <p className="text-[11px] text-[#5F6A64] dark:text-[#A8AFA9]">Halaman {page + 1} dari {totalPages}</p>
               <div className="flex gap-1.5">
-                <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0} className="px-3 py-1.5 rounded-lg border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] disabled:opacity-40 hover:border-[#C9A24B] hover:text-[#8C6E26] transition-all cursor-pointer disabled:cursor-not-allowed">← Sebelumnya</button>
-                <button onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1} className="px-3 py-1.5 rounded-lg border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] disabled:opacity-40 hover:border-[#C9A24B] hover:text-[#8C6E26] transition-all cursor-pointer disabled:cursor-not-allowed">Berikutnya →</button>
+                <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0} className="px-3 py-1.5 rounded-lg border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] disabled:opacity-40 hover:border-[#C9A24B] hover:text-[#735A1E] transition-all cursor-pointer disabled:cursor-not-allowed">← Sebelumnya</button>
+                <button onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1} className="px-3 py-1.5 rounded-lg border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] disabled:opacity-40 hover:border-[#C9A24B] hover:text-[#735A1E] transition-all cursor-pointer disabled:cursor-not-allowed">Berikutnya →</button>
               </div>
             </div>
           )}

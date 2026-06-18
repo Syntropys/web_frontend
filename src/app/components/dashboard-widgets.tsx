@@ -30,7 +30,7 @@ function Card({
       <header className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-4">
         {eyebrow && (
           <div className="flex items-center gap-3 shrink-0">
-            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#8C6E26] dark:text-[#C9A24B]">
+            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#735A1E] dark:text-[#C9A24B]">
               {eyebrow}
             </span>
             <span className="h-px w-6 bg-[#C9A24B]/40" />
@@ -129,7 +129,7 @@ export function ClimateKpiCard() {
             key={it.label}
             className="rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-white/40 dark:bg-white/[0.04] p-3 flex sm:block items-center gap-3"
           >
-            <span className="inline-flex w-8 h-8 sm:w-7 sm:h-7 items-center justify-center rounded-md bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B] shrink-0 sm:mb-2">
+            <span className="inline-flex w-8 h-8 sm:w-7 sm:h-7 items-center justify-center rounded-md bg-[#C9A24B]/15 text-[#735A1E] dark:text-[#C9A24B] shrink-0 sm:mb-2">
               {it.icon}
             </span>
             <div className="min-w-0">
@@ -337,7 +337,7 @@ export function PriorityTableCard() {
 
   const badge = (k: string) =>
     k === "Tinggi"
-      ? "bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B]"
+      ? "bg-[#C9A24B]/15 text-[#735A1E] dark:text-[#C9A24B]"
       : "bg-[#7A9A6E]/15 text-[#4A7A40] dark:text-[#84B878]";
 
   return (
@@ -758,7 +758,7 @@ export function DiseaseDetectionCard() {
         {!previewUrl && (
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer underline-offset-2 hover:underline"
+            className="text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer underline-offset-2 hover:underline"
           >
             atau klik untuk memilih dari komputer
           </button>

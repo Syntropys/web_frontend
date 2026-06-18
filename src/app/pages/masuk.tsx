@@ -167,7 +167,7 @@ export default function Masuk() {
       footer={
         <>
           Belum punya akun?{' '}
-          <Link to="/daftar" className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors">
+          <Link to="/daftar" className="text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors">
             Daftar sekarang
           </Link>
         </>
@@ -203,7 +203,7 @@ export default function Masuk() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
-              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
             >
               {showPassword ? <EyeOff size={16} strokeWidth={1.6} /> : <Eye size={16} strokeWidth={1.6} />}
             </button>
@@ -238,7 +238,7 @@ export default function Masuk() {
             />
             <span className="text-[12px] text-[#5F6A64] dark:text-[#B8BFB9]">Ingat saya</span>
           </label>
-          <Link to="/lupa-password" className="text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors">
+          <Link to="/lupa-password" className="text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors">
             Lupa kata sandi?
           </Link>
         </div>

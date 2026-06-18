@@ -64,8 +64,8 @@ export function Nav() {
                     href={l.href}
                     className={`relative text-[13px] tracking-wide transition-colors ${
                       isActive
-                        ? "text-[#8C6E26] dark:text-[#C9A24B]"
-                        : "text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B]"
+                        ? "text-[#735A1E] dark:text-[#C9A24B]"
+                        : "text-[#5F6A64] dark:text-[#B8BFB9] hover:text-[#735A1E] dark:hover:text-[#C9A24B]"
                     }`}
                   >
                     {l.label}
@@ -84,7 +84,7 @@ export function Nav() {
             <button
               onClick={toggle}
               aria-label="Toggle theme"
-              className="w-10 h-10 md:w-9 md:h-9 rounded-full border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 flex items-center justify-center text-[#5F6A64] dark:text-[#E8E6DF] hover:border-[#C9A24B] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
+              className="w-10 h-10 md:w-9 md:h-9 rounded-full border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 flex items-center justify-center text-[#5F6A64] dark:text-[#E8E6DF] hover:border-[#C9A24B] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer"
             >
               {theme === "dark" ? <SunIcon /> : <MoonIcon />}
             </button>
@@ -125,8 +125,8 @@ export function Nav() {
                       onClick={() => setOpen(false)}
                       className={`block py-4 text-[15px] transition-colors ${
                         isActive
-                          ? "text-[#8C6E26] dark:text-[#C9A24B]"
-                          : "text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#8C6E26] dark:hover:text-[#C9A24B]"
+                          ? "text-[#735A1E] dark:text-[#C9A24B]"
+                          : "text-[#2A3530] dark:text-[#E8E6DF] hover:text-[#735A1E] dark:hover:text-[#C9A24B]"
                       }`}
                     >
                       {l.label}

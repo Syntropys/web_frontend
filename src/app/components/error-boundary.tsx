@@ -16,7 +16,7 @@ function ErrorFallback() {
   return (
     <div className="min-h-screen w-full bg-[#EFEBE1] text-[#2A3530] dark:bg-[#0B1215] dark:text-[#E8E6DF] flex items-center justify-center px-5 sm:px-8 transition-colors">
       <div className="max-w-md w-full text-center">
-        <p className="font-serif text-[88px] sm:text-[112px] leading-none tracking-tight text-[#8C6E26] dark:text-[#C9A24B]">
+        <p className="font-serif text-[88px] sm:text-[112px] leading-none tracking-tight text-[#735A1E] dark:text-[#C9A24B]">
           500
         </p>
 
