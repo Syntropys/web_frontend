@@ -1,4 +1,4 @@
-import { memo, type ReactNode } from "react";
+import { memo, useState, useCallback, useRef, useEffect, type ReactNode } from "react";
 import {
   CloudRain,
   Thermometer,
@@ -6,7 +6,10 @@ import {
   TrendingUp,
   AlertTriangle,
   UploadCloud,
+  Loader2,
 } from "lucide-react";
+import { detectDisease, getDiseaseLabel } from "@/services/disease";
+import type { DiseasePredictionResponse } from "@/types/api-types";
 
 function Card({
   title,
@@ -263,31 +266,269 @@ export function PriorityTableCard() {
 }
 
 export function DiseaseDetectionCard() {
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [result, setResult] = useState<DiseasePredictionResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Cleanup preview URL on unmount
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
+
+  const handleFile = useCallback(async (selected: File) => {
+    // Reset previous state
+    setError(null);
+    setResult(null);
+
+    // Validate
+    if (!selected.type.startsWith("image/")) {
+      setError("File harus berupa gambar (PNG, JPG, JPEG).");
+      return;
+    }
+    if (selected.size > 5 * 1024 * 1024) {
+      setError("Ukuran file maksimal 5MB.");
+      return;
+    }
+
+    // Set file and preview
+    setFile(selected);
+    if (preview) URL.revokeObjectURL(preview);
+    setPreview(URL.createObjectURL(selected));
+
+    // Call API
+    setLoading(true);
+    try {
+      const response = await detectDisease(selected);
+      setResult(response);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Gagal menghubungi layanan deteksi. Pastikan backend berjalan.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [preview]);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragOver(false);
+      const dropped = e.dataTransfer.files[0];
+      if (dropped) handleFile(dropped);
+    },
+    [handleFile],
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  }, []);
+
+  const handleClick = useCallback(() => {
+    inputRef.current?.click();
+  }, []);
+
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const selected = e.target.files?.[0];
+      if (selected) handleFile(selected);
+    },
+    [handleFile],
+  );
+
+  const handleReset = useCallback(() => {
+    setFile(null);
+    if (preview) URL.revokeObjectURL(preview);
+    setPreview(null);
+    setResult(null);
+    setError(null);
+    setLoading(false);
+    if (inputRef.current) inputRef.current.value = "";
+  }, [preview]);
+
+  const confidencePercent = result
+    ? (result.confidence * 100).toFixed(1)
+    : "0";
+
   return (
     <Card title="Diagnosis Penyakit Cepat" eyebrow="Deteksi">
-      <div className="rounded-xl border-2 border-dashed border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/30 dark:bg-white/[0.04] px-4 py-8 flex flex-col items-center justify-center text-center">
-        <span className="inline-flex w-10 h-10 items-center justify-center rounded-full bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B] mb-3">
-          <UploadCloud size={18} strokeWidth={1.6} />
-        </span>
-        <p className="font-mono text-[12px] tracking-wider text-[#5F6A64] dark:text-[#A8AFA9]">
-          [ Area Drag & Drop Foto Daun ]
-        </p>
-        <p className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] mt-1.5">
-          PNG / JPG · maks. 5MB
-        </p>
+      {/* Drag & Drop / Preview Area */}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={handleClick}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") handleClick();
+        }}
+        className={`relative rounded-xl border-2 border-dashed transition-all duration-200 cursor-pointer
+          ${
+            isDragOver
+              ? "border-[#C9A24B] bg-[#C9A24B]/10 dark:bg-[#C9A24B]/5 scale-[1.01]"
+              : "border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/30 dark:bg-white/[0.04]"
+          }
+          ${preview ? "p-3" : "px-4 py-8"}
+          flex flex-col items-center justify-center text-center`}
+      >
+        {preview ? (
+          <img
+            src={preview}
+            alt={file?.name ?? "Preview gambar"}
+            className="max-h-48 rounded-lg object-contain mx-auto"
+          />
+        ) : (
+          <>
+            <span className="inline-flex w-10 h-10 items-center justify-center rounded-full bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B] mb-3">
+              <UploadCloud size={18} strokeWidth={1.6} />
+            </span>
+            <p className="font-mono text-[12px] tracking-wider text-[#5F6A64] dark:text-[#A8AFA9]">
+              {isDragOver
+                ? "Lepaskan file di sini..."
+                : "[ Area Drag & Drop Foto Daun ]"}
+            </p>
+            <p className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] mt-1.5">
+              PNG / JPG · maks. 5MB
+            </p>
+          </>
+        )}
+
+        {/* Loading overlay */}
+        {loading && (
+          <div className="absolute inset-0 rounded-xl bg-black/40 flex flex-col items-center justify-center gap-2 z-10">
+            <Loader2
+              size={24}
+              className="animate-spin text-[#C9A24B]"
+              strokeWidth={2}
+            />
+            <span className="text-[12px] text-white/80 font-mono tracking-wider">
+              Menganalisis...
+            </span>
+          </div>
+        )}
       </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9]">
-        <span>
-          Diagnosis:{" "}
-          <span className="text-[#2A3530] dark:text-[#E8E6DF]">
-            [ Menunggu Data ]
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/jpg"
+        className="hidden"
+        onChange={handleInputChange}
+      />
+
+      {/* Error display */}
+      {error && (
+        <div className="mt-3 px-3 py-2 rounded-lg bg-[#A04848]/10 border border-[#A04848]/20 text-[12px] text-[#A04848] dark:text-[#D17878]">
+          ⚠ {error}
+        </div>
+      )}
+
+      {/* Result display */}
+      {result && (
+        <div className="mt-4 space-y-3">
+          {/* Main result */}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <div>
+              <p className="text-[11px] uppercase tracking-wider text-[#5F6A64] dark:text-[#A8AFA9] mb-0.5">
+                Diagnosis
+              </p>
+              <p className="font-serif tracking-tight text-[18px] text-[#2A3530] dark:text-[#E8E6DF]">
+                {getDiseaseLabel(result.predicted_class)}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-[11px] uppercase tracking-wider text-[#5F6A64] dark:text-[#A8AFA9] mb-0.5">
+                Akurasi
+              </p>
+              <p className="font-mono text-[20px] font-semibold text-[#7A9A6E] dark:text-[#84B878]">
+                {confidencePercent}%
+              </p>
+            </div>
+          </div>
+
+          {/* Top-K predictions */}
+          {result.top_k_predictions.length > 0 && (
+            <div className="rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-white/30 dark:bg-white/[0.04] p-3">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#8C6E26] dark:text-[#C9A24B] mb-2">
+                Kemungkinan Lain
+              </p>
+              <div className="space-y-1.5">
+                {result.top_k_predictions.slice(0, 5).map((pred) => (
+                  <div
+                    key={pred.class_name}
+                    className="flex items-center justify-between gap-3"
+                  >
+                    <span className="text-[12px] text-[#2A3530] dark:text-[#E8E6DF] truncate">
+                      {getDiseaseLabel(pred.class_name)}
+                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="w-16 h-1.5 rounded-full bg-[#2A3530]/10 dark:bg-[#E8E6DF]/10 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-[#C9A24B]/60"
+                          style={{
+                            width: `${(pred.probability * 100).toFixed(0)}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="font-mono text-[11px] text-[#5F6A64] dark:text-[#B8BFB9] w-10 text-right">
+                        {(pred.probability * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Metadata */}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[11px] text-[#5F6A64] dark:text-[#B8BFB9]">
+            <span>Model: {result.model_used}</span>
+            {result.inference_time_ms != null && (
+              <span>Waktu: {result.inference_time_ms.toFixed(0)}ms</span>
+            )}
+          </div>
+
+          {/* Reset button */}
+          <button
+            type="button"
+            onClick={handleReset}
+            className="w-full mt-1 py-2 rounded-lg border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-white/40 dark:bg-white/[0.04] text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:bg-[#C9A24B]/10 hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors"
+          >
+            Analisis Ulang
+          </button>
+        </div>
+      )}
+
+      {/* Default footer when no result */}
+      {!result && !error && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9]">
+          <span>
+            Diagnosis:{" "}
+            <span className="text-[#2A3530] dark:text-[#E8E6DF]">
+              [ Menunggu Data ]
+            </span>
           </span>
-        </span>
-        <span>
-          Akurasi:{" "}
-          <span className="text-[#2A3530] dark:text-[#E8E6DF]">[ 0% ]</span>
-        </span>
-      </div>
+          <span>
+            Akurasi:{" "}
+            <span className="text-[#2A3530] dark:text-[#E8E6DF]">[ 0% ]</span>
+          </span>
+        </div>
+      )}
     </Card>
   );
 }
+

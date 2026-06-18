@@ -20,8 +20,7 @@ import {
   DatabaseZap,
 } from "lucide-react";
 
-
-
+import { authService } from "@/services/auth";
 import { BrandMark } from "./brand-mark";
 import { useAuthSession } from "@/hooks/useAuthSession";
 
@@ -55,7 +54,7 @@ export function DashboardLayout({
   children: ReactNode;
 }) {
   const { theme, toggle } = useThemeStore();
-  const { profile, isAdmin, isAuthenticated } = useAuthSession();
+  const { profile, isAdmin, isAuthenticated, isLoading } = useAuthSession();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -78,10 +77,17 @@ export function DashboardLayout({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  useEffect(() => {
+    // If auth check is done and user is not authenticated, redirect to login
+    if (!isLoading && !isAuthenticated) {
+      navigate("/masuk", { replace: true });
+    }
+  }, [isLoading, isAuthenticated, navigate]);
+
   const handleLogout = async () => {
     setLoggingOut(true);
     try {
-      await authService.signOut()
+      await authService.signOut();
     } catch {
       // ignore
     } finally {
@@ -89,7 +95,7 @@ export function DashboardLayout({
     }
   };
 
-  if (!isAuthenticated) {
+  if (isLoading || !isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#EFEBE1] dark:bg-[#0B1215]">
         <div className="flex items-center gap-3 text-[#5F6A64] dark:text-[#B8BFB9]">

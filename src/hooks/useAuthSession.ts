@@ -4,14 +4,13 @@ import { useAuthStore } from '@/stores/useAuthStore'
 import { profilesService } from '@/services/profiles'
 import type { Session } from '@supabase/supabase-js'
 
+let isInitialized = false
+
 export function useAuthSession() {
   const { session, user, profile, isLoading, setSession, setProfile, setLoading, reset } =
     useAuthStore()
-  const initRef = useRef(false)
 
   useEffect(() => {
-    if (initRef.current) return
-    initRef.current = true
 
     let cancelled = false
 
@@ -56,12 +55,19 @@ export function useAuthSession() {
       } catch {
         if (!cancelled) reset()
       } finally {
-        if (!cancelled) setLoading(false)
+        if (!cancelled) {
+          isInitialized = true
+          setLoading(false)
+        }
       }
     }
 
-    setLoading(true)
-    bootstrap()
+    if (!isInitialized) {
+      setLoading(true)
+      bootstrap()
+    } else {
+      setLoading(false)
+    }
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       if (cancelled) return
