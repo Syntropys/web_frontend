@@ -184,65 +184,120 @@ export default function RisikoPage() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="text-[10px] uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] bg-[#2A3530]/3 dark:bg-white/[0.02]">
-                    <th className="px-4 py-2.5 font-normal">No</th>
-                    <th className="px-4 py-2.5 font-normal cursor-pointer hover:text-[#C9A24B] select-none" onClick={() => handleSort("wilayah")}>
-                      Wilayah <SortIcon k="wilayah" />
-                    </th>
-                    <th className="px-4 py-2.5 font-normal">Provinsi</th>
-                    <th className="px-4 py-2.5 font-normal cursor-pointer hover:text-[#C9A24B] select-none" onClick={() => handleSort("risiko")}>
-                      Risiko <SortIcon k="risiko" />
-                    </th>
-                    <th className="px-4 py-2.5 font-normal text-right cursor-pointer hover:text-[#C9A24B] select-none" onClick={() => handleSort("produksi")}>
-                      Estimasi Produksi (ton) <SortIcon k="produksi" />
-                    </th>
-                    <th className="px-4 py-2.5 font-normal text-right cursor-pointer hover:text-[#C9A24B] select-none" onClick={() => handleSort("yield")}>
-                      Yield (t/ha) <SortIcon k="yield" />
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="text-[13px] text-[#2A3530] dark:text-[#E8E6DF]">
-                  {paginated.map((r, idx) => {
-                    const meta = RISK_META[r.clusterLabel] ?? RISK_META[2];
-                    const Icon = meta.icon;
-                    return (
-                      <tr key={r.id} className="border-t border-[#2A3530]/6 dark:border-[#E8E6DF]/6 hover:bg-[#C9A24B]/3 dark:hover:bg-white/[0.02] transition-colors">
-                        <td className="px-4 py-3 text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] font-mono">
-                          {page * PER_PAGE + idx + 1}
-                        </td>
-                        <td className="px-4 py-3 font-medium">{r.wilayah}</td>
-                        <td className="px-4 py-3 text-[12px] text-[#5F6A64] dark:text-[#A8AFA9]">{r.provinsi}</td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${meta.bg} ${meta.border}`}
-                            style={{ color: meta.color }}
-                          >
-                            <Icon size={10} strokeWidth={2} />
-                            {r.risiko}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono text-[12px]">
-                          {r.produksi > 0 ? Math.round(r.produksi).toLocaleString("id-ID") : "—"}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono text-[12px]">
-                          {r.yield > 0 ? r.yield.toFixed(2) : "—"}
+            <>
+              {/* ── Mobile cards ── */}
+              <div className="lg:hidden space-y-2 px-3 py-2">
+                {paginated.length === 0 && (
+                  <div className="py-12 text-center text-[#5F6A64] dark:text-[#A8AFA9] text-[13px]">
+                    Tidak ada wilayah yang sesuai filter
+                  </div>
+                )}
+                {paginated.map((r, idx) => {
+                  const meta = RISK_META[r.clusterLabel] ?? RISK_META[2];
+                  const Icon = meta.icon;
+                  return (
+                    <div
+                      key={r.id}
+                      className="rounded-xl border border-[#2A3530]/10 dark:border-[#E8E6DF]/8 bg-white/50 dark:bg-white/[0.03] p-3.5"
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-medium text-[#2A3530] dark:text-[#E8E6DF] leading-tight truncate">
+                            <span className="text-[10px] font-mono text-[#5F6A64] dark:text-[#A8AFA9] mr-1.5">
+                              {page * PER_PAGE + idx + 1}.
+                            </span>
+                            {r.wilayah}
+                          </p>
+                          <p className="text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] mt-0.5">{r.provinsi}</p>
+                        </div>
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border shrink-0 ${meta.bg} ${meta.border}`}
+                          style={{ color: meta.color }}
+                        >
+                          <Icon size={10} strokeWidth={2} />
+                          {r.risiko}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-4 pt-2 border-t border-[#2A3530]/6 dark:border-[#E8E6DF]/6">
+                        <div className="flex-1">
+                          <p className="text-[9px] uppercase tracking-wider text-[#5F6A64] dark:text-[#A8AFA9] mb-0.5">Produksi</p>
+                          <p className="font-mono text-[13px] text-[#2A3530] dark:text-[#E8E6DF]">
+                            {r.produksi > 0 ? Math.round(r.produksi).toLocaleString("id-ID") : "—"} <span className="text-[10px] text-[#5F6A64]">ton</span>
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[9px] uppercase tracking-wider text-[#5F6A64] dark:text-[#A8AFA9] mb-0.5">Yield</p>
+                          <p className="font-mono text-[13px] text-[#2A3530] dark:text-[#E8E6DF]">
+                            {r.yield > 0 ? r.yield.toFixed(2) : "—"} <span className="text-[10px] text-[#5F6A64]">t/ha</span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* ── Desktop table ── */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="text-[10px] uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] bg-[#2A3530]/3 dark:bg-white/[0.02]">
+                      <th className="px-4 py-2.5 font-normal">No</th>
+                      <th className="px-4 py-2.5 font-normal cursor-pointer hover:text-[#C9A24B] select-none" onClick={() => handleSort("wilayah")}>
+                        Wilayah <SortIcon k="wilayah" />
+                      </th>
+                      <th className="px-4 py-2.5 font-normal">Provinsi</th>
+                      <th className="px-4 py-2.5 font-normal cursor-pointer hover:text-[#C9A24B] select-none" onClick={() => handleSort("risiko")}>
+                        Risiko <SortIcon k="risiko" />
+                      </th>
+                      <th className="px-4 py-2.5 font-normal text-right cursor-pointer hover:text-[#C9A24B] select-none" onClick={() => handleSort("produksi")}>
+                        Estimasi Produksi (ton) <SortIcon k="produksi" />
+                      </th>
+                      <th className="px-4 py-2.5 font-normal text-right cursor-pointer hover:text-[#C9A24B] select-none" onClick={() => handleSort("yield")}>
+                        Yield (t/ha) <SortIcon k="yield" />
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-[13px] text-[#2A3530] dark:text-[#E8E6DF]">
+                    {paginated.map((r, idx) => {
+                      const meta = RISK_META[r.clusterLabel] ?? RISK_META[2];
+                      const Icon = meta.icon;
+                      return (
+                        <tr key={r.id} className="border-t border-[#2A3530]/6 dark:border-[#E8E6DF]/6 hover:bg-[#C9A24B]/3 dark:hover:bg-white/[0.02] transition-colors">
+                          <td className="px-4 py-3 text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] font-mono">
+                            {page * PER_PAGE + idx + 1}
+                          </td>
+                          <td className="px-4 py-3 font-medium">{r.wilayah}</td>
+                          <td className="px-4 py-3 text-[12px] text-[#5F6A64] dark:text-[#A8AFA9]">{r.provinsi}</td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${meta.bg} ${meta.border}`}
+                              style={{ color: meta.color }}
+                            >
+                              <Icon size={10} strokeWidth={2} />
+                              {r.risiko}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right font-mono text-[12px]">
+                            {r.produksi > 0 ? Math.round(r.produksi).toLocaleString("id-ID") : "—"}
+                          </td>
+                          <td className="px-4 py-3 text-right font-mono text-[12px]">
+                            {r.yield > 0 ? r.yield.toFixed(2) : "—"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {paginated.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="px-4 py-12 text-center text-[#5F6A64] dark:text-[#A8AFA9] text-[13px]">
+                          Tidak ada wilayah yang sesuai filter
                         </td>
                       </tr>
-                    );
-                  })}
-                  {paginated.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="px-4 py-12 text-center text-[#5F6A64] dark:text-[#A8AFA9] text-[13px]">
-                        Tidak ada wilayah yang sesuai filter
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
 
           {/* Pagination */}
