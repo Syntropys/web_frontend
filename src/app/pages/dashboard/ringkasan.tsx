@@ -62,10 +62,11 @@ export default function RingkasanPage() {
         // Fetch production
         const { data: prodRaw } = await supabase
           .from("production_history")
-          .select("production_ton")
+          .select("production_ton, year")
           .gte("year", yearRange.start)
           .lte("year", yearRange.end);
-        const prodData = prodRaw as Array<{ production_ton: number | null }> | null;
+        const prodData = prodRaw as Array<{ production_ton: number | null; year: number | null }> | null;
+
 
         // Fetch weather
         const { data: weatherRaw } = await supabase
