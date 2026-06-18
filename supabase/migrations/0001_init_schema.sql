@@ -73,7 +73,7 @@ create table public.weather_history (
 );
 
 -- ──────────────────────────────────────────────────────────────────
--- predictions (model output, Phase 1 dummy seed)
+-- predictions (model output, real ML training results)
 -- ──────────────────────────────────────────────────────────────────
 create table public.predictions (
   id uuid primary key default gen_random_uuid(),
@@ -85,7 +85,7 @@ create table public.predictions (
   confidence_lower numeric,
   confidence_upper numeric,
   model_name text not null check (model_name in ('lstm','xgboost','random_forest','linear')),
-  model_version text not null default 'v1-dummy',
+  model_version text not null default 'v1-real',
   computed_at timestamptz not null default now(),
   is_baseline boolean not null default false
 );
@@ -122,6 +122,6 @@ comment on table public.profiles is 'Extends auth.users with role, status, theme
 comment on table public.regions is 'Master 56 kabupaten/kota Kalimantan dari BPS';
 comment on table public.production_history is 'Produksi padi historis (BPS) per region per tahun/bulan';
 comment on table public.weather_history is 'Cuaca historis (NASA POWER) per region bulanan';
-comment on table public.predictions is 'Output model prediksi produktivitas (LSTM + 3 baseline)';
+comment on table public.predictions is 'Output model prediksi produktivitas (XGBoost + 2 baseline)';
 comment on table public.cluster_assignments is 'Hasil K-Means clustering 3 kategori (high/medium/low)';
 comment on table public.audit_log is 'Log admin actions; INSERT only via RPC functions';
