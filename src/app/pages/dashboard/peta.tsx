@@ -1,7 +1,8 @@
 import { DashboardLayout } from "../../components/dashboard-layout";
 import { KalimantanMap } from "../../components/peta";
 import { supabase } from "../../../lib/supabase";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { Download, ChevronDown } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface RegionData {
@@ -102,6 +103,8 @@ export default function PetaPage() {
   const [loading, setLoading] = useState(true);
   const [showKmeansPng, setShowKmeansPng] = useState(false);
   const [sortMode, setSortMode] = useState<"cluster" | "yield" | "prod">("cluster");
+  const [selectedYear] = useState(2026); // expandable for future years
+  const [exportOpen, setExportOpen] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -158,13 +161,37 @@ export default function PetaPage() {
       }
     }
     fetchData();
-  }, []);
+  }, [selectedYear]);
 
+  // ─── regionsList (must be before exportCSV) ─────────────────────────────────
   const regionsList = useMemo(() => {
     const list: RegionData[] = [];
     dbData.forEach((v) => list.push(v));
     return list;
   }, [dbData]);
+
+  // ─── Export CSV ──────────────────────────────────────────────────────────────
+  const exportCSV = useCallback(() => {
+    const header = ["Wilayah", "Provinsi", "Kluster", "Prioritas", "Yield 2026 (t/ha)", "Produksi 2026 (ton)"];
+    const prioritasLabel = ["Tinggi", "Sedang", "Rendah"];
+    const rows = regionsList.map((r) => [
+      r.name,
+      r.province,
+      r.cluster_label,
+      prioritasLabel[r.cluster_label] ?? "—",
+      r.predicted_yield != null ? r.predicted_yield.toFixed(4) : "",
+      r.predicted_prod != null ? Math.round(r.predicted_prod) : "",
+    ]);
+    const csv = [header, ...rows].map((row) => row.map((c) => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `agrolytics_peta_spasial_${selectedYear}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setExportOpen(false);
+  }, [regionsList, selectedYear]);
 
   const filteredList = useMemo(() => {
     let result = regionsList;
@@ -225,6 +252,39 @@ export default function PetaPage() {
       eyebrow="Peta"
       title="Distribusi Kerentanan Spasial"
       description="Visualisasi sebaran kerentanan K-Means per wilayah Kalimantan — prediksi XGBoost 2026."
+      toolbar={
+        <div className="flex items-center gap-2">
+          {/* Year badge — fixed 2026, future-ready */}
+          <div className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#C9A24B]/40 bg-[#C9A24B]/8 text-[#8C6E26] dark:text-[#C9A24B] text-[12px] font-mono">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Proyeksi {selectedYear}
+          </div>
+
+          {/* Export dropdown */}
+          <div className="relative">
+            <button
+              id="peta-export-btn"
+              onClick={() => setExportOpen((v) => !v)}
+              className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer bg-white/40 dark:bg-white/[0.03]"
+            >
+              <Download size={13} strokeWidth={1.6} />
+              Ekspor
+              <ChevronDown size={11} strokeWidth={2} className={`transition-transform duration-200 ${exportOpen ? "rotate-180" : ""}`} />
+            </button>
+            {exportOpen && (
+              <div className="absolute right-0 top-11 z-50 w-44 rounded-xl border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 bg-[#F7F4EE] dark:bg-[#0E1619] shadow-xl overflow-hidden">
+                <button
+                  onClick={exportCSV}
+                  className="w-full flex items-center gap-2.5 px-4 py-3 text-[12px] text-[#2A3530] dark:text-[#E8E6DF] hover:bg-[#C9A24B]/8 hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors text-left cursor-pointer"
+                >
+                  <Download size={13} strokeWidth={1.6} />
+                  Unduh CSV
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      }
     >
       {/* ── Stats Row ─────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
