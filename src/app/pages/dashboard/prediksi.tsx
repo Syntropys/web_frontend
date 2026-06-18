@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 import { DashboardLayout } from "../../components/dashboard-layout";
-import { DateRangeAndExportToolbar } from "../../components/date-range-export-toolbar";
 import { supabase } from "@/lib/supabase";
 import {
   ResponsiveContainer,
@@ -142,7 +141,12 @@ export default function PrediksiPage() {
       eyebrow="Prediksi"
       title="Proyeksi Produksi 2026"
       description="Tren historis 2018–2025 + proyeksi 2026 dari tiga model ML. Pilih wilayah dan aktifkan model untuk perbandingan."
-      toolbar={<DateRangeAndExportToolbar />}
+      toolbar={
+        <div className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#C9A24B]/40 bg-[#C9A24B]/8 text-[#8C6E26] dark:text-[#C9A24B] text-[12px] font-mono">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          BPS 2018–2025 + Proyeksi 2026
+        </div>
+      }
     >
       <div className="space-y-5">
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-5">

@@ -36,13 +36,15 @@ const toneClasses: Record<SummaryItem["tone"], string> = {
 export default function RingkasanPage() {
   const [yearRange, setYearRange] = useState({ start: 2018, end: 2026 });
   const [metrics, setMetrics] = useState({
-    totalProd: "2.306.722",
-    highRiskCount: "19",
-    priorityCount: "38",
-    priorityCaption: "19 Tinggi · 19 Sedang",
-    avgRain: "150",
-    avgTemp: "28",
-    avgHumid: "80",
+    totalProd: "—",
+    highRiskCount: "—",
+    priorityCount: "—",
+    priorityCaption: "Memuat…",
+    avgRain: "—",
+    avgTemp: "—",
+    avgHumid: "—",
+    trendPct: "—",
+    regionCount: "—",
   });
 
   useEffect(() => {
@@ -81,7 +83,7 @@ export default function RingkasanPage() {
         const total = prodData?.reduce((acc, p) => acc + Number(p.production_ton || 0), 0) || 0;
         const totalFormatted = total > 0
           ? Math.round(total).toLocaleString("id-ID")
-          : "2.306.722";
+          : "—";
 
         // Calculate weather averages
         let rainSum = 0, tempSum = 0, humidSum = 0;
@@ -93,17 +95,41 @@ export default function RingkasanPage() {
             humidSum += Number(w.humidity_pct || 0);
           });
         }
-        const avgRain = weatherLen > 0 ? Math.round(rainSum / weatherLen).toString() : "150";
-        const avgTemp = weatherLen > 0 ? Math.round(tempSum / weatherLen).toString() : "28";
-        const avgHumid = weatherLen > 0 ? Math.round(humidSum / weatherLen).toString() : "80";
+        const avgRain = weatherLen > 0 ? Math.round(rainSum / weatherLen).toString() : "—";
+        const avgTemp = weatherLen > 0 ? Math.round(tempSum / weatherLen).toString() : "—";
+        const avgHumid = weatherLen > 0 ? Math.round(humidSum / weatherLen).toString() : "—";
 
         // Count risk and priority
         const highRisk = clusters?.filter((c) => c.cluster_label === 0).length || 0;
         const medRisk = clusters?.filter((c) => c.cluster_label === 1).length || 0;
 
-        const highRiskStr = highRisk > 0 ? String(highRisk) : "19";
-        const priorityCountStr = (highRisk + medRisk) > 0 ? String(highRisk + medRisk) : "38";
-        const priorityCaptionStr = `${highRisk} Tinggi · ${medRisk} Sedang`;
+        const highRiskStr = (highRisk + medRisk) > 0 ? String(highRisk) : "—";
+        const priorityCountStr = (highRisk + medRisk) > 0 ? String(highRisk + medRisk) : "—";
+        const priorityCaptionStr = (highRisk + medRisk) > 0 ? `${highRisk} Tinggi · ${medRisk} Sedang` : "Memuat…";
+
+        // Calculate YoY trend from production history
+        let trendPct = "—";
+        if (prodData && prodData.length > 0) {
+          // Group by year to get yearly totals
+          const yearlyTotals: Record<number, number> = {};
+          prodData.forEach((p: any) => {
+            const yr = p.year ?? p.target_year;
+            if (yr) yearlyTotals[yr] = (yearlyTotals[yr] || 0) + Number(p.production_ton || 0);
+          });
+          const sortedYears = Object.keys(yearlyTotals).map(Number).sort();
+          if (sortedYears.length >= 2) {
+            const first = yearlyTotals[sortedYears[0]];
+            const last = yearlyTotals[sortedYears[sortedYears.length - 1]];
+            if (first > 0) {
+              const pct = ((last - first) / first) * 100;
+              trendPct = (pct >= 0 ? "+" : "") + pct.toFixed(1);
+            }
+          }
+        }
+
+        // Fetch region count
+        const { count: regCount } = await supabase.from("regions").select("id", { count: "exact", head: true });
+        const regionCount = regCount != null && regCount > 0 ? String(regCount) : "—";
 
         setMetrics({
           totalProd: totalFormatted,
@@ -113,6 +139,8 @@ export default function RingkasanPage() {
           avgRain,
           avgTemp,
           avgHumid,
+          trendPct,
+          regionCount,
         });
       } catch (err) {
         console.error("Error fetching summary metrics:", err);
@@ -157,7 +185,7 @@ export default function RingkasanPage() {
       eyebrow: "Peta Spasial",
       title: "Cakupan Pemetaan",
       icon: Map,
-      metric: "56",
+      metric: metrics.regionCount,
       unit: "kabupaten",
       caption: "Total wilayah Kalimantan",
       tone: "neutral",
@@ -167,9 +195,9 @@ export default function RingkasanPage() {
       eyebrow: "Tren Historis",
       title: "Tren Produksi",
       icon: TrendingUp,
-      metric: "+4,2",
+      metric: metrics.trendPct,
       unit: "%",
-      caption: "BPS 2018–2025 vs Prediksi XGBoost",
+      caption: `BPS ${yearRange.start}–${yearRange.end}`,
       tone: "green",
     },
     {

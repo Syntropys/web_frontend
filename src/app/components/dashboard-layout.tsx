@@ -82,7 +82,7 @@ export function DashboardLayout({
   }, [isLoading, isAuthenticated, navigate]);
 
   useEffect(() => {
-    document.title = pageTitle;
+    document.title = `${pageTitle} — Agrolytics`;
   }, [pageTitle]);
 
   useEffect(() => {

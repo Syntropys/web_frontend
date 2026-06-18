@@ -1,7 +1,7 @@
 import { DashboardLayout } from "../../components/dashboard-layout";
 import { KalimantanMap } from "../../components/peta";
 import { supabase } from "../../../lib/supabase";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Download, ChevronDown } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -105,6 +105,20 @@ export default function PetaPage() {
   const [sortMode, setSortMode] = useState<"cluster" | "yield" | "prod">("cluster");
   const [selectedYear] = useState(2026); // expandable for future years
   const [exportOpen, setExportOpen] = useState(false);
+  const exportRef = useRef<HTMLDivElement>(null);
+
+  // Close export dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (exportRef.current && !exportRef.current.contains(e.target as Node)) {
+        setExportOpen(false);
+      }
+    }
+    if (exportOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [exportOpen]);
 
   useEffect(() => {
     async function fetchData() {
@@ -261,7 +275,7 @@ export default function PetaPage() {
           </div>
 
           {/* Export dropdown */}
-          <div className="relative">
+          <div className="relative" ref={exportRef}>
             <button
               id="peta-export-btn"
               onClick={() => setExportOpen((v) => !v)}

@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 import { DashboardLayout } from "../../components/dashboard-layout";
-import { DateRangeAndExportToolbar } from "../../components/date-range-export-toolbar";
 import { supabase } from "@/lib/supabase";
 import {
   ResponsiveContainer,
@@ -63,6 +62,13 @@ export default function IklimPage() {
 
   const years = useMemo(() => [...new Set(weather.map((w) => w.year))].sort(), [weather]);
 
+  // Auto-select latest year when data loads
+  useEffect(() => {
+    if (years.length > 0 && !years.includes(yearFilter)) {
+      setYearFilter(years[years.length - 1]);
+    }
+  }, [years]);
+
   // Monthly chart data for selected year
   const monthlyData = useMemo(() => {
     const rows = weather.filter((w) => w.year === yearFilter);
@@ -115,7 +121,12 @@ export default function IklimPage() {
       eyebrow="Iklim"
       title="Data Iklim Wilayah"
       description="Curah hujan, suhu, dan kelembapan dari NASA POWER. Pilih wilayah dan tahun untuk analisis tren iklim."
-      toolbar={<DateRangeAndExportToolbar />}
+      toolbar={
+        <div className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#6BA5C8]/40 bg-[#6BA5C8]/8 text-[#3A7A9F] dark:text-[#6BA5C8] text-[12px] font-mono">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          NASA POWER
+        </div>
+      }
     >
       <div className="space-y-5">
         <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-5">
