@@ -46,7 +46,8 @@ const DISEASE_QUICK_REFS = [
 ];
 
 const API_URL = import.meta.env.VITE_DISEASE_API_URL || "";
-const isApiConfigured = API_URL && !API_URL.includes("your-ml-service");
+// Configured = real https URL with no placeholder keyword
+const isApiConfigured = API_URL.startsWith("https://") && !API_URL.includes("your-");
 
 export default function PenyakitPage() {
   return (

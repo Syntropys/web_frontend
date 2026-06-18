@@ -500,87 +500,220 @@ export function DiseaseDetectionCard() {
 
   return (
     <Card title="Diagnosis Penyakit Cepat" eyebrow="Deteksi">
-      <div className="space-y-4">
-        {/* Upload Zone */}
-        {!previewUrl && (
+      {/* Scan keyframe */}
+      <style>{`
+        @keyframes ag-scanline {
+          0%   { top: 22%; }
+          50%  { top: 74%; }
+          100% { top: 22%; }
+        }
+        @keyframes ag-fadeup {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
+      <div className="flex flex-col items-center gap-5">
+
+        {/* ── iPhone Mockup ── */}
+        <div className="relative select-none">
+          {/* Outer phone body */}
           <div
-            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-            onDragLeave={() => setIsDragging(false)}
-            onDrop={(e) => { e.preventDefault(); setIsDragging(false); if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]); }}
-            onClick={() => fileInputRef.current?.click()}
-            className={`rounded-xl border-2 border-dashed transition-all duration-200 cursor-pointer px-4 py-10 flex flex-col items-center justify-center text-center ${
-              isDragging ? "border-[#C9A24B] bg-[#C9A24B]/5" : "border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/30 dark:bg-white/[0.04] hover:border-[#C9A24B]/50"
-            }`}
+            className="relative transition-all duration-300"
+            style={{
+              width: 210,
+              borderRadius: 46,
+              padding: 4,
+              background: "linear-gradient(160deg, #48484a 0%, #1c1c1e 55%, #3a3a3c 100%)",
+              boxShadow: isDragging
+                ? "0 0 0 2px #C9A24B, 0 0 40px rgba(201,162,75,0.35), 0 24px 64px rgba(0,0,0,0.7)"
+                : "inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 1px rgba(0,0,0,0.5), 0 28px 72px rgba(0,0,0,0.75)",
+            }}
           >
-            <input type="file" ref={fileInputRef} onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }} accept="image/png, image/jpeg, image/jpg" className="hidden" />
-            <span className="inline-flex w-12 h-12 items-center justify-center rounded-full bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B] mb-3">
-              <UploadCloud size={20} strokeWidth={1.6} />
-            </span>
-            <p className="font-serif text-[15px] text-[#2A3530] dark:text-[#E8E6DF] font-medium">Tarik &amp; taruh foto daun padi di sini</p>
-            <p className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] mt-1">atau klik untuk memilih dari komputer</p>
-            <p className="text-[11px] text-[#5F6A64]/60 dark:text-[#A8AFA9]/50 mt-3 font-mono">PNG / JPG · maks. 5MB</p>
-            <div className="mt-4 flex flex-wrap justify-center gap-1.5">
-              {["Hispa 🐛", "Brown Spot 🟤", "Blast 🚨", "Tungro 🦠", "Sehat ✅"].map((d) => (
-                <span key={d} className="px-2 py-0.5 rounded-full text-[10px] border border-[#2A3530]/10 dark:border-[#E8E6DF]/10 text-[#5F6A64] dark:text-[#A8AFA9]">{d}</span>
-              ))}
+            {/* Side hardware buttons */}
+            <div className="absolute -left-[5px] top-[52px]  w-[4px] h-[22px] rounded-l-full" style={{ background: "linear-gradient(180deg,#48484a,#2c2c2e)" }} />
+            <div className="absolute -left-[5px] top-[84px]  w-[4px] h-[40px] rounded-l-full" style={{ background: "linear-gradient(180deg,#48484a,#2c2c2e)" }} />
+            <div className="absolute -left-[5px] top-[132px] w-[4px] h-[40px] rounded-l-full" style={{ background: "linear-gradient(180deg,#48484a,#2c2c2e)" }} />
+            <div className="absolute -right-[5px] top-[94px]  w-[4px] h-[56px] rounded-r-full" style={{ background: "linear-gradient(180deg,#48484a,#2c2c2e)" }} />
+
+            {/* Screen */}
+            <div
+              className="relative overflow-hidden cursor-pointer"
+              style={{ borderRadius: 42, background: "#050505", aspectRatio: "9/19.5" }}
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => { e.preventDefault(); setIsDragging(false); if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]); }}
+              onClick={() => { if (!previewUrl) fileInputRef.current?.click(); }}
+            >
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }}
+                accept="image/png, image/jpeg, image/jpg"
+                className="hidden"
+              />
+
+              {/* Dynamic Island */}
+              <div
+                className="absolute top-[10px] left-1/2 -translate-x-1/2 z-30"
+                style={{ width: 64, height: 18, background: "#000", borderRadius: 12, boxShadow: "0 0 0 1px rgba(255,255,255,0.06)" }}
+              />
+
+              {/* ── Scan animation when analyzing ── */}
+              {isAnalyzing && (
+                <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
+                  {/* Grid */}
+                  <div className="absolute inset-0" style={{
+                    backgroundImage: "linear-gradient(rgba(201,162,75,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(201,162,75,0.05) 1px,transparent 1px)",
+                    backgroundSize: "18px 18px",
+                  }} />
+                  {/* Sweeping line */}
+                  <div
+                    className="absolute left-0 right-0 z-30"
+                    style={{
+                      height: 2,
+                      background: "linear-gradient(90deg,transparent 0%,rgba(201,162,75,0.4) 20%,#C9A24B 50%,rgba(201,162,75,0.4) 80%,transparent 100%)",
+                      boxShadow: "0 0 14px 5px rgba(201,162,75,0.55)",
+                      animation: "ag-scanline 1.8s ease-in-out infinite",
+                    }}
+                  />
+                  {/* Corner brackets */}
+                  {[
+                    "top-[26%] left-[10%] border-t-2 border-l-2",
+                    "top-[26%] right-[10%] border-t-2 border-r-2",
+                    "bottom-[16%] left-[10%] border-b-2 border-l-2",
+                    "bottom-[16%] right-[10%] border-b-2 border-r-2",
+                  ].map((cls, i) => (
+                    <div key={i} className={`absolute w-5 h-5 border-[#C9A24B] ${cls}`} />
+                  ))}
+                  {/* Analyzing label */}
+                  <div className="absolute bottom-[12%] left-0 right-0 flex justify-center">
+                    <span className="text-[9px] font-mono tracking-[0.25em] text-[#C9A24B] animate-pulse uppercase">
+                      Menganalisis…
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Drag-over overlay */}
+              {isDragging && !previewUrl && (
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#C9A24B]/10 backdrop-blur-[2px]">
+                  <div className="w-10 h-10 rounded-full border-2 border-[#C9A24B] flex items-center justify-center mb-2">
+                    <UploadCloud size={18} className="text-[#C9A24B]" />
+                  </div>
+                  <p className="text-[10px] text-[#C9A24B] font-medium">Lepaskan di sini</p>
+                </div>
+              )}
+
+              {/* Preview image */}
+              {previewUrl && (
+                <img
+                  src={previewUrl}
+                  alt="Paddy leaf preview"
+                  className="w-full h-full object-cover"
+                  style={{ filter: isAnalyzing ? "brightness(0.45)" : "brightness(1)", transition: "filter 0.4s" }}
+                />
+              )}
+
+              {/* Empty state */}
+              {!previewUrl && !isDragging && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 pt-8">
+                  <div
+                    className="w-14 h-14 rounded-full flex items-center justify-center mb-1"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  >
+                    <UploadCloud size={22} strokeWidth={1.4} style={{ color: "rgba(168,175,169,0.7)" }} />
+                  </div>
+                  <p className="text-[10px] text-center leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+                    Tarik & taruh<br />foto daun padi
+                  </p>
+                  <p className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.22)" }}>
+                    PNG · JPG · maks 5MB
+                  </p>
+                  <div className="mt-1.5 flex flex-wrap justify-center gap-1">
+                    {["Hispa", "Brown Spot", "Blast", "Tungro"].map((d) => (
+                      <span
+                        key={d}
+                        className="px-1.5 py-0.5 rounded-full text-[7px]"
+                        style={{ border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.28)" }}
+                      >
+                        {d}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Mini result overlay at bottom of phone */}
+              {result && diseaseInfo && !isAnalyzing && !error && (
+                <div
+                  className="absolute bottom-0 left-0 right-0 z-20 px-3 py-2.5"
+                  style={{
+                    background: `linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.5) 100%)`,
+                    backdropFilter: "blur(4px)",
+                    animation: "ag-fadeup 0.4s ease",
+                  }}
+                >
+                  <p className="text-[7px] uppercase tracking-[0.2em] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
+                    Diagnosis
+                  </p>
+                  <p className="text-[11px] font-semibold text-white leading-tight mt-0.5">
+                    {diseaseInfo.emoji} {diseaseInfo.name}
+                  </p>
+                  <p className="font-mono text-[14px] font-bold" style={{ color: diseaseInfo.severityColor }}>
+                    {(result.confidence * 100).toFixed(1)}%
+                    <span className="text-[8px] font-normal ml-1" style={{ color: "rgba(255,255,255,0.35)" }}>kepercayaan</span>
+                  </p>
+                </div>
+              )}
+
+              {/* Home indicator */}
+              <div
+                className="absolute bottom-2 left-1/2 -translate-x-1/2 z-30 rounded-full"
+                style={{ width: 48, height: 3, background: "rgba(255,255,255,0.15)" }}
+              />
             </div>
           </div>
-        )}
 
-        {/* Preview + Analyzing overlay */}
-        {previewUrl && (
-          <div className="relative rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#EFEBE1]/30 dark:bg-black/20 p-4 flex flex-col items-center justify-center min-h-[200px]">
-            {isAnalyzing && (
-              <div className="absolute inset-0 bg-[#EFEBE1]/88 dark:bg-[#0E1619]/92 rounded-xl flex flex-col items-center justify-center z-10 backdrop-blur-sm gap-2">
-                <Loader2 className="animate-spin text-[#C9A24B]" size={34} />
-                <p className="text-[13px] font-medium text-[#2A3530] dark:text-[#E8E6DF]">Menganalisis gambar…</p>
-                <p className="text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] font-mono">Paddy SoftVoting Ensemble</p>
-              </div>
-            )}
-            <img src={previewUrl} alt="Paddy leaf preview" className="max-h-[200px] w-auto rounded-lg object-contain shadow-md" />
-            {file && !isAnalyzing && <p className="mt-2 text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] truncate max-w-full">{file.name}</p>}
-          </div>
+          {/* Glow beneath phone */}
+          <div
+            className="absolute inset-x-8 -bottom-3 h-5 rounded-full transition-opacity duration-300"
+            style={{
+              background: "rgba(201,162,75,0.3)",
+              filter: "blur(10px)",
+              opacity: isDragging || isAnalyzing ? 1 : 0.3,
+            }}
+          />
+        </div>
+
+        {/* CTA below phone */}
+        {!previewUrl && (
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#8C6E26] dark:hover:text-[#C9A24B] transition-colors cursor-pointer underline-offset-2 hover:underline"
+          >
+            atau klik untuk memilih dari komputer
+          </button>
         )}
 
         {/* Error */}
         {error && (
-          <div className="p-3 rounded-lg border border-[#A04848]/20 bg-[#A04848]/5 text-[#A04848] dark:text-[#D17878] text-[12px] leading-relaxed">
+          <div className="w-full p-3 rounded-xl border border-[#A04848]/20 bg-[#A04848]/5 text-[#A04848] dark:text-[#D17878] text-[12px] leading-relaxed">
             {error}
-            <button onClick={handleReset} className="block mt-2 text-[#C9A24B] hover:underline font-medium focus:outline-none cursor-pointer">Coba File Lain</button>
+            <button onClick={handleReset} className="block mt-2 text-[#C9A24B] hover:underline font-medium cursor-pointer">
+              Coba File Lain
+            </button>
           </div>
         )}
 
-        {/* Rich Result */}
+        {/* ── Full result panel ── */}
         {result && diseaseInfo && !error && !isAnalyzing && (
-          <div className="space-y-4">
-            {/* Diagnosis header */}
-            <div className={`rounded-xl border border-[#2A3530]/8 dark:border-[#E8E6DF]/8 ${diseaseInfo.severityBg} p-4`}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] mb-1">Hasil Diagnosis</p>
-                  <p className="font-serif text-[16px] text-[#2A3530] dark:text-[#E8E6DF] font-semibold leading-snug">
-                    {diseaseInfo.emoji} {diseaseInfo.name}
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border" style={{ color: diseaseInfo.severityColor, borderColor: diseaseInfo.severityColor + "40" }}>
-                    {diseaseInfo.severity}
-                  </span>
-                  <p className="font-mono text-[24px] font-bold mt-1" style={{ color: diseaseInfo.severityColor }}>
-                    {(result.confidence * 100).toFixed(1)}%
-                  </p>
-                  <p className="text-[10px] text-[#5F6A64] dark:text-[#A8AFA9]">Kepercayaan</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Description */}
+          <div className="w-full space-y-3" style={{ animation: "ag-fadeup 0.5s ease" }}>
             <p className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] leading-relaxed">{diseaseInfo.description}</p>
 
-            {/* Top-k probability bars */}
             {result.top_k_predictions && result.top_k_predictions.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9]">Probabilitas Kelas</p>
+              <div className="space-y-1.5">
+                <p className="text-[9px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9]">Probabilitas Kelas</p>
                 {result.top_k_predictions.map((pred) => (
                   <div key={pred.class_name} className="space-y-0.5">
                     <div className="flex items-center justify-between text-[11px]">
@@ -588,17 +721,23 @@ export function DiseaseDetectionCard() {
                       <span className="font-mono text-[#5F6A64] dark:text-[#A8AFA9]">{(pred.probability * 100).toFixed(1)}%</span>
                     </div>
                     <div className="h-1.5 rounded-full bg-[#2A3530]/8 dark:bg-white/8 overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pred.probability * 100}%`, background: pred.class_name.toLowerCase() === result.predicted_class.toLowerCase() ? diseaseInfo.severityColor : "#5F6A64" }} />
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{
+                          width: `${pred.probability * 100}%`,
+                          background: pred.class_name.toLowerCase() === result.predicted_class.toLowerCase()
+                            ? diseaseInfo.severityColor : "#5F6A64",
+                        }}
+                      />
                     </div>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Symptoms + Treatment */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="rounded-xl border border-[#2A3530]/10 dark:border-[#E8E6DF]/8 bg-white/30 dark:bg-white/[0.03] p-3">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] mb-2">🔍 Gejala</p>
+                <p className="text-[9px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] mb-2">🔍 Gejala</p>
                 <ul className="space-y-1.5">
                   {diseaseInfo.symptoms.map((s, i) => (
                     <li key={i} className="flex items-start gap-1.5 text-[11px] text-[#2A3530] dark:text-[#E8E6DF]">
@@ -609,7 +748,7 @@ export function DiseaseDetectionCard() {
                 </ul>
               </div>
               <div className="rounded-xl border border-[#7A9A6E]/20 bg-[#7A9A6E]/5 p-3">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] mb-2">💊 Rekomendasi</p>
+                <p className="text-[9px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] mb-2">💊 Rekomendasi</p>
                 <ul className="space-y-1.5">
                   {diseaseInfo.treatment.map((t, i) => (
                     <li key={i} className="flex items-start gap-1.5 text-[11px] text-[#2A3530] dark:text-[#E8E6DF]">
@@ -621,12 +760,15 @@ export function DiseaseDetectionCard() {
               </div>
             </div>
 
-            {/* Model info + reset */}
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-[#5F6A64]/70 dark:text-[#A8AFA9]/60 font-mono border-t border-[#2A3530]/8 dark:border-[#E8E6DF]/8 pt-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-[#5F6A64]/60 dark:text-[#A8AFA9]/50 font-mono border-t border-[#2A3530]/8 dark:border-[#E8E6DF]/8 pt-3">
               <span>Model: {result.model_used}</span>
               <span>Inferensi: {result.inference_time_ms}ms</span>
             </div>
-            <button type="button" onClick={handleReset} className="w-full inline-flex items-center justify-center h-10 px-4 rounded-lg bg-[#C9A24B] text-[#2A1F08] text-[13px] hover:bg-[#D4B05E] transition-colors cursor-pointer font-medium focus:outline-none">
+            <button
+              type="button"
+              onClick={handleReset}
+              className="w-full inline-flex items-center justify-center h-10 px-4 rounded-xl bg-[#C9A24B] text-[#2A1F08] text-[13px] hover:bg-[#D4B05E] transition-colors cursor-pointer font-medium"
+            >
               Analisis Foto Lain
             </button>
           </div>
@@ -635,3 +777,4 @@ export function DiseaseDetectionCard() {
     </Card>
   );
 }
+
