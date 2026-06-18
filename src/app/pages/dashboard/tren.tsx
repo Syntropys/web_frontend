@@ -274,8 +274,8 @@ export default function TrenPage() {
                       fontSize: 12,
                       color: "#E8E6DF",
                     }}
-                    formatter={(val: number) =>
-                      [val.toLocaleString("id-ID"), ""]
+                    formatter={(val: any) =>
+                      [val != null ? Number(val).toLocaleString("id-ID") : "—", ""] as [string, string]
                     }
                   />
                   <Legend

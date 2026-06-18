@@ -58,25 +58,28 @@ export default function RingkasanPage() {
     async function fetchSummaryMetrics() {
       try {
         // Fetch production
-        const { data: prodData } = await supabase
+        const { data: prodRaw } = await supabase
           .from("production_history")
           .select("production_ton")
           .gte("year", yearRange.start)
           .lte("year", yearRange.end);
+        const prodData = prodRaw as Array<{ production_ton: number | null }> | null;
 
         // Fetch weather
-        const { data: weatherData } = await supabase
+        const { data: weatherRaw } = await supabase
           .from("weather_history")
           .select("rainfall_mm, temp_avg_c, humidity_pct")
           .gte("year", yearRange.start)
           .lte("year", yearRange.end);
+        const weatherData = weatherRaw as Array<{ rainfall_mm: number | null; temp_avg_c: number | null; humidity_pct: number | null }> | null;
 
         // Fetch clusters
-        const { data: clusters } = await supabase.from("cluster_assignments").select("cluster_label");
+        const { data: clustersRaw } = await supabase.from("cluster_assignments").select("cluster_label");
+        const clusters = clustersRaw as Array<{ cluster_label: number }> | null;
 
         // Sum production
         const total = prodData?.reduce((acc, p) => acc + Number(p.production_ton || 0), 0) || 0;
-        const totalFormatted = total > 0 
+        const totalFormatted = total > 0
           ? Math.round(total).toLocaleString("id-ID")
           : "2.306.722";
 

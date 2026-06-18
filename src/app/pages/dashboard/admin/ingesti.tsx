@@ -256,7 +256,7 @@ export default function IngestiPage() {
 
       for (let i = 0; i < staged.data.length; i += BATCH_SIZE) {
         const batch = staged.data.slice(i, i + BATCH_SIZE);
-        const { error } = await supabase.from(targetTable).upsert(batch, {
+        const { error } = await (supabase.from(targetTable) as any).upsert(batch, {
           onConflict: "id",
           ignoreDuplicates: false,
         });

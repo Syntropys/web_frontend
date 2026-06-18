@@ -40,9 +40,10 @@ export default function PrediksiPage() {
   // Load regions
   useEffect(() => {
     supabase.from("regions").select("id, name, province").order("name").then(({ data }) => {
-      if (data && data.length > 0) {
-        setRegions(data);
-        setRegionId(data[0].id);
+      const regions = data as Array<{ id: string; name: string; province: string }> | null;
+      if (regions && regions.length > 0) {
+        setRegions(regions);
+        setRegionId(regions[0].id);
       }
     });
   }, []);
@@ -104,7 +105,7 @@ export default function PrediksiPage() {
       ...[String(PRED_YEAR)],
     ];
 
-    const lastHist = histData.at(-1);
+    const lastHist = histData[histData.length - 1];
 
     return allLabels.map((label) => {
       const yr = Number(label);
@@ -267,7 +268,7 @@ export default function PrediksiPage() {
                       fontSize: 12,
                       color: "#E8E6DF",
                     }}
-                    formatter={(val: number) => [val != null ? val.toFixed(2) : "—", ""]}
+                    formatter={(val: any) => [val != null ? Number(val).toFixed(2) : "—", ""] as [string, string]}
                   />
                   <Legend wrapperStyle={{ fontSize: 12, paddingTop: 12 }} iconType="circle" iconSize={8} />
                   {/* Historical solid line */}

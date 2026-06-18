@@ -23,9 +23,9 @@ export const profilesService = {
   },
 
   async updateProfile(id: string, updates: Partial<Profile>) {
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+    const payload = { ...updates, updated_at: new Date().toISOString() }
+    const { data, error } = await (supabase.from('profiles') as any)
+      .update(payload)
       .eq('id', id)
       .select()
       .single()

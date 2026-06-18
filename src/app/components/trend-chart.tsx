@@ -35,16 +35,19 @@ export function TrendChart() {
       try {
         setLoading(true);
         // Fetch historical BPS data (2018-2025)
-        const { data: bpsRes } = await supabase
+        const { data: bpsRaw } = await supabase
           .from("production_history")
           .select("year, production_ton");
+        const bpsRes = bpsRaw as Array<{ year: number; production_ton: number | null }> | null;
 
         // Fetch predicted XGBoost data (2026)
-        const { data: xgbRes } = await supabase
+        const { data: xgbRaw } = await supabase
           .from("predictions")
           .select("target_year, predicted_prod_ton")
           .eq("model_name", "xgboost")
           .eq("model_version", "v1-real");
+        const xgbRes = xgbRaw as Array<{ target_year: number; predicted_prod_ton: number | null }> | null;
+
 
         // Group by year and calculate sum
         const years = Array.from({ length: 9 }, (_, i) => 2018 + i);

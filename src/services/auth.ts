@@ -40,13 +40,14 @@ export const authService = {
     if (!data) throw new Error('Respon server kosong')
     if (!data.session) {
       // Try to reconstruct session from flat response (Supabase v2 server compat)
-      if (data.user && data.expires_at && data.expires_in) {
+      const raw = data as any
+      if (raw.user && raw.expires_at && raw.expires_in) {
         const session = {
-          access_token: data.access_token,
-          refresh_token: data.refresh_token,
-          expires_in: data.expires_in,
-          expires_at: data.expires_at,
-          token_type: data.token_type || 'bearer',
+          access_token: raw.access_token as string,
+          refresh_token: raw.refresh_token as string,
+          expires_in: raw.expires_in as number,
+          expires_at: raw.expires_at as number,
+          token_type: (raw.token_type as string) || 'bearer',
           user: data.user,
         }
         return { user: data.user, session }

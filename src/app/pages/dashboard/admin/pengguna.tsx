@@ -101,7 +101,7 @@ export default function PenggunaPage() {
       const { error } = await supabase.rpc("admin_set_user_status", {
         target_user: user.id,
         new_status: newStatus,
-      });
+      } as any);
       if (error) throw error;
       setUsers((prev) =>
         prev.map((u) =>

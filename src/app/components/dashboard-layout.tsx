@@ -378,8 +378,10 @@ function SidebarContent({
   isCollapsed,
 }: {
   isAdmin: boolean
-  profile: { full_name?: string; email?: string } | null
+  profile: { full_name?: string | null; email?: string | null } | null
   onNavigate?: () => void
+  onLogout?: () => void
+  loggingOut?: boolean
   isCollapsed: boolean
 }) {
   const displayName = profile?.full_name || profile?.email?.split('@')[0] || 'Pengguna'

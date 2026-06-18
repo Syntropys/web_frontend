@@ -71,9 +71,9 @@ export const KalimantanMap = memo(function KalimantanMap({
         if (clustersRes.error) throw clustersRes.error;
         if (predictionsRes.error) throw predictionsRes.error;
 
-        const regions = regionsRes.data || [];
-        const clusters = clustersRes.data || [];
-        const predictions = predictionsRes.data || [];
+        const regions = (regionsRes.data || []) as Array<{ id: string; bps_code: string; name: string; province: string; centroid_lat: number | null; centroid_lng: number | null }>;
+        const clusters = (clustersRes.data || []) as Array<{ region_id: string; cluster_label: number }>;
+        const predictions = (predictionsRes.data || []) as Array<{ region_id: string; predicted_yield: number | null }>;
 
         const tempMap = new Map<string, any>();
         regions.forEach((r) => {
@@ -473,9 +473,9 @@ export function Peta() {
         if (clustersRes.error) throw clustersRes.error;
         if (predictionsRes.error) throw predictionsRes.error;
 
-        const regions = regionsRes.data || [];
-        const clusters = clustersRes.data || [];
-        const predictions = predictionsRes.data || [];
+        const regions = (regionsRes.data || []) as Array<{ id: string; bps_code: string; name: string; province: string; centroid_lat: number | null; centroid_lng: number | null }>;
+        const clusters = (clustersRes.data || []) as Array<{ region_id: string; cluster_label: number }>;
+        const predictions = (predictionsRes.data || []) as Array<{ region_id: string; predicted_yield: number | null }>;
 
         const tempMap = new Map<string, any>();
         regions.forEach((r) => {

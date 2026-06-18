@@ -41,7 +41,8 @@ export const productionService = {
     const { data, error } = await query
     if (error) throw error
 
-    const rows = data ?? []
+    type ProdRow = { production_ton: number | null; area_harvest_ha: number | null; yield_ton_ha: number | null }
+    const rows = (data ?? []) as ProdRow[]
     const totalProd = rows.reduce((s, r) => s + (r.production_ton ?? 0), 0)
     const totalHa = rows.reduce((s, r) => s + (r.area_harvest_ha ?? 0), 0)
     const yields = rows.filter((r) => r.yield_ton_ha != null).map((r) => r.yield_ton_ha!)

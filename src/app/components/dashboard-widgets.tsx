@@ -79,12 +79,13 @@ export function ClimateKpiCard() {
   useEffect(() => {
     async function fetchClimate() {
       try {
-        const { data } = await supabase
+        const { data: rawData } = await supabase
           .from("weather_history")
           .select("rainfall_mm, temp_avg_c, humidity_pct")
           .gte("year", yearRange.start)
           .lte("year", yearRange.end);
 
+        const data = rawData as Array<{ rainfall_mm: number | null; temp_avg_c: number | null; humidity_pct: number | null }> | null;
         if (data && data.length > 0) {
           const rain = Math.round(data.reduce((acc, w) => acc + (w.rainfall_mm || 0), 0) / data.length);
           const temp = Math.round(data.reduce((acc, w) => acc + (w.temp_avg_c || 0), 0) / data.length);
@@ -181,13 +182,14 @@ export function PredictionKpiCard() {
   useEffect(() => {
     async function fetchProduction() {
       try {
-        const { data, error } = await supabase
+        const { data: rawData, error } = await supabase
           .from("predictions")
           .select("predicted_prod_ton")
           .eq("target_year", 2026)
           .eq("model_name", "xgboost")
           .eq("model_version", "v1-real");
         if (error) throw error;
+        const data = rawData as Array<{ predicted_prod_ton: number | null }> | null;
         if (data) {
           const total = data.reduce((sum, p) => sum + Number(p.predicted_prod_ton || 0), 0);
           if (total > 0) {
@@ -268,7 +270,7 @@ export function SpatialMapCard() {
   return (
     <Card title="Distribusi Kerentanan Spasial" eyebrow="Peta">
       <div className="w-full">
-        <KalimantanMap />
+        <KalimantanMap selectedBpsCode={null} />
       </div>
     </Card>
   );
@@ -300,9 +302,9 @@ export function PriorityTableCard() {
           supabase.from("cluster_assignments").select("region_id, cluster_label")
         ]);
 
-        const regions = regionsRes.data || [];
-        const predictions = predictionsRes.data || [];
-        const clusters = clustersRes.data || [];
+        const regions = (regionsRes.data || []) as Array<{ id: string; name: string }>;
+        const predictions = (predictionsRes.data || []) as Array<{ region_id: string; predicted_prod_ton: number | null }>;
+        const clusters = (clustersRes.data || []) as Array<{ region_id: string; cluster_label: number }>;
 
         const rows = predictions.map((p) => {
           const reg = regions.find((r) => r.id === p.region_id);

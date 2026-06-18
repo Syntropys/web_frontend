@@ -38,9 +38,10 @@ export default function IklimPage() {
 
   useEffect(() => {
     supabase.from("regions").select("id, name, province").order("name").then(({ data }) => {
-      if (data && data.length > 0) {
-        setRegions(data);
-        setRegionId(data[0].id);
+      const regions = data as Array<{ id: string; name: string; province: string }> | null;
+      if (regions && regions.length > 0) {
+        setRegions(regions);
+        setRegionId(regions[0].id);
       }
     });
   }, []);
