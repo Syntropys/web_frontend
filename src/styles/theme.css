@@ -39,6 +39,20 @@
     font-feature-settings: "ss01", "cv11";
   }
 
+  /* Native select dark mode: force browser dropdown to respect dark theme */
+  html[data-theme="dark"] select {
+    color-scheme: dark;
+    background-color: #1A2326;
+    color: #E8E6DF;
+  }
+  html[data-theme="dark"] select option {
+    background-color: #1A2326;
+    color: #E8E6DF;
+  }
+  select {
+    color-scheme: light;
+  }
+
   .font-serif {
     font-family: var(--font-serif);
     font-feature-settings: "ss01";

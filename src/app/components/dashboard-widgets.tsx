@@ -404,6 +404,48 @@ export function PriorityTableCard() {
     </Card>
   );
 }
+// ─── Disease Info Database ────────────────────────────────────────────────────
+const DISEASE_INFO: Record<string, {
+  name: string; severity: string; severityColor: string; severityBg: string;
+  description: string; symptoms: string[]; treatment: string[]; emoji: string;
+}> = {
+  hispa: {
+    name: "Hispa (Dicladispa armigera)", severity: "Tinggi", severityColor: "#C9A24B", severityBg: "bg-[#C9A24B]/10",
+    description: "Hama serangga yang menyerang daun padi. Larva menggerek jaringan daun membuat bekas berwarna putih, sementara imago mengikis permukaan daun dari atas.",
+    symptoms: ["Goresan putih memanjang pada daun", "Larva dalam jaringan daun (terowongan berliku)", "Tepi daun mengering dan menggulung", "Serangan berat: daun putih keseluruhan"],
+    treatment: ["Semprotkan insektisida berbahan aktif chlorpyrifos atau imidacloprid", "Kumpulkan dan musnahkan tanaman terinfeksi", "Optimalkan jarak tanam untuk sirkulasi udara", "Hindari pemupukan nitrogen berlebihan"],
+    emoji: "🐛",
+  },
+  brown_spot: {
+    name: "Bercak Coklat (Bipolaris oryzae)", severity: "Sedang", severityColor: "#C9A24B", severityBg: "bg-[#C9A24B]/10",
+    description: "Penyakit jamur yang terutama muncul pada tanaman kekurangan nutrisi, khususnya kalium dan silika. Dapat menyebabkan gabah hampa.",
+    symptoms: ["Bercak oval coklat tua di permukaan daun", "Tepi bercak berwarna kuning", "Bercak pada gabah menyebabkan gabah hampa", "Bibit terserang dapat mati (damping off)"],
+    treatment: ["Gunakan benih bersertifikat + perlakuan fungisida", "Tingkatkan pemupukan K (Kalium) dan Si (Silika)", "Semprotkan fungisida mancozeb atau propiconazole", "Perbaiki drainase lahan sawah"],
+    emoji: "🟤",
+  },
+  blast: {
+    name: "Blas (Magnaporthe oryzae)", severity: "Kritis", severityColor: "#D17878", severityBg: "bg-[#A04848]/10",
+    description: "Penyakit jamur paling merusak pada padi. Menyerang daun, leher malai, dan ruas batang. Epidemi dapat memusnahkan hingga 100% panen.",
+    symptoms: ["Bercak belah ketupat dengan tepi coklat, pusat abu-abu", "Leher malai patah (blast leher)", "Gabah hampa akibat serangan malai", "Antraknosa pada batang dan buku ruas"],
+    treatment: ["SEGERA semprot: tricyclazole, isoprothiolane, atau azoxystrobin", "Gunakan varietas tahan blas (Ciherang, Inpari)", "Kurangi nitrogen, tambah kalium + silika", "Hindari irigasi berlebihan saat cuaca lembap"],
+    emoji: "🚨",
+  },
+  tungro: {
+    name: "Tungro (Rice Tungro Virus)", severity: "Kritis", severityColor: "#D17878", severityBg: "bg-[#A04848]/10",
+    description: "Penyakit virus ditularkan oleh wereng hijau (Nephotettix virescens). Merupakan penyakit virus padi paling merugikan di Asia Tenggara.",
+    symptoms: ["Daun kuning-jingga mulai dari ujung", "Tanaman kerdil, anakan berkurang", "Gabah berisi tidak sempurna", "Populasi wereng hijau tinggi di sekitar tanaman"],
+    treatment: ["Kendalikan wereng hijau (BPMC, imidacloprid)", "Cabut dan bakar tanaman bergejala parah", "Tanam varietas tahan tungro (Tukad Unda, Bondoyudo)", "Atur waktu tanam serentak untuk memutus siklus hama"],
+    emoji: "🦠",
+  },
+  healthy: {
+    name: "Daun Sehat", severity: "Sehat", severityColor: "#7A9A6E", severityBg: "bg-[#7A9A6E]/10",
+    description: "Tanaman padi terdeteksi dalam kondisi sehat. Tidak ada gejala penyakit yang terdeteksi pada daun yang dianalisis.",
+    symptoms: ["Warna daun hijau merata dan segar", "Tidak ada bercak atau perubahan warna abnormal", "Permukaan daun bersih dan tidak berlubang"],
+    treatment: ["Pertahankan jadwal pemupukan sesuai dosis anjuran", "Monitor rutin minimal 2x per minggu", "Jaga drainase dan irigasi yang baik", "Lanjutkan program PHT (Pengendalian Hama Terpadu)"],
+    emoji: "✅",
+  },
+};
+
 export function DiseaseDetectionCard() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -414,222 +456,180 @@ export function DiseaseDetectionCard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
+    return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
   }, [previewUrl]);
 
-  const capitalizeClass = (className: string) => {
-    if (!className) return "Unknown";
-    return className
-      .split(/[-_]/)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+  const getDiseaseInfo = (className: string) => {
+    const key = className.toLowerCase().replace(/[\s-]+/g, "_");
+    return DISEASE_INFO[key] ?? {
+      name: capitalizeClass(className), severity: "Tidak Dikenal", severityColor: "#5F6A64", severityBg: "bg-[#5F6A64]/10",
+      description: "Kondisi tidak dikenali. Konsultasikan dengan ahli pertanian setempat.",
+      symptoms: ["Gejala tidak teridentifikasi"], treatment: ["Konsultasikan dengan Dinas Pertanian setempat"], emoji: "❓",
+    };
   };
 
+  const capitalizeClass = (s: string) =>
+    s ? s.split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "Unknown";
+
   const handleFile = async (selectedFile: File) => {
-    if (!selectedFile.type.startsWith("image/")) {
-      setError("File harus berupa gambar (PNG, JPG, atau JPEG).");
-      return;
-    }
-    if (selectedFile.size > 5 * 1024 * 1024) {
-      setError("Ukuran file tidak boleh melebihi 5MB.");
-      return;
-    }
-
-    setFile(selectedFile);
-    setError(null);
-    setResult(null);
-    
-    const url = URL.createObjectURL(selectedFile);
-    setPreviewUrl(url);
-
+    if (!selectedFile.type.startsWith("image/")) { setError("File harus berupa gambar (PNG, JPG, atau JPEG)."); return; }
+    if (selectedFile.size > 5 * 1024 * 1024) { setError("Ukuran file tidak boleh melebihi 5MB."); return; }
+    setFile(selectedFile); setError(null); setResult(null);
+    setPreviewUrl(URL.createObjectURL(selectedFile));
     setIsAnalyzing(true);
     try {
       const startTime = Date.now();
       const response = await diseaseService.detectDisease(selectedFile);
-      const elapsed = Date.now() - startTime;
-      setResult({
-        ...response,
-        inference_time_ms: response.inference_time_ms || elapsed,
-      });
+      setResult({ ...response, inference_time_ms: response.inference_time_ms || (Date.now() - startTime) });
     } catch (err: any) {
-      console.error(err);
       setError(err.message || "Gagal melakukan deteksi penyakit.");
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  const onDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const onDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0]);
-    }
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
-
   const handleReset = () => {
     setFile(null);
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-    setPreviewUrl(null);
-    setResult(null);
-    setError(null);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null); setResult(null); setError(null);
   };
+
+  const diseaseInfo = result ? getDiseaseInfo(result.predicted_class) : null;
 
   return (
     <Card title="Diagnosis Penyakit Cepat" eyebrow="Deteksi">
-      {/* Upload Zone & Preview Zone */}
-      {!previewUrl ? (
-        <div
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-          onDrop={onDrop}
-          onClick={triggerFileInput}
-          className={`rounded-xl border-2 border-dashed transition-all duration-200 cursor-pointer px-4 py-10 flex flex-col items-center justify-center text-center ${
-            isDragging
-              ? "border-[#C9A24B] bg-[#C9A24B]/5"
-              : "border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/30 dark:bg-white/[0.04] hover:border-[#C9A24B]/50"
-          }`}
-        >
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={onSelectFile}
-            accept="image/png, image/jpeg, image/jpg"
-            className="hidden"
-          />
-          <span className="inline-flex w-10 h-10 items-center justify-center rounded-full bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B] mb-3">
-            <UploadCloud size={18} strokeWidth={1.6} />
-          </span>
-          <p className="font-serif text-[14px] text-[#2A3530] dark:text-[#E8E6DF] font-medium">
-            Tarik & taruh foto daun di sini
-          </p>
-          <p className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] mt-1">
-            atau klik untuk memilih file dari komputer Anda
-          </p>
-          <p className="text-[11px] text-[#5F6A64]/70 dark:text-[#A8AFA9]/50 mt-3 font-mono">
-            PNG / JPG · maks. 5MB
-          </p>
-        </div>
-      ) : (
-        <div className="relative rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#EFEBE1]/30 dark:bg-black/20 p-4 flex flex-col items-center justify-center min-h-[220px]">
-          {isAnalyzing ? (
-            <div className="absolute inset-0 bg-[#EFEBE1]/80 dark:bg-[#0E1619]/90 rounded-xl flex flex-col items-center justify-center z-10 backdrop-blur-sm">
-              <Loader2 className="animate-spin text-[#C9A24B] mb-3" size={32} />
-              <p className="text-[13px] font-medium text-[#2A3530] dark:text-[#E8E6DF] animate-pulse">
-                Menganalisis gambar...
-              </p>
-            </div>
-          ) : null}
-          <img
-            src={previewUrl}
-            alt="Paddy leaf preview"
-            className="max-h-[200px] w-auto rounded-lg object-contain shadow-md"
-          />
-        </div>
-      )}
-
-      {/* Error state */}
-      {error && (
-        <div className="mt-4 p-3 rounded-lg border border-[#A04848]/20 bg-[#A04848]/5 text-[#A04848] dark:text-[#D17878] text-[12px] leading-relaxed">
-          {error}
-          <button
-            onClick={handleReset}
-            className="block mt-2 text-[#C9A24B] hover:underline font-medium focus:outline-none"
+      <div className="space-y-4">
+        {/* Upload Zone */}
+        {!previewUrl && (
+          <div
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={(e) => { e.preventDefault(); setIsDragging(false); if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]); }}
+            onClick={() => fileInputRef.current?.click()}
+            className={`rounded-xl border-2 border-dashed transition-all duration-200 cursor-pointer px-4 py-10 flex flex-col items-center justify-center text-center ${
+              isDragging ? "border-[#C9A24B] bg-[#C9A24B]/5" : "border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/30 dark:bg-white/[0.04] hover:border-[#C9A24B]/50"
+            }`}
           >
-            Coba File Lain
-          </button>
-        </div>
-      )}
-
-      {/* Output KPI & Action Button */}
-      {result && !error && !isAnalyzing && (
-        <div className="mt-4 space-y-4">
-          <div className="grid grid-cols-2 gap-4 border-t border-b border-[#2A3530]/10 dark:border-[#E8E6DF]/10 py-3 text-[12px]">
-            <div>
-              <p className="text-[#5F6A64] dark:text-[#A8AFA9] uppercase tracking-wider text-[10px]">
-                DIAGNOSIS
-              </p>
-              <p className="font-serif text-[18px] text-[#2A3530] dark:text-[#E8E6DF] font-medium mt-0.5">
-                {capitalizeClass(result.predicted_class)}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-[#5F6A64] dark:text-[#A8AFA9] uppercase tracking-wider text-[10px]">
-                AKURASI
-              </p>
-              <p className="font-mono text-[18px] text-[#7A9A6E] dark:text-[#84B878] font-semibold mt-0.5">
-                {(result.confidence * 100).toFixed(1)}%
-              </p>
-            </div>
-          </div>
-
-          <div className="flex justify-between text-[11px] text-[#5F6A64]/80 dark:text-[#A8AFA9]/70 font-mono">
-            <span>Model: {result.model_used}</span>
-            <span>Waktu: {result.inference_time_ms}ms</span>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleReset}
-            className="w-full inline-flex items-center justify-center h-10 px-4 rounded-lg bg-[#C9A24B] text-[#2A1F08] text-[13px] hover:bg-[#D4B05E] transition-colors cursor-pointer font-medium focus:outline-none"
-          >
-            Analisis Ulang
-          </button>
-        </div>
-      )}
-
-      {/* Default placeholder state (waiting for input) */}
-      {!result && !error && !isAnalyzing && previewUrl && (
-        <div className="mt-4">
-          <button
-            type="button"
-            onClick={handleReset}
-            className="w-full inline-flex items-center justify-center h-10 px-4 rounded-lg border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#2A3530] dark:text-[#E8E6DF] text-[13px] hover:bg-[#2A3530]/5 dark:hover:bg-white/5 transition-colors cursor-pointer font-medium focus:outline-none"
-          >
-            Batal
-          </button>
-        </div>
-      )}
-
-      {!previewUrl && (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9]">
-          <span>
-            Diagnosis:{" "}
-            <span className="text-[#2A3530] dark:text-[#E8E6DF]">
-              [ Menunggu Data ]
+            <input type="file" ref={fileInputRef} onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }} accept="image/png, image/jpeg, image/jpg" className="hidden" />
+            <span className="inline-flex w-12 h-12 items-center justify-center rounded-full bg-[#C9A24B]/15 text-[#8C6E26] dark:text-[#C9A24B] mb-3">
+              <UploadCloud size={20} strokeWidth={1.6} />
             </span>
-          </span>
-          <span>
-            Akurasi:{" "}
-            <span className="text-[#2A3530] dark:text-[#E8E6DF]">[ 0% ]</span>
-          </span>
-        </div>
-      )}
+            <p className="font-serif text-[15px] text-[#2A3530] dark:text-[#E8E6DF] font-medium">Tarik &amp; taruh foto daun padi di sini</p>
+            <p className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] mt-1">atau klik untuk memilih dari komputer</p>
+            <p className="text-[11px] text-[#5F6A64]/60 dark:text-[#A8AFA9]/50 mt-3 font-mono">PNG / JPG · maks. 5MB</p>
+            <div className="mt-4 flex flex-wrap justify-center gap-1.5">
+              {["Hispa 🐛", "Brown Spot 🟤", "Blast 🚨", "Tungro 🦠", "Sehat ✅"].map((d) => (
+                <span key={d} className="px-2 py-0.5 rounded-full text-[10px] border border-[#2A3530]/10 dark:border-[#E8E6DF]/10 text-[#5F6A64] dark:text-[#A8AFA9]">{d}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Preview + Analyzing overlay */}
+        {previewUrl && (
+          <div className="relative rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#EFEBE1]/30 dark:bg-black/20 p-4 flex flex-col items-center justify-center min-h-[200px]">
+            {isAnalyzing && (
+              <div className="absolute inset-0 bg-[#EFEBE1]/88 dark:bg-[#0E1619]/92 rounded-xl flex flex-col items-center justify-center z-10 backdrop-blur-sm gap-2">
+                <Loader2 className="animate-spin text-[#C9A24B]" size={34} />
+                <p className="text-[13px] font-medium text-[#2A3530] dark:text-[#E8E6DF]">Menganalisis gambar…</p>
+                <p className="text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] font-mono">Paddy SoftVoting Ensemble</p>
+              </div>
+            )}
+            <img src={previewUrl} alt="Paddy leaf preview" className="max-h-[200px] w-auto rounded-lg object-contain shadow-md" />
+            {file && !isAnalyzing && <p className="mt-2 text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] truncate max-w-full">{file.name}</p>}
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="p-3 rounded-lg border border-[#A04848]/20 bg-[#A04848]/5 text-[#A04848] dark:text-[#D17878] text-[12px] leading-relaxed">
+            {error}
+            <button onClick={handleReset} className="block mt-2 text-[#C9A24B] hover:underline font-medium focus:outline-none cursor-pointer">Coba File Lain</button>
+          </div>
+        )}
+
+        {/* Rich Result */}
+        {result && diseaseInfo && !error && !isAnalyzing && (
+          <div className="space-y-4">
+            {/* Diagnosis header */}
+            <div className={`rounded-xl border border-[#2A3530]/8 dark:border-[#E8E6DF]/8 ${diseaseInfo.severityBg} p-4`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] mb-1">Hasil Diagnosis</p>
+                  <p className="font-serif text-[16px] text-[#2A3530] dark:text-[#E8E6DF] font-semibold leading-snug">
+                    {diseaseInfo.emoji} {diseaseInfo.name}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border" style={{ color: diseaseInfo.severityColor, borderColor: diseaseInfo.severityColor + "40" }}>
+                    {diseaseInfo.severity}
+                  </span>
+                  <p className="font-mono text-[24px] font-bold mt-1" style={{ color: diseaseInfo.severityColor }}>
+                    {(result.confidence * 100).toFixed(1)}%
+                  </p>
+                  <p className="text-[10px] text-[#5F6A64] dark:text-[#A8AFA9]">Kepercayaan</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            <p className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9] leading-relaxed">{diseaseInfo.description}</p>
+
+            {/* Top-k probability bars */}
+            {result.top_k_predictions && result.top_k_predictions.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9]">Probabilitas Kelas</p>
+                {result.top_k_predictions.map((pred) => (
+                  <div key={pred.class_name} className="space-y-0.5">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-[#2A3530] dark:text-[#E8E6DF]">{capitalizeClass(pred.class_name)}</span>
+                      <span className="font-mono text-[#5F6A64] dark:text-[#A8AFA9]">{(pred.probability * 100).toFixed(1)}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-[#2A3530]/8 dark:bg-white/8 overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pred.probability * 100}%`, background: pred.class_name.toLowerCase() === result.predicted_class.toLowerCase() ? diseaseInfo.severityColor : "#5F6A64" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Symptoms + Treatment */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="rounded-xl border border-[#2A3530]/10 dark:border-[#E8E6DF]/8 bg-white/30 dark:bg-white/[0.03] p-3">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] mb-2">🔍 Gejala</p>
+                <ul className="space-y-1.5">
+                  {diseaseInfo.symptoms.map((s, i) => (
+                    <li key={i} className="flex items-start gap-1.5 text-[11px] text-[#2A3530] dark:text-[#E8E6DF]">
+                      <span className="shrink-0 mt-1 w-1.5 h-1.5 rounded-full" style={{ background: diseaseInfo.severityColor }} />
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-xl border border-[#7A9A6E]/20 bg-[#7A9A6E]/5 p-3">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] mb-2">💊 Rekomendasi</p>
+                <ul className="space-y-1.5">
+                  {diseaseInfo.treatment.map((t, i) => (
+                    <li key={i} className="flex items-start gap-1.5 text-[11px] text-[#2A3530] dark:text-[#E8E6DF]">
+                      <span className="shrink-0 mt-0.5 text-[#7A9A6E] dark:text-[#84B878] font-bold">→</span>
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Model info + reset */}
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-[#5F6A64]/70 dark:text-[#A8AFA9]/60 font-mono border-t border-[#2A3530]/8 dark:border-[#E8E6DF]/8 pt-3">
+              <span>Model: {result.model_used}</span>
+              <span>Inferensi: {result.inference_time_ms}ms</span>
+            </div>
+            <button type="button" onClick={handleReset} className="w-full inline-flex items-center justify-center h-10 px-4 rounded-lg bg-[#C9A24B] text-[#2A1F08] text-[13px] hover:bg-[#D4B05E] transition-colors cursor-pointer font-medium focus:outline-none">
+              Analisis Foto Lain
+            </button>
+          </div>
+        )}
+      </div>
     </Card>
   );
 }

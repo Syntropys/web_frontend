@@ -40,6 +40,10 @@ export default function Masuk() {
   const location = useLocation()
   const from = (location.state as { from?: Location })?.from?.pathname ?? '/dashboard'
 
+  const isLocked = lockUntil !== null && now < lockUntil
+  const secondsLeft = lockUntil !== null ? Math.max(0, Math.ceil((lockUntil - now) / 1000)) : 0
+  const attemptsLeft = MAX_ATTEMPTS - failCount
+
   useEffect(() => {
     if (lockUntil === null) return
     const id = window.setInterval(() => setNow(Date.now()), 1000)

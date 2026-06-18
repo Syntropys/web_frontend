@@ -6,7 +6,6 @@ import {
   Trash2,
   ChevronRight,
   Loader2,
-  MessageSquareDot,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
@@ -22,6 +21,15 @@ const SUGGESTED = [
   "Kabupaten risiko tinggi di Kalimantan Barat?",
   "Prediksi curah hujan vs hasil panen",
   "Rekomendasi intervensi pertanian prioritas?",
+];
+
+// Rotating bubble tips — relevan untuk Agrolytics
+const BUBBLE_TIPS = [
+  "Wilayah mana produksi terendah 2026?",
+  "Tanya analisis iklim Kalimantan",
+  "Cek prediksi panen XGBoost!",
+  "Kabupaten risiko tinggi mana?",
+  "Bandingkan model prediksi kita",
 ];
 
 const GREETING: Message = {
@@ -86,8 +94,11 @@ export function AiChatbotOverlay() {
   const [loading, setLoading] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [showPulse, setShowPulse] = useState(true);
   const [newMessageIds, setNewMessageIds] = useState<Set<string>>(new Set());
+  // Rotating bubble tip
+  const [tipIndex, setTipIndex] = useState(0);
+  const [tipVisible, setTipVisible] = useState(true);
+  const [tipDismissed, setTipDismissed] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -140,13 +151,26 @@ export function AiChatbotOverlay() {
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
-      setShowPulse(false);
+      setTipDismissed(true);
     }
   }, [isOpen]);
 
-  // Dismiss pulse after 5s
+  // Rotate bubble tips every 3.5s — fade out → swap → fade in
   useEffect(() => {
-    const t = setTimeout(() => setShowPulse(false), 8000);
+    if (isOpen || tipDismissed) return;
+    const interval = setInterval(() => {
+      setTipVisible(false);
+      setTimeout(() => {
+        setTipIndex((prev) => (prev + 1) % BUBBLE_TIPS.length);
+        setTipVisible(true);
+      }, 350);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [isOpen, tipDismissed]);
+
+  // Auto-dismiss bubble after 20s
+  useEffect(() => {
+    const t = setTimeout(() => setTipDismissed(true), 20000);
     return () => clearTimeout(t);
   }, []);
 
@@ -166,7 +190,6 @@ export function AiChatbotOverlay() {
       setLoading(true);
 
       try {
-        // Fetch context data from Supabase
         const [regionsRes, predictionsRes] = await Promise.all([
           supabase.from("regions").select("name, province"),
           supabase
@@ -177,7 +200,11 @@ export function AiChatbotOverlay() {
         ]);
 
         const regionsCount = regionsRes.data?.length || 56;
-        const predictions = (predictionsRes.data || []) as Array<{ predicted_yield: number | null; predicted_prod_ton: number | null; target_year: number }>;
+        const predictions = (predictionsRes.data || []) as Array<{
+          predicted_yield: number | null;
+          predicted_prod_ton: number | null;
+          target_year: number;
+        }>;
         const totalYield = predictions.reduce(
           (acc, p) => acc + (p.predicted_yield || 0),
           0
@@ -185,13 +212,10 @@ export function AiChatbotOverlay() {
         const avgYield2026 =
           regionsCount > 0 ? (totalYield / regionsCount).toFixed(2) : "3.52";
 
-        // Build message history (exclude greeting for brevity)
         const history = messages
           .filter((m) => m.id !== "greeting")
           .map((m) => ({ role: m.role, content: m.content }));
 
-        // Try Edge Function first (production, API key secure server-side)
-        // Falls back to direct API in dev mode only
         let aiResponseText = "";
         try {
           const res = await fetch("/api/chat", {
@@ -210,15 +234,16 @@ export function AiChatbotOverlay() {
             throw new Error(`API ${res.status}`);
           }
         } catch {
-          // Dev fallback — direct Gemini call (API key visible in dev only)
+          // Dev fallback — Gemini 2.5 Flash direct call
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const devKey: string = (import.meta as any).env?.VITE_GEMINI_API_KEY ?? "";
           if (!devKey) {
-            aiResponseText = "Mode development: jalankan `vercel dev` atau tambahkan VITE_GEMINI_API_KEY di .env untuk test lokal.";
+            aiResponseText =
+              "Mode development: tambahkan VITE_GEMINI_API_KEY di .env untuk test lokal.";
           } else {
             const systemPrompt = `Anda adalah Decision Support AI Agrolytics. Bantu analisis data produksi padi Kalimantan. Total wilayah: ${regionsCount} kabupaten. Rata-rata yield 2026: ${avgYield2026} t/ha. Jawab dalam Bahasa Indonesia, ringkas dan bernilai tinggi.`;
             const gemRes = await fetch(
-              `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${devKey}`,
+              `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${devKey}`,
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -226,21 +251,27 @@ export function AiChatbotOverlay() {
                   contents: [
                     { role: "user", parts: [{ text: systemPrompt }] },
                     { role: "model", parts: [{ text: "Siap!" }] },
-                    ...history.map((m) => ({ role: m.role === "user" ? "user" : "model", parts: [{ text: m.content }] })),
+                    ...history.map((m) => ({
+                      role: m.role === "user" ? "user" : "model",
+                      parts: [{ text: m.content }],
+                    })),
                     { role: "user", parts: [{ text: userText.trim() }] },
                   ],
                 }),
               }
             );
             const gd = await gemRes.json();
-            aiResponseText = gd?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            aiResponseText =
+              gd?.candidates?.[0]?.content?.parts?.[0]?.text || "";
           }
         }
 
         const aiMsg: Message = {
           id: `a-${Date.now()}`,
           role: "assistant",
-          content: aiResponseText || "Maaf, saya tidak dapat merespon saat ini. Silakan coba lagi.",
+          content:
+            aiResponseText ||
+            "Maaf, saya tidak dapat merespon saat ini. Silakan coba lagi.",
         };
 
         setMessages((prev) => [...prev, aiMsg]);
@@ -286,58 +317,97 @@ export function AiChatbotOverlay() {
         }
         @keyframes chatBubbleIn {
           from { opacity: 0; transform: translateY(8px) scale(0.97); }
-          to   { opacity: 1; transform: translateY(0)   scale(1); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
         }
         .chat-bubble-in {
           animation: chatBubbleIn 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards;
         }
-        @keyframes fabPulseRing {
-          0%   { transform: scale(1);   opacity: 0.6; }
-          70%  { transform: scale(1.8); opacity: 0; }
-          100% { transform: scale(1.8); opacity: 0; }
+
+        /* FAB gentle bounce — persis referensi ledgerly */
+        @keyframes fab-bounce {
+          0%, 100% { transform: translateY(0); }
+          50%       { transform: translateY(-8px); }
         }
-        .fab-pulse-ring::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          border-radius: 9999px;
-          background: #C9A24B;
-          animation: fabPulseRing 2s ease-out infinite;
+        .fab-bounce-btn {
+          animation: fab-bounce 2s ease-in-out infinite;
+        }
+        .fab-bounce-btn:hover {
+          animation-play-state: paused;
+          transform: scale(1.1) translateY(-3px) !important;
+        }
+
+        /* Bubble tip fade */
+        @keyframes tip-fade-in {
+          from { opacity: 0; transform: translateX(10px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        .tip-visible {
+          opacity: 1;
+          transform: translateX(0);
+          transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+        .tip-hidden {
+          opacity: 0;
+          transform: translateX(8px);
+          transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .tip-enter {
+          animation: tip-fade-in 0.5s ease-out;
+        }
+
+        /* Chat window open */
+        @keyframes chatWindowIn {
+          from { opacity: 0; transform: scale(0.93) translateY(10px); transform-origin: bottom right; }
+          to   { opacity: 1; transform: scale(1) translateY(0); transform-origin: bottom right; }
+        }
+        .chat-window-in {
+          animation: chatWindowIn 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards;
         }
       `}</style>
 
-      {/* FAB Trigger Button */}
+      {/* ─── FAB ─── */}
       {!isOpen && (
-        <button
-          id="chatbot-fab-btn"
-          onClick={() => setIsOpen(true)}
-          aria-label="Buka asisten AI"
-          className="fixed bottom-6 right-6 z-50 group cursor-pointer"
+        <div
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-3"
+          style={{ pointerEvents: "none" }}
         >
-          <span className="relative flex items-center gap-2.5 pl-4 pr-5 py-3.5 rounded-full bg-[#C9A24B] text-[#2A1F08] shadow-xl shadow-[#C9A24B]/30 hover:bg-[#D4B05E] hover:shadow-[#C9A24B]/40 hover:scale-105 active:scale-95 transition-all duration-200">
-            {showPulse && (
-              <span
-                className="fab-pulse-ring absolute inset-0 rounded-full pointer-events-none"
-                aria-hidden
-              />
-            )}
-            <MessageSquareDot className="w-5 h-5 shrink-0" />
-            <span className="text-[13px] font-semibold tracking-wide whitespace-nowrap">
-              AI Assistant
-            </span>
-            {/* Unread indicator */}
-            {showPulse && (
-              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#7A9A6E] border-2 border-[#EFEBE1] dark:border-[#0B1215]" />
-            )}
-          </span>
-        </button>
+          {/* Bubble tip — di kiri FAB, persis referensi ledgerly */}
+          {!tipDismissed && (
+            <div
+              className={tipVisible ? "tip-visible" : "tip-hidden"}
+              style={{ pointerEvents: "auto" }}
+            >
+              <div className="relative bg-white dark:bg-[#1C2B30] text-[#2A3530] dark:text-[#E8E6DF] text-[13px] font-medium rounded-xl px-4 py-2 shadow-lg border border-[#2A3530]/8 dark:border-[#E8E6DF]/10 whitespace-nowrap">
+                {BUBBLE_TIPS[tipIndex]}
+                {/* Arrow tail pointing right toward FAB */}
+                <span
+                  className="absolute top-1/2 -right-[7px] w-[10px] h-[10px] bg-white dark:bg-[#1C2B30] border-r border-t border-[#2A3530]/8 dark:border-[#E8E6DF]/10"
+                  style={{ transform: "translateY(-50%) rotate(45deg)" }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* FAB ball — 56px round, gentle bounce */}
+          <button
+            id="chatbot-fab-btn"
+            onClick={() => setIsOpen(true)}
+            aria-label="Buka asisten AI"
+            style={{ pointerEvents: "auto" }}
+            className="fab-bounce-btn relative grid place-items-center w-14 h-14 rounded-full bg-gradient-to-br from-[#D4B05E] to-[#C9A24B] text-[#2A1F08] border-none cursor-pointer shadow-[0_4px_20px_rgba(201,162,75,0.45)] transition-all duration-300"
+          >
+            <Sparkles className="w-6 h-6" strokeWidth={1.8} />
+            {/* Green online dot */}
+            <span className="absolute top-[3px] right-[3px] w-3 h-3 rounded-full bg-[#7A9A6E] border-2 border-white dark:border-[#0B1215]" />
+          </button>
+        </div>
       )}
 
-      {/* Chat Window */}
+      {/* ─── Chat Window ─── */}
       {isOpen && (
         <div
           id="chatbot-window"
-          className="fixed bottom-6 right-6 z-50 w-[360px] sm:w-[420px] flex flex-col rounded-3xl border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 bg-[#F7F4EE]/96 dark:bg-[#0E1619]/96 backdrop-blur-2xl shadow-2xl shadow-black/20 overflow-hidden"
+          className="chat-window-in fixed bottom-6 right-6 z-50 w-[360px] sm:w-[420px] flex flex-col rounded-3xl border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 bg-[#F7F4EE]/96 dark:bg-[#0E1619]/96 backdrop-blur-2xl shadow-2xl shadow-black/20 overflow-hidden"
           style={{ maxHeight: "min(600px, calc(100vh - 100px))" }}
         >
           {/* Header */}
@@ -352,13 +422,12 @@ export function AiChatbotOverlay() {
                 </p>
                 <p className="text-[10px] text-[#7A9A6E] font-medium tracking-wide flex items-center gap-1 mt-0.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#7A9A6E] animate-pulse" />
-                  Aktif · Gemini 2.0 Flash
+                  Aktif · Gemini 2.5 Flash
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-1.5">
-              {/* Clear button */}
               {!showClearConfirm ? (
                 <button
                   onClick={() => setShowClearConfirm(true)}
@@ -387,8 +456,6 @@ export function AiChatbotOverlay() {
                   </button>
                 </div>
               )}
-
-              {/* Close button */}
               <button
                 onClick={() => setIsOpen(false)}
                 title="Tutup"
@@ -405,8 +472,7 @@ export function AiChatbotOverlay() {
             className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0"
             style={{
               scrollbarWidth: "thin",
-              scrollbarColor:
-                "rgba(140,110,38,0.2) transparent",
+              scrollbarColor: "rgba(140,110,38,0.2) transparent",
             }}
           >
             {messages.map((m) => (
@@ -417,7 +483,6 @@ export function AiChatbotOverlay() {
               />
             ))}
 
-            {/* Typing indicator */}
             {loading && (
               <div className="flex justify-start chat-bubble-in">
                 <span className="w-6 h-6 rounded-full bg-[#C9A24B]/15 flex items-center justify-center shrink-0 mt-0.5 mr-1.5">
@@ -430,7 +495,7 @@ export function AiChatbotOverlay() {
             )}
           </div>
 
-          {/* Suggested Questions — only if no user messages yet */}
+          {/* Suggested chips */}
           {!hasUserMessages && !loading && (
             <div className="shrink-0 px-4 pb-3">
               <p className="text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] mb-2">
@@ -451,10 +516,9 @@ export function AiChatbotOverlay() {
             </div>
           )}
 
-          {/* Divider */}
           <div className="shrink-0 h-px bg-[#2A3530]/8 dark:bg-[#E8E6DF]/8" />
 
-          {/* Input form */}
+          {/* Input */}
           <form
             onSubmit={handleFormSubmit}
             className="shrink-0 flex items-center gap-2 px-3 py-3 bg-white/20 dark:bg-white/[0.02]"

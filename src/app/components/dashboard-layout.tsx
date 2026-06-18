@@ -272,7 +272,7 @@ export function DashboardLayout({
             {toolbar && <div className="shrink-0 flex items-center gap-3">{toolbar}</div>}
           </div>
 
-          <div className="mt-8">{children}</div>
+          <div className="mt-8 pb-28">{children}</div>
         </main>
 
         <footer className="border-t border-[#2A3530]/12 dark:border-[#E8E6DF]/12">
