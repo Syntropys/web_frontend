@@ -99,8 +99,39 @@ export function AiChatbotOverlay() {
   const [tipIndex, setTipIndex] = useState(0);
   const [tipVisible, setTipVisible] = useState(true);
   const [tipDismissed, setTipDismissed] = useState(false);
+  // Toggle chatbot visibility (persisted in localStorage)
+  const [enabled, setEnabled] = useState<boolean>(() => {
+    try { return localStorage.getItem("agrolytics_chatbot_enabled") !== "false"; }
+    catch { return true; }
+  });
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Expose toggle so dashboard header can call it
+  useEffect(() => {
+    const handler = () => {
+      setEnabled((prev) => {
+        const next = !prev;
+        try { localStorage.setItem("agrolytics_chatbot_enabled", String(next)); } catch { /**/ }
+        if (!next) setIsOpen(false);
+        return next;
+      });
+    };
+    window.addEventListener("agrolytics:toggle-chatbot", handler);
+    return () => window.removeEventListener("agrolytics:toggle-chatbot", handler);
+  }, []);
+
+  // Sync enabled to localStorage
+  useEffect(() => {
+    try { localStorage.setItem("agrolytics_chatbot_enabled", String(enabled)); } catch { /**/ }
+    if (!enabled) setIsOpen(false);
+  }, [enabled]);
+
+  // Read enabled from storage on mount (in case changed by other tabs)
+  useEffect(() => {
+    const stored = localStorage.getItem("agrolytics_chatbot_enabled");
+    if (stored === "false") setEnabled(false);
+  }, []);
 
   const hasUserMessages = messages.some((m) => m.role === "user");
 
@@ -309,6 +340,8 @@ export function AiChatbotOverlay() {
   };
 
   return (
+    // If chatbot disabled, render nothing
+    !enabled ? null :
     <>
       <style>{`
         @keyframes chatBounce {
@@ -368,18 +401,17 @@ export function AiChatbotOverlay() {
       {/* ─── FAB ─── */}
       {!isOpen && (
         <div
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-3"
+          className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 flex items-center gap-3"
           style={{ pointerEvents: "none" }}
         >
-          {/* Bubble tip — di kiri FAB, persis referensi ledgerly */}
+          {/* Bubble tip — kiri FAB */}
           {!tipDismissed && (
             <div
               className={tipVisible ? "tip-visible" : "tip-hidden"}
               style={{ pointerEvents: "auto" }}
             >
-              <div className="relative bg-white dark:bg-[#1C2B30] text-[#2A3530] dark:text-[#E8E6DF] text-[13px] font-medium rounded-xl px-4 py-2 shadow-lg border border-[#2A3530]/8 dark:border-[#E8E6DF]/10 whitespace-nowrap">
+              <div className="relative bg-white dark:bg-[#1C2B30] text-[#2A3530] dark:text-[#E8E6DF] text-[12px] sm:text-[13px] font-medium rounded-xl px-3 py-1.5 sm:px-4 sm:py-2 shadow-lg border border-[#2A3530]/8 dark:border-[#E8E6DF]/10 whitespace-nowrap">
                 {BUBBLE_TIPS[tipIndex]}
-                {/* Arrow tail pointing right toward FAB */}
                 <span
                   className="absolute top-1/2 -right-[7px] w-[10px] h-[10px] bg-white dark:bg-[#1C2B30] border-r border-t border-[#2A3530]/8 dark:border-[#E8E6DF]/10"
                   style={{ transform: "translateY(-50%) rotate(45deg)" }}
@@ -388,17 +420,17 @@ export function AiChatbotOverlay() {
             </div>
           )}
 
-          {/* FAB ball — 56px round, gentle bounce */}
+          {/* FAB ball — kecil di mobile, normal di sm+ */}
           <button
             id="chatbot-fab-btn"
             onClick={() => setIsOpen(true)}
             aria-label="Buka asisten AI"
             style={{ pointerEvents: "auto" }}
-            className="fab-bounce-btn relative grid place-items-center w-14 h-14 rounded-full bg-gradient-to-br from-[#D4B05E] to-[#C9A24B] text-[#2A1F08] border-none cursor-pointer shadow-[0_4px_20px_rgba(201,162,75,0.45)] transition-all duration-300"
+            className="fab-bounce-btn relative grid place-items-center w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-[#D4B05E] to-[#C9A24B] text-[#2A1F08] border-none cursor-pointer shadow-[0_4px_20px_rgba(201,162,75,0.45)] transition-all duration-300"
           >
-            <Sparkles className="w-6 h-6" strokeWidth={1.8} />
+            <Sparkles className="w-4 h-4 sm:w-6 sm:h-6" strokeWidth={1.8} />
             {/* Green online dot */}
-            <span className="absolute top-[3px] right-[3px] w-3 h-3 rounded-full bg-[#7A9A6E] border-2 border-white dark:border-[#0B1215]" />
+            <span className="absolute top-[2px] right-[2px] sm:top-[3px] sm:right-[3px] w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#7A9A6E] border-2 border-white dark:border-[#0B1215]" />
           </button>
         </div>
       )}
@@ -407,8 +439,8 @@ export function AiChatbotOverlay() {
       {isOpen && (
         <div
           id="chatbot-window"
-          className="chat-window-in fixed bottom-6 right-6 z-50 w-[360px] sm:w-[420px] flex flex-col rounded-3xl border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 bg-[#F7F4EE]/96 dark:bg-[#0E1619]/96 backdrop-blur-2xl shadow-2xl shadow-black/20 overflow-hidden"
-          style={{ maxHeight: "min(600px, calc(100vh - 100px))" }}
+          className="chat-window-in fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-40px)] sm:w-[360px] md:w-[420px] flex flex-col rounded-2xl sm:rounded-3xl border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 bg-[#F7F4EE]/96 dark:bg-[#0E1619]/96 backdrop-blur-2xl shadow-2xl shadow-black/20 overflow-hidden"
+          style={{ maxHeight: "min(560px, calc(100dvh - 80px))" }}
         >
           {/* Header */}
           <header className="shrink-0 flex items-center justify-between px-4 py-3.5 bg-white/30 dark:bg-white/[0.03] border-b border-[#2A3530]/8 dark:border-[#E8E6DF]/8">

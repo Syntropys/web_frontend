@@ -20,6 +20,7 @@ import {
   DatabaseZap,
   ChevronLeft,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 
 
@@ -69,6 +70,10 @@ export function DashboardLayout({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [chatbotOn, setChatbotOn] = useState<boolean>(() => {
+    try { return localStorage.getItem("agrolytics_chatbot_enabled") !== "false"; }
+    catch { return true; }
+  });
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -226,6 +231,24 @@ export function DashboardLayout({
               ) : (
                 <Moon size={16} strokeWidth={1.6} />
               )}
+            </button>
+
+            {/* Chatbot toggle */}
+            <button
+              onClick={() => {
+                const next = !chatbotOn;
+                setChatbotOn(next);
+                window.dispatchEvent(new CustomEvent("agrolytics:toggle-chatbot"));
+              }}
+              aria-label={chatbotOn ? "Matikan AI Chatbot" : "Aktifkan AI Chatbot"}
+              title={chatbotOn ? "Matikan AI Chatbot" : "Aktifkan AI Chatbot"}
+              className={`w-10 h-10 sm:w-9 sm:h-9 rounded-full border flex items-center justify-center transition-colors cursor-pointer ${
+                chatbotOn
+                  ? "border-[#C9A24B]/50 bg-[#C9A24B]/10 text-[#8C6E26] dark:text-[#C9A24B] hover:bg-[#C9A24B]/20"
+                  : "border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#5F6A64]/40 dark:text-[#E8E6DF]/30 hover:border-[#C9A24B]/40 hover:text-[#8C6E26]"
+              }`}
+            >
+              <Sparkles size={15} strokeWidth={1.6} />
             </button>
 
             <span className="hidden sm:inline-block h-6 w-px bg-[#2A3530]/12 dark:bg-[#E8E6DF]/12 mx-0.5" />
