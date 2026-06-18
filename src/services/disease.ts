@@ -11,7 +11,7 @@ export interface DiseasePredictionResponse {
   inference_time_ms: number;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+const API_BASE_URL = import.meta.env.VITE_DISEASE_API_URL || "";
 
 export const diseaseService = {
   async detectDisease(file: File): Promise<DiseasePredictionResponse> {
