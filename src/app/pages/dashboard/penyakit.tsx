@@ -1,6 +1,7 @@
 import { DashboardLayout } from "../../components/dashboard-layout";
 import { DiseaseDetectionCard } from "../../components/dashboard-widgets";
-import { Microscope, Wifi, Info, Leaf, Bug, Flame, Zap } from "lucide-react";
+import { diseaseService } from "../../../services/disease";
+import { Microscope, WifiOff, Wifi, Info, Leaf, Bug, Flame, Zap } from "lucide-react";
 
 const DISEASE_QUICK_REFS = [
   {
@@ -45,11 +46,10 @@ const DISEASE_QUICK_REFS = [
   },
 ];
 
-const API_URL = import.meta.env.VITE_DISEASE_API_URL || "";
-// Configured = real https URL with no placeholder keyword
-const isApiConfigured = API_URL.startsWith("https://") && !API_URL.includes("your-");
+
 
 export default function PenyakitPage() {
+  const isConfigured = diseaseService.isConfigured;
   return (
     <DashboardLayout
       pageTitle="Deteksi Penyakit Padi"
@@ -61,29 +61,26 @@ export default function PenyakitPage() {
         {/* API Status Banner */}
         <div
           className={`rounded-xl border px-4 py-3 flex items-start gap-2.5 ${
-            isApiConfigured
+            isConfigured
               ? "border-[#7A9A6E]/25 bg-[#7A9A6E]/5"
               : "border-[#C9A24B]/25 bg-[#C9A24B]/5"
           }`}
         >
-          <Wifi
-            size={14}
-            className={`mt-0.5 shrink-0 ${
-              isApiConfigured
-                ? "text-[#7A9A6E] dark:text-[#84B878]"
-                : "text-[#8C6E26] dark:text-[#C9A24B]"
-            }`}
-          />
+          {isConfigured ? (
+            <Wifi size={14} className="mt-0.5 shrink-0 text-[#7A9A6E] dark:text-[#84B878]" />
+          ) : (
+            <WifiOff size={14} className="mt-0.5 shrink-0 text-[#8C6E26] dark:text-[#C9A24B]" />
+          )}
           <div>
             <p className="text-[12px] font-medium text-[#2A3530] dark:text-[#E8E6DF]">
-              {isApiConfigured
+              {isConfigured
                 ? "API Railway Aktif — Mode Inferensi Real"
-                : "Mode Demo — API Railway belum dikonfigurasi"}
+                : "Mode Demo — API Railway Belum Dikonfigurasi"}
             </p>
             <p className="text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] mt-0.5">
-              {isApiConfigured
-                ? `Terhubung ke: ${API_URL}`
-                : "Set VITE_DISEASE_API_URL ke URL Railway di Vercel untuk menggunakan model CNN sungguhan. Sementara menggunakan mock inference."}
+              {isConfigured
+                ? `Terhubung ke: ${import.meta.env.VITE_DISEASE_API_URL}`
+                : "Fitur deteksi non-aktif. Set VITE_DISEASE_API_URL ke URL FastAPI Bridge Railway. Hubungi teman untuk deploy Railway terlebih dahulu."}
             </p>
           </div>
         </div>

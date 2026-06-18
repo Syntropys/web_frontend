@@ -474,6 +474,10 @@ export function DiseaseDetectionCard() {
     s ? s.split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "Unknown";
 
   const handleFile = async (selectedFile: File) => {
+    if (!diseaseService.isConfigured) {
+      setError("API Railway belum terhubung. Hubungi teman untuk mendapatkan URL FastAPI Bridge Railway yang aktif.");
+      return;
+    }
     if (!selectedFile.type.startsWith("image/")) { setError("File harus berupa gambar (PNG, JPG, atau JPEG)."); return; }
     if (selectedFile.size > 5 * 1024 * 1024) { setError("Ukuran file tidak boleh melebihi 5MB."); return; }
     setFile(selectedFile); setError(null); setResult(null);
@@ -521,8 +525,8 @@ export function DiseaseDetectionCard() {
           <div
             className="relative transition-all duration-300"
             style={{
-              width: 210,
-              borderRadius: 46,
+              width: 260,
+              borderRadius: 50,
               padding: 4,
               background: "linear-gradient(160deg, #48484a 0%, #1c1c1e 55%, #3a3a3c 100%)",
               boxShadow: isDragging
@@ -615,32 +619,61 @@ export function DiseaseDetectionCard() {
                 />
               )}
 
-              {/* Empty state */}
+              {/* Empty state — 2 modes: not configured vs ready */}
               {!previewUrl && !isDragging && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 pt-8">
-                  <div
-                    className="w-14 h-14 rounded-full flex items-center justify-center mb-1"
-                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}
-                  >
-                    <UploadCloud size={22} strokeWidth={1.4} style={{ color: "rgba(168,175,169,0.7)" }} />
-                  </div>
-                  <p className="text-[10px] text-center leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-                    Tarik & taruh<br />foto daun padi
-                  </p>
-                  <p className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.22)" }}>
-                    PNG · JPG · maks 5MB
-                  </p>
-                  <div className="mt-1.5 flex flex-wrap justify-center gap-1">
-                    {["Hispa", "Brown Spot", "Blast", "Tungro"].map((d) => (
-                      <span
-                        key={d}
-                        className="px-1.5 py-0.5 rounded-full text-[7px]"
-                        style={{ border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.28)" }}
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-5 pt-10">
+                  {!diseaseService.isConfigured ? (
+                    /* ── Not configured ── */
+                    <>
+                      <div
+                        className="w-14 h-14 rounded-full flex items-center justify-center mb-1"
+                        style={{ background: "rgba(201,162,75,0.12)", border: "1px solid rgba(201,162,75,0.25)" }}
                       >
-                        {d}
-                      </span>
-                    ))}
-                  </div>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C9A24B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="1" y1="1" x2="23" y2="23"/>
+                          <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+                          <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+                          <path d="M10.71 5.05A16 16 0 0 1 22.56 9"/>
+                          <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+                          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                          <circle cx="12" cy="20" r="1"/>
+                        </svg>
+                      </div>
+                      <p className="text-[10px] text-center font-medium" style={{ color: "rgba(201,162,75,0.9)" }}>
+                        API Belum Terhubung
+                      </p>
+                      <p className="text-[8px] text-center leading-relaxed" style={{ color: "rgba(255,255,255,0.3)" }}>
+                        Set VITE_DISEASE_API_URL ke URL Railway FastAPI Bridge
+                      </p>
+                    </>
+                  ) : (
+                    /* ── Ready to upload ── */
+                    <>
+                      <div
+                        className="w-14 h-14 rounded-full flex items-center justify-center mb-1"
+                        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}
+                      >
+                        <UploadCloud size={22} strokeWidth={1.4} style={{ color: "rgba(168,175,169,0.7)" }} />
+                      </div>
+                      <p className="text-[10px] text-center leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+                        Tarik &amp; taruh<br />foto daun padi
+                      </p>
+                      <p className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.22)" }}>
+                        PNG · JPG · maks 5MB
+                      </p>
+                      <div className="mt-1.5 flex flex-wrap justify-center gap-1">
+                        {["Hispa", "Brown Spot", "Blast", "Tungro"].map((d) => (
+                          <span
+                            key={d}
+                            className="px-1.5 py-0.5 rounded-full text-[7px]"
+                            style={{ border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.28)" }}
+                          >
+                            {d}
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
