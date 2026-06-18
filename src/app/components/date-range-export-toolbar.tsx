@@ -12,7 +12,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
 
 type ExportFormat = "csv" | "xlsx" | "json" | "geojson" | "pdf" | "zip";
 
@@ -92,74 +93,56 @@ export function DateRangeAndExportToolbar() {
     } catch (err) { console.error(err); } finally { setExportingFormat(null); }
   };
 
-  // ─── XLSX (SpreadsheetML) ────────────────────────────────────────────────────
+  // ─── XLSX (SheetJS) ──────────────────────────────────────────────────────────
   const handleExportXLSX = async () => {
     try {
       setExportingFormat("xlsx");
       const { regions, production, predictions } = await fetchData();
 
-      let xml = `<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:o="urn:schemas-microsoft-com:office:office"
- xmlns:x="urn:schemas-microsoft-com:office:excel"
- xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
- <Worksheet ss:Name="Produksi Historis">
-  <Table>
-   <Row>
-    <Cell><Data ss:Type="String">Provinsi</Data></Cell>
-    <Cell><Data ss:Type="String">Kabupaten</Data></Cell>
-    <Cell><Data ss:Type="String">Tahun</Data></Cell>
-    <Cell><Data ss:Type="String">Bulan</Data></Cell>
-    <Cell><Data ss:Type="String">Produksi (Ton)</Data></Cell>
-    <Cell><Data ss:Type="String">Luas Panen (Ha)</Data></Cell>
-    <Cell><Data ss:Type="String">Yield (Ton/Ha)</Data></Cell>
-   </Row>`;
+      const wb = XLSX.utils.book_new();
 
-      production.forEach((row: Record<string, unknown>) => {
+      // Sheet 1: Produksi Historis
+      const prodRows = production.map((row: Record<string, unknown>) => {
         const region = regions.find((r: Record<string, unknown>) => r.id === row.region_id) as Record<string, string> | undefined;
-        xml += `
-   <Row>
-    <Cell><Data ss:Type="String">${region?.province || "-"}</Data></Cell>
-    <Cell><Data ss:Type="String">${region?.name || "-"}</Data></Cell>
-    <Cell><Data ss:Type="Number">${row.year}</Data></Cell>
-    <Cell><Data ss:Type="String">${row.month || "-"}</Data></Cell>
-    <Cell><Data ss:Type="Number">${row.production_ton || 0}</Data></Cell>
-    <Cell><Data ss:Type="String">${row.area_harvest_ha || "-"}</Data></Cell>
-    <Cell><Data ss:Type="String">${row.yield_ton_ha || "-"}</Data></Cell>
-   </Row>`;
+        return {
+          Provinsi: region?.province || "-",
+          Kabupaten: region?.name || "-",
+          Tahun: row.year,
+          Bulan: row.month || "-",
+          "Produksi (Ton)": row.production_ton || 0,
+          "Luas Panen (Ha)": row.area_harvest_ha || "-",
+          "Yield (Ton/Ha)": row.yield_ton_ha || "-",
+        };
       });
-      xml += `\n  </Table>\n </Worksheet>`;
+      const wsProd = XLSX.utils.json_to_sheet(prodRows);
+      wsProd["!cols"] = [
+        { wch: 22 }, { wch: 28 }, { wch: 8 }, { wch: 8 },
+        { wch: 16 }, { wch: 16 }, { wch: 14 },
+      ];
+      XLSX.utils.book_append_sheet(wb, wsProd, "Produksi Historis");
 
-      // Predictions sheet
+      // Sheet 2: Prediksi
       if (predictions.length > 0) {
-        xml += `\n <Worksheet ss:Name="Prediksi">
-  <Table>
-   <Row>
-    <Cell><Data ss:Type="String">Provinsi</Data></Cell>
-    <Cell><Data ss:Type="String">Kabupaten</Data></Cell>
-    <Cell><Data ss:Type="String">Model</Data></Cell>
-    <Cell><Data ss:Type="String">Tahun Target</Data></Cell>
-    <Cell><Data ss:Type="String">Prediksi Yield (t/ha)</Data></Cell>
-    <Cell><Data ss:Type="String">Prediksi Produksi (ton)</Data></Cell>
-   </Row>`;
-        predictions.forEach((p: Record<string, unknown>) => {
+        const predRows = predictions.map((p: Record<string, unknown>) => {
           const region = regions.find((r: Record<string, unknown>) => r.id === p.region_id) as Record<string, string> | undefined;
-          xml += `
-   <Row>
-    <Cell><Data ss:Type="String">${region?.province || "-"}</Data></Cell>
-    <Cell><Data ss:Type="String">${region?.name || "-"}</Data></Cell>
-    <Cell><Data ss:Type="String">${p.model_name || "-"}</Data></Cell>
-    <Cell><Data ss:Type="Number">${p.target_year}</Data></Cell>
-    <Cell><Data ss:Type="Number">${p.predicted_yield || 0}</Data></Cell>
-    <Cell><Data ss:Type="Number">${p.predicted_prod_ton || 0}</Data></Cell>
-   </Row>`;
+          return {
+            Provinsi: region?.province || "-",
+            Kabupaten: region?.name || "-",
+            Model: p.model_name || "-",
+            "Tahun Target": p.target_year,
+            "Prediksi Yield (t/ha)": p.predicted_yield || 0,
+            "Prediksi Produksi (ton)": p.predicted_prod_ton || 0,
+          };
         });
-        xml += `\n  </Table>\n </Worksheet>`;
+        const wsPred = XLSX.utils.json_to_sheet(predRows);
+        wsPred["!cols"] = [
+          { wch: 22 }, { wch: 28 }, { wch: 14 }, { wch: 14 },
+          { wch: 20 }, { wch: 22 },
+        ];
+        XLSX.utils.book_append_sheet(wb, wsPred, "Prediksi");
       }
 
-      xml += `\n</Workbook>`;
-      const blob = new Blob([xml], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-      blobToDownload(blob, `agrolytics_${startYear}_${endYear}.xlsx`);
+      XLSX.writeFile(wb, `agrolytics_${startYear}_${endYear}.xlsx`);
     } catch (err) { console.error(err); } finally { setExportingFormat(null); }
   };
 
@@ -225,22 +208,126 @@ export function DateRangeAndExportToolbar() {
   const handleExportPDF = async () => {
     try {
       setExportingFormat("pdf");
-      const element = document.querySelector("main");
-      if (!element) return;
-      const canvas = await html2canvas(element, { scale: 1.5, useCORS: true });
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgW = 210;
-      const imgH = (canvas.height * imgW) / canvas.width;
-      let pos = 0, heightLeft = imgH;
-      pdf.addImage(imgData, "PNG", 0, pos, imgW, imgH);
-      heightLeft -= 297;
-      while (heightLeft > 0) {
-        pos = heightLeft - imgH;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, pos, imgW, imgH);
-        heightLeft -= 297;
+      const { regions, production, predictions, clusters } = await fetchData();
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pdf = new jsPDF("p", "mm", "a4") as any;
+      const pageW = pdf.internal.pageSize.getWidth();
+
+      // Header
+      pdf.setFontSize(18);
+      pdf.setTextColor(42, 53, 48); // #2A3530
+      pdf.text("Agrolytics — Laporan Data", 14, 20);
+      pdf.setFontSize(10);
+      pdf.setTextColor(95, 106, 100); // #5F6A64
+      pdf.text(`Periode: ${startYear} – ${endYear}  |  Diekspor: ${new Date().toLocaleDateString("id-ID")}`, 14, 27);
+      pdf.setDrawColor(201, 162, 75); // #C9A24B
+      pdf.setLineWidth(0.5);
+      pdf.line(14, 30, pageW - 14, 30);
+
+      // Table 1: Produksi Historis
+      const prodHead = [["Provinsi", "Kabupaten", "Tahun", "Produksi (Ton)", "Yield (t/ha)"]];
+      const prodBody = production.map((row: Record<string, unknown>) => {
+        const region = regions.find((r: Record<string, unknown>) => r.id === row.region_id) as Record<string, string> | undefined;
+        return [
+          region?.province || "-",
+          region?.name || "-",
+          String(row.year),
+          row.production_ton ? Number(row.production_ton).toLocaleString("id-ID") : "-",
+          row.yield_ton_ha ? Number(row.yield_ton_ha).toFixed(2) : "-",
+        ];
+      });
+
+      pdf.setFontSize(12);
+      pdf.setTextColor(42, 53, 48);
+      pdf.text("Produksi Historis BPS", 14, 38);
+
+      pdf.autoTable({
+        startY: 41,
+        head: prodHead,
+        body: prodBody,
+        theme: "grid",
+        headStyles: { fillColor: [201, 162, 75], textColor: [42, 31, 8], fontSize: 8, fontStyle: "bold" },
+        bodyStyles: { fontSize: 7, textColor: [42, 53, 48] },
+        alternateRowStyles: { fillColor: [247, 244, 238] },
+        margin: { left: 14, right: 14 },
+        styles: { cellPadding: 2, overflow: "linebreak" },
+      });
+
+      // Table 2: Prediksi (new page if needed)
+      if (predictions.length > 0) {
+        const lastY = pdf.lastAutoTable?.finalY ?? 50;
+        const startY2 = lastY + 12 > 270 ? (pdf.addPage(), 20) : lastY + 12;
+
+        pdf.setFontSize(12);
+        pdf.setTextColor(42, 53, 48);
+        pdf.text("Prediksi Model ML", 14, startY2 - 3);
+
+        const predHead = [["Provinsi", "Kabupaten", "Model", "Tahun", "Yield (t/ha)", "Produksi (ton)"]];
+        const predBody = predictions.map((p: Record<string, unknown>) => {
+          const region = regions.find((r: Record<string, unknown>) => r.id === p.region_id) as Record<string, string> | undefined;
+          return [
+            region?.province || "-",
+            region?.name || "-",
+            String(p.model_name || "-"),
+            String(p.target_year),
+            p.predicted_yield ? Number(p.predicted_yield).toFixed(2) : "-",
+            p.predicted_prod_ton ? Number(p.predicted_prod_ton).toLocaleString("id-ID") : "-",
+          ];
+        });
+
+        pdf.autoTable({
+          startY: startY2,
+          head: predHead,
+          body: predBody,
+          theme: "grid",
+          headStyles: { fillColor: [122, 154, 110], textColor: [255, 255, 255], fontSize: 8, fontStyle: "bold" },
+          bodyStyles: { fontSize: 7, textColor: [42, 53, 48] },
+          alternateRowStyles: { fillColor: [247, 244, 238] },
+          margin: { left: 14, right: 14 },
+          styles: { cellPadding: 2, overflow: "linebreak" },
+        });
       }
+
+      // Table 3: Ringkasan Risiko
+      const riskCounts = { tinggi: 0, sedang: 0, rendah: 0 };
+      clusters.forEach((c: Record<string, unknown>) => {
+        if (c.cluster_label === 0) riskCounts.tinggi++;
+        else if (c.cluster_label === 1) riskCounts.sedang++;
+        else riskCounts.rendah++;
+      });
+
+      const lastY2 = pdf.lastAutoTable?.finalY ?? 50;
+      const startY3 = lastY2 + 12 > 270 ? (pdf.addPage(), 20) : lastY2 + 12;
+      pdf.setFontSize(12);
+      pdf.setTextColor(42, 53, 48);
+      pdf.text("Distribusi Risiko Wilayah", 14, startY3 - 3);
+
+      pdf.autoTable({
+        startY: startY3,
+        head: [["Kategori Risiko", "Jumlah Wilayah"]],
+        body: [
+          ["Tinggi", String(riskCounts.tinggi)],
+          ["Sedang", String(riskCounts.sedang)],
+          ["Rendah", String(riskCounts.rendah)],
+          ["Total", String(riskCounts.tinggi + riskCounts.sedang + riskCounts.rendah)],
+        ],
+        theme: "grid",
+        headStyles: { fillColor: [160, 72, 72], textColor: [255, 255, 255], fontSize: 8, fontStyle: "bold" },
+        bodyStyles: { fontSize: 8, textColor: [42, 53, 48] },
+        margin: { left: 14, right: 14 },
+        columnStyles: { 1: { halign: "center" } },
+      });
+
+      // Footer
+      const pageCount = pdf.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(150);
+        pdf.text(`Agrolytics v2 — Halaman ${i}/${pageCount}`, pageW / 2, 290, { align: "center" });
+      }
+
       pdf.save(`agrolytics_laporan_${startYear}_${endYear}.pdf`);
     } catch (err) { console.error(err); } finally { setExportingFormat(null); }
   };
