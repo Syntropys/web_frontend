@@ -311,7 +311,7 @@ export function DateRangeAndExportToolbar() {
     { format: "json",    icon: FileJson,        title: "Ekspor JSON",    onClick: handleExportJSON },
     { format: "geojson", icon: Globe,           title: "Ekspor GeoJSON", onClick: handleExportGeoJSON },
     { format: "pdf",     icon: Download,        title: "Unduh PDF",      onClick: handleExportPDF },
-    { format: "zip",     icon: Archive,         title: "Bundle ZIP (CSV+JSON+GeoJSON)", onClick: handleExportZIP },
+    { format: "zip",     icon: Archive,         title: "Bundle ZIP", onClick: handleExportZIP },
   ];
 
   return (

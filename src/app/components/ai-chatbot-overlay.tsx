@@ -106,6 +106,7 @@ export function AiChatbotOverlay() {
   });
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   // Expose toggle so dashboard header can call it
   useEffect(() => {
@@ -204,6 +205,18 @@ export function AiChatbotOverlay() {
     const t = setTimeout(() => setTipDismissed(true), 20000);
     return () => clearTimeout(t);
   }, []);
+
+  // Click-outside-to-close: close chatbot when clicking outside the panel
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [isOpen]);
 
   const handleSend = useCallback(
     async (userText: string) => {
@@ -438,6 +451,7 @@ export function AiChatbotOverlay() {
       {/* ─── Chat Window ─── */}
       {isOpen && (
         <div
+          ref={panelRef}
           id="chatbot-window"
           className="chat-window-in fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-40px)] sm:w-[360px] md:w-[420px] flex flex-col rounded-2xl sm:rounded-3xl border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 bg-[#F7F4EE]/96 dark:bg-[#0E1619]/96 backdrop-blur-2xl shadow-2xl shadow-black/20 overflow-hidden"
           style={{ maxHeight: "min(560px, calc(100dvh - 80px))" }}
