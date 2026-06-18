@@ -1,14 +1,54 @@
 import { DashboardLayout } from "../../components/dashboard-layout";
 import { DiseaseDetectionCard } from "../../components/dashboard-widgets";
 import { diseaseService } from "../../../services/disease";
-import { Microscope, WifiOff, Wifi, Info, Leaf, Bug, Flame, Zap } from "lucide-react";
+import { Microscope, WifiOff, Wifi, Info, Leaf, Bug, Flame, Zap, ShieldAlert, Droplets, CircleDot, Layers, AlertTriangle } from "lucide-react";
 
 const DISEASE_QUICK_REFS = [
+  {
+    name: "Bacterial Blight",
+    emoji: "🔬",
+    icon: ShieldAlert,
+    severity: "Kritis",
+    color: "#D17878",
+    bg: "bg-[#A04848]/8",
+    border: "border-[#A04848]/20",
+    desc: "Hawar daun bakteri — tepi daun mengering bergelombang, menyebar cepat saat musim hujan.",
+  },
+  {
+    name: "Leaf Blast",
+    emoji: "🚨",
+    icon: Flame,
+    severity: "Kritis",
+    color: "#D17878",
+    bg: "bg-[#A04848]/8",
+    border: "border-[#A04848]/20",
+    desc: "Bercak belah ketupat abu-abu dengan tepi coklat, dapat menyerang leher malai.",
+  },
+  {
+    name: "Tungro",
+    emoji: "🦠",
+    icon: Zap,
+    severity: "Kritis",
+    color: "#D17878",
+    bg: "bg-[#A04848]/8",
+    border: "border-[#A04848]/20",
+    desc: "Daun menguning dari ujung, tanaman kerdil. Disebarkan wereng hijau sebagai vektor.",
+  },
+  {
+    name: "Sheath Blight",
+    emoji: "🛡️",
+    icon: Layers,
+    severity: "Tinggi",
+    color: "#D17878",
+    bg: "bg-[#A04848]/8",
+    border: "border-[#A04848]/20",
+    desc: "Hawar pelepah — bercak oval hijau keabu-abuan di pelepah daun, menjalar ke atas.",
+  },
   {
     name: "Hispa",
     emoji: "🐛",
     icon: Bug,
-    severity: "Sedang",
+    severity: "Tinggi",
     color: "#C9A24B",
     bg: "bg-[#C9A24B]/8",
     border: "border-[#C9A24B]/20",
@@ -25,24 +65,44 @@ const DISEASE_QUICK_REFS = [
     desc: "Bercak coklat oval dengan tepi kuning pada daun, biasanya akibat kekurangan nutrisi.",
   },
   {
-    name: "Blast",
-    emoji: "🚨",
-    icon: Flame,
-    severity: "Tinggi",
-    color: "#D17878",
-    bg: "bg-[#A04848]/8",
-    border: "border-[#A04848]/20",
-    desc: "Bercak belah ketupat abu-abu dengan tepi coklat, dapat menyerang leher malai.",
+    name: "Leaf Scald",
+    emoji: "🔥",
+    icon: Droplets,
+    severity: "Sedang",
+    color: "#C9A24B",
+    bg: "bg-[#C9A24B]/8",
+    border: "border-[#C9A24B]/20",
+    desc: "Ujung daun berwarna coklat keabu-abuan menyerupai luka bakar, umum di daerah tropis.",
   },
   {
-    name: "Tungro",
-    emoji: "🦠",
-    icon: Zap,
-    severity: "Tinggi",
-    color: "#D17878",
-    bg: "bg-[#A04848]/8",
-    border: "border-[#A04848]/20",
-    desc: "Daun menguning dari ujung, tanaman kerdil. Disebarkan wereng hijau sebagai vektor.",
+    name: "Narrow Brown Spot",
+    emoji: "📏",
+    icon: CircleDot,
+    severity: "Sedang",
+    color: "#C9A24B",
+    bg: "bg-[#C9A24B]/8",
+    border: "border-[#C9A24B]/20",
+    desc: "Bercak coklat sempit linear di antara urat daun, sering dikacaukan dengan brown spot.",
+  },
+  {
+    name: "Leaf Smut",
+    emoji: "⬛",
+    icon: AlertTriangle,
+    severity: "Rendah",
+    color: "#5F6A64",
+    bg: "bg-[#5F6A64]/8",
+    border: "border-[#5F6A64]/20",
+    desc: "Bintik-bintik hitam kecil pada daun, jarang menyebabkan kerusakan ekonomis signifikan.",
+  },
+  {
+    name: "Healthy",
+    emoji: "✅",
+    icon: Leaf,
+    severity: "Sehat",
+    color: "#7A9A6E",
+    bg: "bg-[#7A9A6E]/8",
+    border: "border-[#7A9A6E]/20",
+    desc: "Daun padi dalam kondisi sehat, hijau merata, tanpa bercak atau perubahan warna.",
   },
 ];
 
@@ -55,7 +115,7 @@ export default function PenyakitPage() {
       pageTitle="Deteksi Penyakit Padi"
       eyebrow="Deteksi AI"
       title="Diagnosis Penyakit Daun Padi"
-      description="Upload foto daun padi untuk mendapatkan diagnosis penyakit secara instan menggunakan model ensemble SoftVoting CNN (Accuracy ≥ 93%)."
+      description="Upload foto daun padi untuk mendapatkan diagnosis penyakit secara instan menggunakan model ensemble SoftVoting CNN (Accuracy 94.95%)."
     >
       <div className="space-y-5">
         {/* API Status Banner */}
@@ -109,8 +169,8 @@ export default function PenyakitPage() {
               <ol className="space-y-2.5">
                 {[
                   { step: "1", text: "Upload foto daun padi yang menunjukkan gejala (PNG/JPG, maks 5MB)" },
-                  { step: "2", text: "Model SoftVoting Ensemble memproses gambar menggunakan 3 arsitektur CNN" },
-                  { step: "3", text: "Prediksi probabilitas dikombinasikan untuk akurasi optimal (≥93%)" },
+                  { step: "2", text: "Model SoftVoting Ensemble memproses gambar menggunakan 2 arsitektur CNN (DenseNet121 + MobileNetV2)" },
+                  { step: "3", text: "Prediksi probabilitas dikombinasikan untuk akurasi optimal (94.95%)" },
                   { step: "4", text: "Hasil diagnosis ditampilkan beserta gejala dan rekomendasi penanganan" },
                 ].map((item) => (
                   <li key={item.step} className="flex items-start gap-2.5">
@@ -139,10 +199,10 @@ export default function PenyakitPage() {
               </div>
               <dl className="space-y-2">
                 {[
-                  { label: "Arsitektur", value: "SoftVoting Ensemble CNN" },
-                  { label: "Dataset", value: "Paddy Disease Dataset (10.407 gambar)" },
-                  { label: "Kelas", value: "4 Penyakit + Sehat" },
-                  { label: "Akurasi", value: "≥ 93% (Test Set)" },
+                  { label: "Arsitektur", value: "SoftVoting Ensemble (DenseNet121 + MobileNetV2)" },
+                  { label: "Dataset", value: "Paddy Disease Dataset (23.506 gambar)" },
+                  { label: "Kelas", value: "9 Penyakit + 1 Sehat (10 kelas)" },
+                  { label: "Akurasi Test", value: "94.95% (Top-1) · 98.64% (Top-3)" },
                   { label: "Input", value: "224×224 px RGB" },
                   { label: "Backend", value: "FastAPI + Railway" },
                 ].map((item) => (
@@ -163,9 +223,9 @@ export default function PenyakitPage() {
         {/* Disease Quick Reference */}
         <div>
           <p className="text-[11px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] mb-3">
-            Referensi Cepat — Penyakit yang Dapat Dideteksi
+            Referensi Cepat — 10 Kelas Penyakit yang Dapat Dideteksi
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
             {DISEASE_QUICK_REFS.map((d) => {
               const Icon = d.icon;
               return (

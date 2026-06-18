@@ -411,12 +411,12 @@ const DISEASE_INFO: Record<string, {
   name: string; severity: string; severityColor: string; severityBg: string;
   description: string; symptoms: string[]; treatment: string[]; emoji: string;
 }> = {
-  hispa: {
-    name: "Hispa (Dicladispa armigera)", severity: "Tinggi", severityColor: "#C9A24B", severityBg: "bg-[#C9A24B]/10",
-    description: "Hama serangga yang menyerang daun padi. Larva menggerek jaringan daun membuat bekas berwarna putih, sementara imago mengikis permukaan daun dari atas.",
-    symptoms: ["Goresan putih memanjang pada daun", "Larva dalam jaringan daun (terowongan berliku)", "Tepi daun mengering dan menggulung", "Serangan berat: daun putih keseluruhan"],
-    treatment: ["Semprotkan insektisida berbahan aktif chlorpyrifos atau imidacloprid", "Kumpulkan dan musnahkan tanaman terinfeksi", "Optimalkan jarak tanam untuk sirkulasi udara", "Hindari pemupukan nitrogen berlebihan"],
-    emoji: "🐛",
+  bacterial_blight: {
+    name: "Hawar Daun Bakteri (Xanthomonas oryzae)", severity: "Kritis", severityColor: "#D17878", severityBg: "bg-[#A04848]/10",
+    description: "Penyakit bakteri yang menyerang daun dan pelepah padi. Bakteri masuk melalui luka atau stomata, menyebar cepat saat musim hujan dan kelembapan tinggi.",
+    symptoms: ["Tepi daun mengering membentuk garis bergelombang", "Bercak kuning-hijau pucat melebar dari ujung daun", "Daun layu dan mengering keseluruhan (kresek)", "Eksudat bakteri kekuningan pada pagi hari"],
+    treatment: ["Gunakan varietas tahan HDB (Ciherang, Inpari 32)", "Kurangi dosis nitrogen, tambah kalium", "Semprotkan bakterisida streptomycin atau tembaga", "Hindari irigasi berlebihan dan jaga sirkulasi udara"],
+    emoji: "🔬",
   },
   brown_spot: {
     name: "Bercak Coklat (Bipolaris oryzae)", severity: "Sedang", severityColor: "#C9A24B", severityBg: "bg-[#C9A24B]/10",
@@ -425,12 +425,54 @@ const DISEASE_INFO: Record<string, {
     treatment: ["Gunakan benih bersertifikat + perlakuan fungisida", "Tingkatkan pemupukan K (Kalium) dan Si (Silika)", "Semprotkan fungisida mancozeb atau propiconazole", "Perbaiki drainase lahan sawah"],
     emoji: "🟤",
   },
-  blast: {
-    name: "Blas (Magnaporthe oryzae)", severity: "Kritis", severityColor: "#D17878", severityBg: "bg-[#A04848]/10",
+  healthy: {
+    name: "Daun Sehat", severity: "Sehat", severityColor: "#7A9A6E", severityBg: "bg-[#7A9A6E]/10",
+    description: "Tanaman padi terdeteksi dalam kondisi sehat. Tidak ada gejala penyakit yang terdeteksi pada daun yang dianalisis.",
+    symptoms: ["Warna daun hijau merata dan segar", "Tidak ada bercak atau perubahan warna abnormal", "Permukaan daun bersih dan tidak berlubang"],
+    treatment: ["Pertahankan jadwal pemupukan sesuai dosis anjuran", "Monitor rutin minimal 2x per minggu", "Jaga drainase dan irigasi yang baik", "Lanjutkan program PHT (Pengendalian Hama Terpadu)"],
+    emoji: "✅",
+  },
+  hispa: {
+    name: "Hispa (Dicladispa armigera)", severity: "Tinggi", severityColor: "#C9A24B", severityBg: "bg-[#C9A24B]/10",
+    description: "Hama serangga yang menyerang daun padi. Larva menggerek jaringan daun membuat bekas berwarna putih, sementara imago mengikis permukaan daun dari atas.",
+    symptoms: ["Goresan putih memanjang pada daun", "Larva dalam jaringan daun (terowongan berliku)", "Tepi daun mengering dan menggulung", "Serangan berat: daun putih keseluruhan"],
+    treatment: ["Semprotkan insektisida berbahan aktif chlorpyrifos atau imidacloprid", "Kumpulkan dan musnahkan tanaman terinfeksi", "Optimalkan jarak tanam untuk sirkulasi udara", "Hindari pemupukan nitrogen berlebihan"],
+    emoji: "🐛",
+  },
+  leaf_blast: {
+    name: "Blas Daun (Magnaporthe oryzae)", severity: "Kritis", severityColor: "#D17878", severityBg: "bg-[#A04848]/10",
     description: "Penyakit jamur paling merusak pada padi. Menyerang daun, leher malai, dan ruas batang. Epidemi dapat memusnahkan hingga 100% panen.",
     symptoms: ["Bercak belah ketupat dengan tepi coklat, pusat abu-abu", "Leher malai patah (blast leher)", "Gabah hampa akibat serangan malai", "Antraknosa pada batang dan buku ruas"],
     treatment: ["SEGERA semprot: tricyclazole, isoprothiolane, atau azoxystrobin", "Gunakan varietas tahan blas (Ciherang, Inpari)", "Kurangi nitrogen, tambah kalium + silika", "Hindari irigasi berlebihan saat cuaca lembap"],
     emoji: "🚨",
+  },
+  leaf_scald: {
+    name: "Hawar Pelepah Daun (Microdochium oryzae)", severity: "Sedang", severityColor: "#C9A24B", severityBg: "bg-[#C9A24B]/10",
+    description: "Penyakit jamur yang menyebabkan luka memanjang pada ujung daun menyerupai luka bakar. Umum di daerah tropis dengan kelembapan tinggi.",
+    symptoms: ["Ujung daun berwarna coklat keabu-abuan seperti terbakar", "Garis-garis melintang bergelombang di daun", "Daun mengering dari ujung ke pangkal", "Sering muncul bersamaan dengan bercak coklat"],
+    treatment: ["Semprotkan fungisida benomyl atau carbendazim", "Perbaiki drainase dan kurangi kelembapan berlebih", "Gunakan varietas toleran penyakit", "Rotasi tanaman dan bersihkan sisa panen"],
+    emoji: "🔥",
+  },
+  leaf_smut: {
+    name: "Noda Hitam Daun (Entyloma oryzae)", severity: "Rendah", severityColor: "#5F6A64", severityBg: "bg-[#5F6A64]/10",
+    description: "Penyakit jamur ringan yang jarang menyebabkan kerusakan ekonomis signifikan, tetapi bisa mengurangi kapasitas fotosintesis jika serangan parah.",
+    symptoms: ["Bintik-bintik hitam kecil tidak beraturan pada daun", "Bintik sering terpisah-pisah, tidak menyatu", "Daun terlihat kotor atau bertabur debu hitam", "Jarang menyerang gabah"],
+    treatment: ["Biasanya tidak memerlukan perlakuan khusus", "Semprotkan fungisida jika serangan meluas", "Jaga kebersihan lahan dari gulma", "Hindari penanaman terlalu rapat"],
+    emoji: "⬛",
+  },
+  narrow_brown_spot: {
+    name: "Bercak Coklat Sempit (Cercospora janseana)", severity: "Sedang", severityColor: "#C9A24B", severityBg: "bg-[#C9A24B]/10",
+    description: "Penyakit jamur yang menyebabkan bercak coklat sempit memanjang pada daun. Sering dikacaukan dengan bercak coklat biasa, namun bentuknya lebih linear.",
+    symptoms: ["Bercak coklat linear sempit di antara urat daun", "Warna coklat kemerahan dengan tepi lebih gelap", "Bercak memanjang sejajar urat daun", "Daun tua lebih rentan terserang"],
+    treatment: ["Semprotkan fungisida propiconazole atau azoxystrobin", "Tingkatkan pemupukan kalium dan fosfor", "Gunakan benih bersih dan bersertifikat", "Bersihkan sisa-sisa tanaman sakit setelah panen"],
+    emoji: "📏",
+  },
+  sheath_blight: {
+    name: "Hawar Pelepah (Rhizoctonia solani)", severity: "Tinggi", severityColor: "#D17878", severityBg: "bg-[#A04848]/10",
+    description: "Penyakit jamur tanah yang menyerang pelepah daun dan dapat menjalar ke daun. Termasuk penyakit penting kedua setelah blas pada padi.",
+    symptoms: ["Bercak oval/lonjong hijau keabu-abuan pada pelepah", "Bercak membesar dan menyatu menjalar ke atas", "Pusat bercak berwarna putih keabu-abuan", "Sklerotia (bola jamur coklat) terlihat di permukaan"],
+    treatment: ["Semprotkan fungisida validamycin atau hexaconazole", "Kurangi kepadatan tanam dan jarak antar rumpun", "Hindari pemupukan nitrogen berlebihan", "Bersihkan sisa tanaman dan gulma dari lahan"],
+    emoji: "🛡️",
   },
   tungro: {
     name: "Tungro (Rice Tungro Virus)", severity: "Kritis", severityColor: "#D17878", severityBg: "bg-[#A04848]/10",
@@ -438,13 +480,6 @@ const DISEASE_INFO: Record<string, {
     symptoms: ["Daun kuning-jingga mulai dari ujung", "Tanaman kerdil, anakan berkurang", "Gabah berisi tidak sempurna", "Populasi wereng hijau tinggi di sekitar tanaman"],
     treatment: ["Kendalikan wereng hijau (BPMC, imidacloprid)", "Cabut dan bakar tanaman bergejala parah", "Tanam varietas tahan tungro (Tukad Unda, Bondoyudo)", "Atur waktu tanam serentak untuk memutus siklus hama"],
     emoji: "🦠",
-  },
-  healthy: {
-    name: "Daun Sehat", severity: "Sehat", severityColor: "#7A9A6E", severityBg: "bg-[#7A9A6E]/10",
-    description: "Tanaman padi terdeteksi dalam kondisi sehat. Tidak ada gejala penyakit yang terdeteksi pada daun yang dianalisis.",
-    symptoms: ["Warna daun hijau merata dan segar", "Tidak ada bercak atau perubahan warna abnormal", "Permukaan daun bersih dan tidak berlubang"],
-    treatment: ["Pertahankan jadwal pemupukan sesuai dosis anjuran", "Monitor rutin minimal 2x per minggu", "Jaga drainase dan irigasi yang baik", "Lanjutkan program PHT (Pengendalian Hama Terpadu)"],
-    emoji: "✅",
   },
 };
 
@@ -662,7 +697,7 @@ export function DiseaseDetectionCard() {
                         PNG · JPG · maks 5MB
                       </p>
                       <div className="mt-1.5 flex flex-wrap justify-center gap-1">
-                        {["Hispa", "Brown Spot", "Blast", "Tungro"].map((d) => (
+                        {["Blas", "HDB", "Hispa", "Tungro", "Bercak", "Sehat", "+4"].map((d) => (
                           <span
                             key={d}
                             className="px-1.5 py-0.5 rounded-full text-[7px]"
