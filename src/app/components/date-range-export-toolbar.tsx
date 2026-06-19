@@ -238,21 +238,25 @@ export function DateRangeAndExportToolbar() {
         ];
       });
 
-      pdf.setFontSize(12);
-      pdf.setTextColor(42, 53, 48);
-      pdf.text("Produksi Historis BPS", 14, 38);
+      let nextY = 38;
 
-      pdf.autoTable({
-        startY: 41,
-        head: prodHead,
-        body: prodBody,
-        theme: "grid",
-        headStyles: { fillColor: [201, 162, 75], textColor: [42, 31, 8], fontSize: 8, fontStyle: "bold" },
-        bodyStyles: { fontSize: 7, textColor: [42, 53, 48] },
-        alternateRowStyles: { fillColor: [247, 244, 238] },
-        margin: { left: 14, right: 14 },
-        styles: { cellPadding: 2, overflow: "linebreak" },
-      });
+      if (prodBody.length > 0) {
+        pdf.setFontSize(12);
+        pdf.setTextColor(42, 53, 48);
+        pdf.text("Produksi Historis BPS", 14, nextY);
+
+        pdf.autoTable({
+          startY: nextY + 3,
+          head: prodHead,
+          body: prodBody,
+          theme: "grid",
+          headStyles: { fillColor: [201, 162, 75], textColor: [42, 31, 8], fontSize: 8, fontStyle: "bold" },
+          bodyStyles: { fontSize: 7, textColor: [42, 53, 48] },
+          alternateRowStyles: { fillColor: [247, 244, 238] },
+          margin: { left: 14, right: 14 },
+          styles: { cellPadding: 2, overflow: "linebreak" },
+        });
+      }
 
       // Table 2: Prediksi (new page if needed)
       if (predictions.length > 0) {
@@ -415,9 +419,7 @@ export function DateRangeAndExportToolbar() {
         </button>
 
         {isOpen && (
-          <div className="fixed inset-x-3 bottom-3 sm:absolute sm:inset-auto sm:left-0 sm:right-auto sm:bottom-auto sm:mt-2 w-auto sm:w-72 rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-4 shadow-xl z-[60]">
-            {/* Mobile backdrop */}
-            <div className="fixed inset-0 bg-black/30 -z-10 sm:hidden" onClick={() => setIsOpen(false)} />
+          <div className="absolute left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-4 shadow-xl z-[60]">
             <h4 className="font-serif text-[14px] italic font-semibold mb-3 text-[#2A3530] dark:text-[#E8E6DF]">
               Rentang Tahun
             </h4>
@@ -481,8 +483,7 @@ export function DateRangeAndExportToolbar() {
         </button>
 
         {exportOpen && !isExporting && (
-          <div className="fixed inset-x-3 bottom-3 sm:absolute sm:inset-auto sm:left-0 sm:right-auto sm:bottom-auto sm:mt-2 w-auto sm:w-60 rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-2 shadow-xl z-[60]">
-            <div className="fixed inset-0 bg-black/30 -z-10 sm:hidden" onClick={() => setExportOpen(false)} />
+          <div className="absolute left-0 mt-2 w-60 max-w-[calc(100vw-2rem)] rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-2 shadow-xl z-[60]">
             <p className="text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] px-2 py-1.5 mb-1">
               Format Ekspor
             </p>
