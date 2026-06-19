@@ -12,6 +12,34 @@ const MAX_ATTEMPTS = 5
 const LOCK_DURATION_MS = 30_000
 const SUBMIT_COOLDOWN_MS = 1200
 
+// Dual-storage helpers — read MAX of both, write to both. Clearing one alone won't bypass.
+function getStoredCount(): number {
+  const ls = Number(localStorage.getItem('agrolytics_login_fail_count') || 0)
+  const ss = Number(sessionStorage.getItem('agrolytics_login_fail_count') || 0)
+  return Math.max(ls, ss)
+}
+function setStoredCount(n: number) {
+  const val = n.toString()
+  localStorage.setItem('agrolytics_login_fail_count', val)
+  sessionStorage.setItem('agrolytics_login_fail_count', val)
+}
+function getStoredLock(): number | null {
+  const ls = localStorage.getItem('agrolytics_login_lock_until')
+  const ss = sessionStorage.getItem('agrolytics_login_lock_until')
+  const v = Math.max(Number(ls || 0), Number(ss || 0))
+  return v > 0 ? v : null
+}
+function setStoredLock(until: number) {
+  const val = until.toString()
+  localStorage.setItem('agrolytics_login_lock_until', val)
+  sessionStorage.setItem('agrolytics_login_lock_until', val)
+}
+function clearStoredLock() {
+  localStorage.removeItem('agrolytics_login_lock_until')
+  sessionStorage.removeItem('agrolytics_login_lock_until')
+  setStoredCount(0)
+}
+
 import { Turnstile } from '@marsidev/react-turnstile'
 
 export default function Masuk() {
@@ -25,12 +53,11 @@ export default function Masuk() {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [failCount, setFailCount] = useState<number>(() => {
     if (typeof window === 'undefined') return 0
-    return Number(localStorage.getItem('agrolytics_login_fail_count') || 0)
+    return getStoredCount()
   })
   const [lockUntil, setLockUntil] = useState<number | null>(() => {
     if (typeof window === 'undefined') return null
-    const val = localStorage.getItem('agrolytics_login_lock_until')
-    return val ? Number(val) : null
+    return getStoredLock()
   })
   const [now, setNow] = useState(Date.now())
   const [submitting, setSubmitting] = useState(false)
@@ -55,8 +82,7 @@ export default function Masuk() {
       setLockUntil(null)
       setFailCount(0)
       setError('')
-      localStorage.removeItem('agrolytics_login_lock_until')
-      localStorage.setItem('agrolytics_login_fail_count', '0')
+      clearStoredLock()
     }
   }, [now, lockUntil])
 
@@ -82,11 +108,11 @@ export default function Masuk() {
   const registerFail = (message: string) => {
     const next = failCount + 1
     setFailCount(next)
-    localStorage.setItem('agrolytics_login_fail_count', next.toString())
+    setStoredCount(next)
     if (next >= MAX_ATTEMPTS) {
       const until = Date.now() + LOCK_DURATION_MS
       setLockUntil(until)
-      localStorage.setItem('agrolytics_login_lock_until', until.toString())
+      setStoredLock(until)
       setError('')
     } else {
       setError(message)
@@ -132,8 +158,7 @@ export default function Masuk() {
           /* non-fatal */
         }
         setFailCount(0)
-        localStorage.setItem('agrolytics_login_fail_count', '0')
-        localStorage.removeItem('agrolytics_login_lock_until')
+        clearStoredLock()
         navigate(from, { replace: true })
       }
     } catch (err: unknown) {

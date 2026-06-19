@@ -278,36 +278,9 @@ export function AiChatbotOverlay() {
             throw new Error(`API ${res.status}`);
           }
         } catch {
-          // Dev fallback — Gemini 2.5 Flash direct call
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const devKey: string = (import.meta as any).env?.VITE_GEMINI_API_KEY ?? "";
-          if (!devKey) {
-            aiResponseText =
-              "Mode development: tambahkan VITE_GEMINI_API_KEY di .env untuk test lokal.";
-          } else {
-            const systemPrompt = `Anda adalah Decision Support AI Agrolytics. Bantu analisis data produksi padi Kalimantan. Total wilayah: ${regionsCount} kabupaten. Rata-rata yield 2026: ${avgYield2026} t/ha. Jawab dalam Bahasa Indonesia, ringkas dan bernilai tinggi.`;
-            const gemRes = await fetch(
-              `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${devKey}`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  contents: [
-                    { role: "user", parts: [{ text: systemPrompt }] },
-                    { role: "model", parts: [{ text: "Siap!" }] },
-                    ...history.map((m) => ({
-                      role: m.role === "user" ? "user" : "model",
-                      parts: [{ text: m.content }],
-                    })),
-                    { role: "user", parts: [{ text: userText.trim() }] },
-                  ],
-                }),
-              }
-            );
-            const gd = await gemRes.json();
-            aiResponseText =
-              gd?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-          }
+          // Server-side /api/chat failed — show user-friendly error
+          aiResponseText =
+            "Layanan AI sedang tidak tersedia. Pastikan koneksi internet Anda stabil dan coba lagi.";
         }
 
         const aiMsg: Message = {
