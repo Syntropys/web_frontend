@@ -5,7 +5,7 @@
 [![Lead Dev](https://img.shields.io/badge/Lead_Dev-@Zevhys-1F2937?style=flat-square)]()
 [![Dev](https://img.shields.io/badge/Dev-@rohidrivaldi-1F2937?style=flat-square)]()
 ![Created](https://img.shields.io/badge/Created-18--May--2026-1F2937?style=flat-square)
-![Version](https://img.shields.io/badge/Version-v1.0.0-1F2937?style=flat-square)
+![Version](https://img.shields.io/badge/Version-v1.1.0-1F2937?style=flat-square)
 ![Repo Size](https://img.shields.io/github/repo-size/Syntropys/web_frontend?label=Repo%20Size&color=1F2937&style=flat-square)
 ![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2FSyntropys%2Fweb_frontend&countColor=%231F2937&style=flat-square&labelStyle=none)
 [![Issues Welcome](https://img.shields.io/badge/Issues-Welcome-1F2937.svg?style=flat-square)](https://github.com/Syntropys/web_frontend/issues)
@@ -87,7 +87,7 @@ rohidrivaldi/agrolytics-fix (origin)
 | **Database** | Supabase PostgreSQL | RLS-enforced queries via `supabase-js` |
 | **Validation** | Zod v4 | Schema validation for env vars and data |
 | **Icons** | Lucide React | Consistent icon system |
-| **Export** | jsPDF + jspdf-autotable + xlsx + html2canvas | PDF, XLSX, CSV, JSON, GeoJSON export |
+| **Export** | jsPDF + jspdf-autotable + xlsx + html2canvas | PDF, XLSX, CSV, JSON, GeoJSON export with province/region filtering |
 | **AI Chatbot** | Google Gemini API | Conversational analytics overlay |
 | **Hosting** | Vercel | Auto-deploy from Git, CSP/security headers |
 
@@ -101,14 +101,14 @@ rohidrivaldi/agrolytics-fix (origin)
 | 🔑 Forgot Password | `/lupa-password` | Password reset request |
 | 📊 Ringkasan | `/dashboard/ringkasan` | KPI widgets, top/bottom regions, trend chart |
 | 🌡️ Data Iklim | `/dashboard/iklim` | NASA POWER climate data (rainfall, temperature, humidity) per region |
-| 📈 Prediksi | `/dashboard/prediksi` | XGBoost yield predictions with actual vs predicted charts |
+| 📈 Prediksi | `/dashboard/prediksi` | XGBoost yield predictions with year selector (2022–2026) and actual vs predicted charts |
 | 🗺️ Peta | `/dashboard/peta` | Full interactive choropleth map with region detail panel |
 | ⚠️ Risiko | `/dashboard/risiko` | K-Means risk clustering (Tinggi/Sedang/Rendah) with distribution |
 | 📉 Tren Historis | `/dashboard/tren` | Multi-region BPS production trend comparison (2018–2025) |
-| 🎯 Prioritas | `/dashboard/prioritas` | Ranked region recommendations based on composite priority score |
+| 🎯 Prioritas | `/dashboard/prioritas` | Ranked region recommendations with expandable detail panel and intervention suggestions |
 | 🔬 Deteksi Penyakit | `/dashboard/penyakit` | Upload leaf photo → 10-class disease classification via Railway ML API |
-| 👤 Admin: Pengguna | `/dashboard/admin/pengguna` | User management (admin-only) |
-| 📥 Admin: Ingesti | `/dashboard/admin/ingesti` | Data ingestion from CSV (admin-only) |
+| 👤 Admin: Pengguna | `/dashboard/admin/pengguna` | User management with role toggle (Admin ↔ Pengguna), styled confirmation modals |
+| 📥 Admin: Ingesti | `/dashboard/admin/ingesti` | Data ingestion from CSV/JSON with column alias auto-mapping |
 
 # 🚀 Setup
 
@@ -173,7 +173,8 @@ src/
 │   │   ├── footer.tsx     # Site footer
 │   │   ├── dashboard-layout.tsx    # Dashboard shell with sidebar
 │   │   ├── dashboard-widgets.tsx   # Reusable KPI cards & charts
-│   │   ├── date-range-export-toolbar.tsx  # Filter + export toolbar
+│   │   ├── date-range-export-toolbar.tsx  # Filter + export toolbar with province/region filter
+│   │   ├── export-dropdown.tsx            # Reusable export format dropdown
 │   │   ├── ai-chatbot-overlay.tsx  # Gemini AI chatbot popup
 │   │   └── ...
 │   ├── pages/
