@@ -108,14 +108,14 @@ export default function TrenPage() {
     <DashboardLayout
       pageTitle="Tren Historis"
       eyebrow="Tren"
-      title="Analitik Historis BPS"
-      description="Bandingkan hingga 5 wilayah lintas tahun (2018–2025). Data historis BPS. Filter provinsi, pilih metrik, dan ekspor data."
+      title="Analitik Historis"
+      description="Bandingkan hingga 5 wilayah lintas tahun (2018–2025). Filter provinsi, pilih metrik, dan ekspor data."
       toolbar={<DateRangeAndExportToolbar />}
     >
       <div className="space-y-5">
         {/* Filter Panel */}
         <div className="rounded-2xl border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 bg-white/40 dark:bg-white/[0.04] p-5 space-y-5">
-          {/* Row 1: Province + Metric (side-by-side) + Search */}
+          {/* Row 1: Province + Metric */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="block text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9]">
@@ -124,7 +124,7 @@ export default function TrenPage() {
               <select
                 value={province}
                 onChange={(e) => setProvince(e.target.value)}
-                className="h-9 w-full px-3 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-[#F4F0E6] dark:bg-[#1A2326] text-[13px] text-[#2A3530] dark:text-[#E8E6DF] focus:outline-none focus:border-[#C9A24B] cursor-pointer"
+                className="h-9 w-full pl-3 pr-8 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-[#F4F0E6] dark:bg-[#1A2326] text-[13px] text-[#2A3530] dark:text-[#E8E6DF] focus:outline-none focus:border-[#C9A24B] cursor-pointer appearance-none bg-[length:11px] bg-[position:right_0.75rem_center] bg-no-repeat" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%235F6A64' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")` }}
               >
                 <option value="">Semua Provinsi</option>
                 {provinces.map((p) => (
@@ -140,7 +140,7 @@ export default function TrenPage() {
               <select
                 value={metric}
                 onChange={(e) => setMetric(e.target.value as Metric)}
-                className="h-9 w-full px-3 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-[#F4F0E6] dark:bg-[#1A2326] text-[13px] text-[#2A3530] dark:text-[#E8E6DF] focus:outline-none focus:border-[#C9A24B] cursor-pointer"
+                className="h-9 w-full pl-3 pr-8 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-[#F4F0E6] dark:bg-[#1A2326] text-[13px] text-[#2A3530] dark:text-[#E8E6DF] focus:outline-none focus:border-[#C9A24B] cursor-pointer appearance-none bg-[length:11px] bg-[position:right_0.75rem_center] bg-no-repeat" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%235F6A64' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")` }}
               >
                 {Object.entries(METRIC_LABELS).map(([k, v]) => (
                   <option key={k} value={k}>{v}</option>

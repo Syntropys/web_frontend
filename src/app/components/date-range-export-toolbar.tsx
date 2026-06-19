@@ -359,9 +359,8 @@ export function DateRangeAndExportToolbar() {
             <h4 className="font-serif text-[14px] italic font-semibold mb-3 text-[#2A3530] dark:text-[#E8E6DF]">
               Rentang Tahun
             </h4>
-            <div className="grid grid-cols-3 gap-1.5 mb-4">
+            <div className="grid grid-cols-2 gap-1.5 mb-4">
               {[
-                { label: "Historis BPS", start: 2018, end: 2025 },
                 { label: "Prediksi 2026", start: 2026, end: 2026 },
                 { label: "Semua Data", start: 2018, end: 2026 },
               ].map((p) => (

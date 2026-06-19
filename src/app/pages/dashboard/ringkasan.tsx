@@ -168,7 +168,7 @@ export default function RingkasanPage() {
       icon: LineChart,
       metric: metrics.totalProd,
       unit: "ton",
-      caption: `XGBoost & BPS (${yearRange.start}–${yearRange.end})`,
+      caption: `XGBoost (${yearRange.start}–${yearRange.end})`,
       tone: "green",
     },
     {
@@ -198,7 +198,7 @@ export default function RingkasanPage() {
       icon: TrendingUp,
       metric: metrics.trendPct,
       unit: "%",
-      caption: `BPS ${yearRange.start}–${yearRange.end}`,
+      caption: `Historis ${yearRange.start}–${yearRange.end}`,
       tone: "green",
     },
     {
