@@ -491,12 +491,78 @@ export function DiseaseDetectionCard() {
   const [result, setResult] = useState<DiseasePredictionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
-    return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      stopCamera();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previewUrl]);
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+    setIsCameraActive(false);
+    setCameraError(null);
+  };
+
+  const handleStartCamera = async () => {
+    setCameraError(null);
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setCameraError("Browser tidak mendukung akses kamera.");
+        return;
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 960 } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      setIsCameraActive(true);
+      // wait for videoRef to mount then attach
+      requestAnimationFrame(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(() => {});
+        }
+      });
+    } catch (err: any) {
+      if (err.name === "NotAllowedError") {
+        setCameraError("Izin kamera ditolak. Aktifkan izin kamera di pengaturan browser.");
+      } else if (err.name === "NotFoundError") {
+        setCameraError("Kamera tidak ditemukan di perangkat ini.");
+      } else {
+        setCameraError(`Gagal mengakses kamera: ${err.message}`);
+      }
+    }
+  };
+
+  const handleCapturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0);
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const capturedFile = new File([blob], `kamera_${Date.now()}.jpg`, { type: "image/jpeg" });
+        stopCamera();
+        handleFile(capturedFile);
+      }
+    }, "image/jpeg", 0.92);
+  };
 
   const getDiseaseInfo = (className: string) => {
     const key = className.toLowerCase().replace(/[\s-]+/g, "_");
@@ -535,6 +601,7 @@ export function DiseaseDetectionCard() {
     setFile(null);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null); setResult(null); setError(null);
+    stopCamera();
   };
 
   const diseaseInfo = result ? getDiseaseInfo(result.predicted_class) : null;
@@ -584,7 +651,7 @@ export function DiseaseDetectionCard() {
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={() => setIsDragging(false)}
               onDrop={(e) => { e.preventDefault(); setIsDragging(false); if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]); }}
-              onClick={() => { if (!previewUrl) fileInputRef.current?.click(); }}
+              onClick={() => { if (!previewUrl && !isCameraActive) fileInputRef.current?.click(); }}
             >
               <input
                 type="file"
@@ -593,14 +660,7 @@ export function DiseaseDetectionCard() {
                 accept="image/png, image/jpeg, image/jpg, image/webp"
                 className="hidden"
               />
-              <input
-                type="file"
-                ref={cameraInputRef}
-                onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }}
-                accept="image/png, image/jpeg, image/jpg, image/webp"
-                capture="environment"
-                className="hidden"
-              />
+              <canvas ref={canvasRef} className="hidden" />
 
               {/* Dynamic Island */}
               <div
@@ -654,8 +714,58 @@ export function DiseaseDetectionCard() {
                 </div>
               )}
 
+              {/* Live camera view */}
+              {isCameraActive && (
+                <>
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Camera overlay controls */}
+                  <div className="absolute inset-0 z-20 pointer-events-none">
+                    {/* Corner viewfinder brackets */}
+                    {[
+                      "top-[26%] left-[10%] border-t-2 border-l-2",
+                      "top-[26%] right-[10%] border-t-2 border-r-2",
+                      "bottom-[22%] left-[10%] border-b-2 border-l-2",
+                      "bottom-[22%] right-[10%] border-b-2 border-r-2",
+                    ].map((cls, i) => (
+                      <div key={i} className={`absolute w-6 h-6 border-white/60 ${cls}`} />
+                    ))}
+                    {/* Live badge */}
+                    <div className="absolute top-[36px] left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-full pointer-events-none" style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}>
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                      <span className="text-[8px] font-mono text-white/80 uppercase tracking-wider">Live</span>
+                    </div>
+                  </div>
+                  {/* Capture button */}
+                  <div className="absolute bottom-[12%] left-0 right-0 z-20 flex justify-center gap-4 items-center">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); stopCamera(); }}
+                      className="w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-transform hover:scale-110"
+                      style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,0.2)" }}
+                      title="Batal"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleCapturePhoto(); }}
+                      className="w-14 h-14 rounded-full flex items-center justify-center cursor-pointer transition-transform hover:scale-105 active:scale-95"
+                      style={{ background: "rgba(255,255,255,0.95)", boxShadow: "0 0 0 3px rgba(255,255,255,0.3), 0 4px 16px rgba(0,0,0,0.4)" }}
+                      title="Ambil Foto"
+                    >
+                      <div className="w-11 h-11 rounded-full" style={{ border: "2px solid #222" }} />
+                    </button>
+                    <div className="w-9 h-9" /> {/* spacer for centering */}
+                  </div>
+                </>
+              )}
+
               {/* Preview image */}
-              {previewUrl && (
+              {previewUrl && !isCameraActive && (
                 <img
                   src={previewUrl}
                   alt="Paddy leaf preview"
@@ -665,7 +775,7 @@ export function DiseaseDetectionCard() {
               )}
 
               {/* Empty state — 2 modes: not configured vs ready */}
-              {!previewUrl && !isDragging && (
+              {!previewUrl && !isDragging && !isCameraActive && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-5 pt-10">
                   {!diseaseService.isConfigured ? (
                     /* ── Not configured ── */
@@ -709,15 +819,15 @@ export function DiseaseDetectionCard() {
                       {/* Camera & Upload buttons inside phone */}
                       <div className="mt-3 flex gap-2">
                         <button
-                          onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[8px] font-medium transition-all cursor-pointer"
+                          onClick={(e) => { e.stopPropagation(); handleStartCamera(); }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[8px] font-medium transition-all cursor-pointer hover:scale-105"
                           style={{ background: "rgba(201,162,75,0.2)", border: "1px solid rgba(201,162,75,0.35)", color: "#C9A24B" }}
                         >
                           <Camera size={10} /> Kamera
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[8px] font-medium transition-all cursor-pointer"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[8px] font-medium transition-all cursor-pointer hover:scale-105"
                           style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.5)" }}
                         >
                           <UploadCloud size={10} /> Galeri
@@ -782,10 +892,10 @@ export function DiseaseDetectionCard() {
         </div>
 
         {/* CTA below phone */}
-        {!previewUrl && (
+        {!previewUrl && !isCameraActive && (
           <div className="flex items-center gap-3">
             <button
-              onClick={() => cameraInputRef.current?.click()}
+              onClick={() => handleStartCamera()}
               className="flex items-center gap-1.5 text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer underline-offset-2 hover:underline"
             >
               <Camera size={13} /> ambil dari kamera
@@ -797,6 +907,14 @@ export function DiseaseDetectionCard() {
             >
               <UploadCloud size={13} /> pilih dari galeri
             </button>
+          </div>
+        )}
+
+        {/* Camera error */}
+        {cameraError && (
+          <div className="w-full p-3 rounded-xl border border-[#C9A24B]/20 bg-[#C9A24B]/5 text-[#735A1E] dark:text-[#C9A24B] text-[12px] leading-relaxed">
+            <Camera size={14} className="inline mr-1.5 -mt-0.5" />
+            {cameraError}
           </div>
         )}
 
