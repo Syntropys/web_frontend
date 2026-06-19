@@ -70,7 +70,8 @@ export function ExportDropdown({ onExport, label = "Ekspor" }: Props) {
       </button>
 
       {open && !isExporting && (
-        <div className="absolute left-0 sm:right-0 sm:left-auto mt-2 w-52 rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-2 shadow-xl z-50">
+        <div className="fixed inset-x-3 bottom-3 sm:absolute sm:inset-auto sm:left-0 sm:right-auto sm:bottom-auto sm:mt-2 w-auto sm:w-52 rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-2 shadow-xl z-[60]">
+          <div className="fixed inset-0 bg-black/30 -z-10 sm:hidden" onClick={() => setOpen(false)} />
           <p className="text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] px-2 py-1.5 mb-1">
             Format Ekspor
           </p>

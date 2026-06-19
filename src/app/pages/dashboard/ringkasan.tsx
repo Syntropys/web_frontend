@@ -260,18 +260,18 @@ function SummaryCard({ item }: { item: SummaryItem }) {
         />
       </div>
 
-      <div className="mt-4 pt-4 border-t border-[#2A3530]/12 dark:border-[#E8E6DF]/12">
+      <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-[#2A3530]/12 dark:border-[#E8E6DF]/12">
         <div className="flex items-baseline gap-1.5 flex-wrap">
-          <span className="font-serif text-[28px] sm:text-[32px] leading-none text-[#2A3530] dark:text-[#E8E6DF]">
+          <span className="font-serif text-[24px] sm:text-[32px] leading-none text-[#2A3530] dark:text-[#E8E6DF]">
             {item.metric}
           </span>
           {item.unit && (
-            <span className="text-[12px] text-[#5F6A64] dark:text-[#A8AFA9]">
+            <span className="text-[11px] sm:text-[12px] text-[#5F6A64] dark:text-[#A8AFA9]">
               {item.unit}
             </span>
           )}
         </div>
-        <p className="mt-2 text-[12px] leading-[1.5] text-[#5F6A64] dark:text-[#B8BFB9]">
+        <p className="mt-1.5 sm:mt-2 text-[11px] sm:text-[12px] leading-[1.5] text-[#5F6A64] dark:text-[#B8BFB9]">
           {item.caption}
         </p>
       </div>
