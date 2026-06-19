@@ -13,6 +13,7 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  UserCog,
 } from "lucide-react";
 import { DashboardLayout } from "../../../components/dashboard-layout";
 import { supabase } from "@/lib/supabase";
@@ -112,6 +113,36 @@ export default function PenggunaPage() {
       );
     } catch (err: any) {
       alert(err.message || "Gagal mengubah status pengguna.");
+    }
+  };
+
+  const toggleRole = async (id: string) => {
+    const user = users.find((u) => u.id === id);
+    if (!user) return;
+    if (user.id === profile?.id) {
+      alert("Anda tidak dapat mengubah role akun sendiri.");
+      return;
+    }
+    const newRole = user.role === "Admin" ? "user" : "admin";
+    const confirmMsg = newRole === "admin"
+      ? `Jadikan ${user.nama} sebagai Admin?`
+      : `Ubah ${user.nama} menjadi Pengguna biasa?`;
+    if (!confirm(confirmMsg)) return;
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ role: newRole })
+        .eq("id", user.id);
+      if (error) throw error;
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === user.id
+            ? { ...u, role: newRole === "admin" ? "Admin" : "Pengguna" }
+            : u
+        )
+      );
+    } catch (err: any) {
+      alert(err.message || "Gagal mengubah role pengguna.");
     }
   };
 
@@ -241,6 +272,14 @@ export default function PenggunaPage() {
                   </div>
                   <div className="mt-2.5 flex items-center gap-2">
                     <button
+                      onClick={() => toggleRole(u.id)}
+                      disabled={u.id === profile?.id}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 h-10 rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-[#5F6A64]"
+                    >
+                      <UserCog size={12} />
+                      {u.role === "Admin" ? "→ Pengguna" : "→ Admin"}
+                    </button>
+                    <button
                       onClick={() => toggleStatus(u.id)}
                       disabled={u.role === "Admin"}
                       className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 h-10 rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-[#5F6A64]"
@@ -313,6 +352,15 @@ export default function PenggunaPage() {
                       </td>
                       <td className="px-3 py-3">
                         <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => toggleRole(u.id)}
+                            disabled={u.id === profile?.id}
+                            aria-label={u.role === "Admin" ? "Jadikan Pengguna" : "Jadikan Admin"}
+                            title={u.role === "Admin" ? "Jadikan Pengguna" : "Jadikan Admin"}
+                            className="w-8 h-8 inline-flex items-center justify-center rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            <UserCog size={13} strokeWidth={1.7} />
+                          </button>
                           <button
                             onClick={() => toggleStatus(u.id)}
                             disabled={u.role === "Admin"}

@@ -17,6 +17,7 @@ import {
 // Historical BPS data: 2018–2025. Predictions target 2026.
 const HIST_YEARS = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
 const PRED_YEAR = 2026;
+const SELECTABLE_YEARS = [2022, 2023, 2024, 2025, 2026];
 
 const MODELS = [
   { key: "xgboost", label: "XGBoost", color: "#C9A24B", checked: true },
@@ -36,6 +37,7 @@ export default function PrediksiPage() {
   const [histData, setHistData] = useState<HistRow[]>([]);
   const [predData, setPredData] = useState<PredRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedYear, setSelectedYear] = useState(PRED_YEAR);
   const [tableRows, setTableRows] = useState<Array<{ model: string; yield: string; prod: string; color: string }>>([]);
 
   // Load regions
@@ -72,19 +74,31 @@ export default function PrediksiPage() {
     });
   }, [regionId]);
 
-  // Build summary table
+  // Build summary table based on selected year
   useEffect(() => {
-    const rows = MODELS.map((m) => {
-      const pred = predData.find((p) => p.model_name === m.key);
-      return {
-        model: m.label,
-        yield: pred?.predicted_yield != null ? pred.predicted_yield.toFixed(2) : "—",
-        prod: pred?.predicted_prod_ton != null ? Math.round(pred.predicted_prod_ton).toLocaleString("id-ID") : "—",
-        color: m.color,
-      };
-    });
-    setTableRows(rows);
-  }, [predData]);
+    if (selectedYear === PRED_YEAR) {
+      // Show model predictions for 2026
+      const rows = MODELS.map((m) => {
+        const pred = predData.find((p) => p.model_name === m.key);
+        return {
+          model: m.label,
+          yield: pred?.predicted_yield != null ? pred.predicted_yield.toFixed(2) : "—",
+          prod: pred?.predicted_prod_ton != null ? Math.round(pred.predicted_prod_ton).toLocaleString("id-ID") : "—",
+          color: m.color,
+        };
+      });
+      setTableRows(rows);
+    } else {
+      // Show BPS historical data for selected year
+      const hist = histData.find((h) => h.year === selectedYear);
+      setTableRows([{
+        model: `BPS ${selectedYear}`,
+        yield: hist?.yield_ton_ha != null ? Number(hist.yield_ton_ha).toFixed(2) : "—",
+        prod: hist?.production_ton != null ? Math.round(Number(hist.production_ton)).toLocaleString("id-ID") : "—",
+        color: "#E8E6DF",
+      }]);
+    }
+  }, [predData, histData, selectedYear]);
 
   const filteredRegions = regions.filter(
     (r) => !search || r.name.toLowerCase().includes(search.toLowerCase())
@@ -288,14 +302,26 @@ export default function PrediksiPage() {
     <DashboardLayout
       pageTitle="Prediksi Produksi"
       eyebrow="Prediksi"
-      title="Proyeksi Produksi 2026"
-      description="Tren historis 2018–2025 + proyeksi 2026 dari tiga model ML. Pilih wilayah dan aktifkan model untuk perbandingan."
+      title={`Proyeksi ${selectedYear}`}
+      description={selectedYear === PRED_YEAR
+        ? "Tren historis 2018–2025 + proyeksi 2026 dari tiga model ML. Pilih wilayah dan aktifkan model untuk perbandingan."
+        : `Data historis BPS tahun ${selectedYear}. Pilih tahun lain untuk membandingkan atau lihat proyeksi 2026.`}
       toolbar={
         <div className="flex items-center gap-2">
-          <div className="inline-flex items-center gap-1.5 h-9 px-3 sm:px-3.5 rounded-full border border-[#C9A24B]/40 bg-[#C9A24B]/8 text-[#735A1E] dark:text-[#C9A24B] text-[11px] sm:text-[12px] font-mono">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <span className="hidden sm:inline">BPS 2018–2025 + Proyeksi 2026</span>
-            <span className="sm:hidden">2018–2026</span>
+          <div className="inline-flex items-center gap-1 h-9 px-1.5 rounded-full border border-[#C9A24B]/40 bg-[#C9A24B]/8">
+            {SELECTABLE_YEARS.map((yr) => (
+              <button
+                key={yr}
+                onClick={() => setSelectedYear(yr)}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-mono transition-all cursor-pointer ${
+                  selectedYear === yr
+                    ? "bg-[#C9A24B] text-[#2A1F08] font-medium"
+                    : "text-[#735A1E] dark:text-[#C9A24B] hover:bg-[#C9A24B]/20"
+                }`}
+              >
+                {yr}
+              </button>
+            ))}
           </div>
           <ExportDropdown onExport={handleExport} />
         </div>
@@ -366,7 +392,7 @@ export default function PrediksiPage() {
             {/* Summary table */}
             <div className="rounded-2xl border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 bg-[#F0EDE5] dark:bg-[#1A2326] p-4">
               <h3 className="text-[11px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] mb-3">
-                Proyeksi 2026
+                {selectedYear === PRED_YEAR ? "Proyeksi 2026" : `Data BPS ${selectedYear}`}
               </h3>
               <div className="space-y-2.5">
                 {tableRows.map((r) => (

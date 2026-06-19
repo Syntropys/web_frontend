@@ -33,6 +33,31 @@ type IngestJob = {
   uploadedAt: string;
 };
 
+/** Column aliases — maps common CSV/JSON field names to expected schema names */
+const COLUMN_ALIASES: Record<string, string> = {
+  kabupaten_id: "region_id",
+  kode_wilayah: "region_id",
+  id_wilayah: "region_id",
+  kode_kabupaten: "region_id",
+  regency_id: "region_id",
+  tahun: "year",
+  produksi: "production_ton",
+  produksi_ton: "production_ton",
+  curah_hujan: "rainfall_mm",
+  curah_hujan_mm: "rainfall_mm",
+};
+
+/** Known columns per Supabase table — used to strip unknown fields before upsert */
+const TABLE_COLUMNS: Record<string, string[]> = {
+  weather_history: ["id", "region_id", "year", "month", "rainfall_mm", "temp_avg_c", "temp_min_c", "temp_max_c", "humidity_pct", "solar_radiation", "source"],
+  production_history: ["id", "region_id", "year", "month", "production_ton", "area_harvest_ha", "yield_ton_ha", "source"],
+  predictions: ["id", "region_id", "model_name", "model_version", "target_year", "predicted_prod_ton", "predicted_yield", "mape_pct"],
+  regions: ["id", "name", "province", "bps_code", "latitude", "longitude", "area_km2"],
+  cluster_assignments: ["id", "region_id", "cluster_label", "model_version"],
+  model_metrics: ["id", "model_name", "model_version", "metric_name", "metric_value"],
+  disease_model_info: ["id", "model_name", "model_type", "accuracy", "version"],
+};
+
 /** Map Source ke nama tabel Supabase & kolom wajib */
 const schemaBySource: Record<
   Source,
@@ -123,10 +148,11 @@ export default function IngestiPage() {
   const handleFile = async (file: File) => {
     const safeName = sanitizeFilename(file.name);
     const ext = getExtension(file.name);
+    const sizeStr = file.size < 1024 ? `${file.size} B` : file.size < 1024 * 1024 ? `${(file.size / 1024).toFixed(1)} KB` : `${(file.size / 1024 / 1024).toFixed(2)} MB`;
     const baseJob: IngestJob = {
       id: `j-${Math.floor(Math.random() * 9000 + 1000)}`,
       fileName: safeName,
-      size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+      size: sizeStr,
       source,
       status: "validating",
       message: "Memvalidasi struktur file…",
@@ -192,13 +218,17 @@ export default function IngestiPage() {
       } else if (ext === ".csv") {
         const lines = text.split(/\r?\n/).filter(Boolean);
         const rows = lines.length - 1;
-        const header = lines[0]?.toLowerCase() ?? "";
+        const headerRaw = lines[0]?.toLowerCase() ?? "";
+        // Resolve aliases: check both original and aliased column names
+        const headerCols = headerRaw.split(/[,;\t]/).map((c) => c.trim().replace(/^"|"$/g, ""));
+        const resolvedCols = headerCols.map((c) => COLUMN_ALIASES[c] || c);
+        const resolvedHeader = resolvedCols.join(",");
         const missing = schema.required.find(
-          (r) => !header.includes(r.toLowerCase())
+          (r) => !resolvedHeader.includes(r.toLowerCase())
         );
         if (missing) {
           setStaged({
-            job: { ...baseJob, status: "invalid", message: `Kolom wajib "${missing}" tidak ditemukan`, rows: 0 },
+            job: { ...baseJob, status: "invalid", message: `Kolom wajib "${missing}" tidak ditemukan (alias yang diterima: ${Object.entries(COLUMN_ALIASES).filter(([,v]) => v === missing).map(([k]) => k).join(", ") || "tidak ada"})`, rows: 0 },
             data: [],
           });
           return;
@@ -254,8 +284,24 @@ export default function IngestiPage() {
       const BATCH_SIZE = 500;
       let totalInserted = 0;
 
-      for (let i = 0; i < staged.data.length; i += BATCH_SIZE) {
-        const batch = staged.data.slice(i, i + BATCH_SIZE);
+      // Strip unknown columns to prevent Supabase schema cache errors
+      const allowedCols = TABLE_COLUMNS[targetTable];
+      const cleanData = allowedCols
+        ? staged.data.map((row: Record<string, unknown>) => {
+            const clean: Record<string, unknown> = {};
+            for (const key of Object.keys(row)) {
+              // Apply column aliases then check if column is allowed
+              const resolved = COLUMN_ALIASES[key.toLowerCase()] || key;
+              if (allowedCols.includes(resolved)) {
+                clean[resolved] = row[key];
+              }
+            }
+            return clean;
+          })
+        : staged.data;
+
+      for (let i = 0; i < cleanData.length; i += BATCH_SIZE) {
+        const batch = cleanData.slice(i, i + BATCH_SIZE);
         const { error } = await (supabase.from(targetTable) as any).upsert(batch, {
           onConflict: "id",
           ignoreDuplicates: false,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { DashboardLayout } from "../../components/dashboard-layout";
 import { supabase } from "@/lib/supabase";
 import { Search, ChevronUp, ChevronDown, TrendingUp, AlertTriangle, Info } from "lucide-react";
@@ -28,6 +28,7 @@ export default function PrioritasPage() {
   const [sortKey, setSortKey] = useState<SortKey>("prioritas");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(0);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const PER_PAGE = 12;
 
   useEffect(() => {
@@ -203,7 +204,12 @@ export default function PrioritasPage() {
                   return (
                     <div
                       key={r.id}
-                      className="rounded-xl border border-[#2A3530]/10 dark:border-[#E8E6DF]/8 bg-white/50 dark:bg-white/[0.03] p-3.5"
+                      onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}
+                      className={`rounded-xl border bg-white/50 dark:bg-white/[0.03] p-3.5 cursor-pointer transition-all ${
+                        expandedId === r.id
+                          ? "border-[#C9A24B]/40 ring-1 ring-[#C9A24B]/20"
+                          : "border-[#2A3530]/10 dark:border-[#E8E6DF]/8 hover:border-[#C9A24B]/30"
+                      }`}
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div className="min-w-0">
@@ -238,6 +244,7 @@ export default function PrioritasPage() {
                           </p>
                         </div>
                       </div>
+                      {expandedId === r.id && <DetailPanel prioritasKey={r.prioritasKey} wilayah={r.wilayah} produksi={r.produksi} yieldVal={r.yield} action={r.action} />}
                     </div>
                   );
                 })}
@@ -270,7 +277,10 @@ export default function PrioritasPage() {
                       const meta = PRIORITY_META[r.prioritasKey as keyof typeof PRIORITY_META];
                       const Icon = meta.icon;
                       return (
-                        <tr key={r.id} className="border-t border-[#2A3530]/6 dark:border-[#E8E6DF]/6 hover:bg-[#C9A24B]/3 dark:hover:bg-white/[0.02] transition-colors">
+                        <React.Fragment key={r.id}>
+                        <tr onClick={() => setExpandedId(expandedId === r.id ? null : r.id)} className={`border-t border-[#2A3530]/6 dark:border-[#E8E6DF]/6 cursor-pointer transition-colors ${
+                          expandedId === r.id ? "bg-[#C9A24B]/5 dark:bg-[#C9A24B]/5" : "hover:bg-[#C9A24B]/3 dark:hover:bg-white/[0.02]"
+                        }`}>
                           <td className="px-4 py-3 text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] font-mono">{page * PER_PAGE + idx + 1}</td>
                           <td className="px-4 py-3 font-medium">{r.wilayah}</td>
                           <td className="px-4 py-3 text-[12px] text-[#5F6A64] dark:text-[#A8AFA9]">{r.provinsi}</td>
@@ -291,6 +301,14 @@ export default function PrioritasPage() {
                             {r.yield > 0 ? r.yield.toFixed(2) : "—"}
                           </td>
                         </tr>
+                        {expandedId === r.id && (
+                          <tr>
+                            <td colSpan={7} className="px-4 py-0">
+                              <DetailPanel prioritasKey={r.prioritasKey} wilayah={r.wilayah} produksi={r.produksi} yieldVal={r.yield} action={r.action} />
+                            </td>
+                          </tr>
+                        )}
+                        </React.Fragment>
                       );
                     })}
                     {paginated.length === 0 && (
@@ -318,5 +336,78 @@ export default function PrioritasPage() {
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+const RECOMMENDATIONS: Record<string, { rationale: string; items: string[] }> = {
+  tinggi: {
+    rationale: "Wilayah ini berada di klaster risiko tinggi berdasarkan K-Means clustering. Prediksi produksi XGBoost menunjukkan nilai rendah dan indeks kerentanan di atas ambang batas.",
+    items: [
+      "Prioritaskan distribusi bantuan benih unggul tahan penyakit",
+      "Tingkatkan frekuensi penyuluhan teknik budidaya modern",
+      "Evaluasi sistem irigasi dan drainase di kawasan rawan kekeringan/banjir",
+      "Pertimbangkan subsidi pupuk khusus untuk petani di wilayah ini",
+    ],
+  },
+  sedang: {
+    rationale: "Wilayah ini berada di klaster risiko sedang. Produksi cukup stabil namun perlu pemantauan rutin untuk mencegah penurunan.",
+    items: [
+      "Lakukan monitoring produksi secara berkala (bulanan)",
+      "Pastikan ketersediaan pupuk dan pestisida tepat waktu",
+      "Dukung diversifikasi tanaman untuk ketahanan pangan",
+    ],
+  },
+  rendah: {
+    rationale: "Wilayah ini berada di klaster stabil. Prediksi menunjukkan produksi konsisten dan risiko rendah.",
+    items: [
+      "Pertahankan praktik pertanian yang sudah berjalan baik",
+      "Eksplorasi peluang peningkatan nilai tambah (pasca-panen)",
+      "Jadikan wilayah ini sebagai percontohan untuk transfer pengetahuan",
+    ],
+  },
+};
+
+function DetailPanel({ prioritasKey, wilayah, produksi, yieldVal, action }: {
+  prioritasKey: string; wilayah: string; produksi: number; yieldVal: number; action: string;
+}) {
+  const meta = PRIORITY_META[prioritasKey as keyof typeof PRIORITY_META];
+  const rec = RECOMMENDATIONS[prioritasKey] || RECOMMENDATIONS.rendah;
+  return (
+    <div className="mt-3 pt-3 border-t border-[#2A3530]/8 dark:border-[#E8E6DF]/8 pb-3 space-y-3">
+      <div className="flex items-center gap-2 text-[12px] text-[#2A3530] dark:text-[#E8E6DF] font-medium">
+        <span className="w-2 h-2 rounded-full" style={{ background: meta.color }} />
+        Detail Skor — {wilayah}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="rounded-lg bg-[#2A3530]/4 dark:bg-white/[0.04] px-3 py-2">
+          <p className="text-[9px] uppercase tracking-wider text-[#5F6A64] dark:text-[#A8AFA9]">Prioritas</p>
+          <p className="text-[13px] font-serif" style={{ color: meta.color }}>{meta.label}</p>
+        </div>
+        <div className="rounded-lg bg-[#2A3530]/4 dark:bg-white/[0.04] px-3 py-2">
+          <p className="text-[9px] uppercase tracking-wider text-[#5F6A64] dark:text-[#A8AFA9]">Aksi</p>
+          <p className="text-[13px] font-serif text-[#2A3530] dark:text-[#E8E6DF]">{action}</p>
+        </div>
+        <div className="rounded-lg bg-[#2A3530]/4 dark:bg-white/[0.04] px-3 py-2">
+          <p className="text-[9px] uppercase tracking-wider text-[#5F6A64] dark:text-[#A8AFA9]">Estimasi Produksi</p>
+          <p className="text-[13px] font-mono text-[#2A3530] dark:text-[#E8E6DF]">{produksi > 0 ? Math.round(produksi).toLocaleString("id-ID") : "—"} ton</p>
+        </div>
+        <div className="rounded-lg bg-[#2A3530]/4 dark:bg-white/[0.04] px-3 py-2">
+          <p className="text-[9px] uppercase tracking-wider text-[#5F6A64] dark:text-[#A8AFA9]">Yield</p>
+          <p className="text-[13px] font-mono text-[#2A3530] dark:text-[#E8E6DF]">{yieldVal > 0 ? yieldVal.toFixed(2) : "—"} t/ha</p>
+        </div>
+      </div>
+      <div className="rounded-xl border border-[#2A3530]/8 dark:border-[#E8E6DF]/8 bg-white/30 dark:bg-white/[0.02] p-3">
+        <p className="text-[11px] text-[#5F6A64] dark:text-[#B8BFB9] leading-relaxed mb-2">{rec.rationale}</p>
+        <p className="text-[10px] font-medium text-[#2A3530] dark:text-[#E8E6DF] mb-1.5">Rekomendasi Intervensi:</p>
+        <ul className="space-y-1">
+          {rec.items.map((item, i) => (
+            <li key={i} className="flex items-start gap-2 text-[11px] text-[#5F6A64] dark:text-[#B8BFB9]">
+              <span className="mt-1 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: meta.color }} />
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
