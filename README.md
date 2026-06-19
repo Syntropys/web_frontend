@@ -30,7 +30,7 @@ This repository contains the user-facing web dashboard for the **Agrolytics** Sm
 
 ## 🔒 Mozilla HTTP Observatory (Keamanan Header)
 
-Skor **B+ (80/100)** — 9 dari 10 tes lolos. Dilengkapi CSP ketat, HSTS, X-Frame-Options, X-Content-Type-Options, dan header keamanan lainnya.
+Skor **A+ (110/100)** — 10 dari 10 tes lolos. Dilengkapi CSP ketat tanpa `unsafe-inline`, HSTS, X-Frame-Options, X-Content-Type-Options, dan header keamanan lainnya.
 
 ![HTTP Observatory](assets/http-observatory.png)
 
