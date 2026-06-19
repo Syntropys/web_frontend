@@ -12,7 +12,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import { applyPlugin } from "jspdf-autotable";
+applyPlugin(jsPDF);
 import * as XLSX from "xlsx";
 
 type ExportFormat = "csv" | "xlsx" | "json" | "geojson" | "pdf" | "zip";
@@ -56,11 +57,11 @@ export function DateRangeAndExportToolbar() {
   // ─── Fetch helper ───────────────────────────────────────────────────────────
   async function fetchData() {
     const [regRes, prodRes, predRes, clRes, wxRes] = await Promise.all([
-      supabase.from("regions").select("id, name, province, latitude, longitude"),
-      supabase.from("production_history").select("*").gte("year", startYear).lte("year", endYear),
-      supabase.from("predictions").select("*").gte("target_year", startYear).lte("target_year", endYear),
+      supabase.from("regions").select("id, name, province, centroid_lat, centroid_lng"),
+      supabase.from("production_history").select("*, regions(name, province)").gte("year", startYear).lte("year", endYear).limit(5000),
+      supabase.from("predictions").select("*, regions(name, province)").gte("target_year", startYear).lte("target_year", endYear).limit(5000),
       supabase.from("cluster_assignments").select("*"),
-      supabase.from("weather_history").select("*").gte("year", startYear).lte("year", endYear),
+      supabase.from("weather_history").select("*").gte("year", startYear).lte("year", endYear).limit(5000),
     ]);
     return {
       regions: regRes.data || [],
@@ -75,15 +76,15 @@ export function DateRangeAndExportToolbar() {
   const handleExportCSV = async () => {
     try {
       setExportingFormat("csv");
-      const { regions, production } = await fetchData();
+      const { production } = await fetchData();
       if (production.length === 0) { alert("Tidak ada data untuk diekspor."); return; }
 
-      const csvRows = [["Provinsi", "Kabupaten", "Tahun", "Bulan", "Produksi (Ton)", "Luas Panen (Ha)", "Yield (Ton/Ha)"]];
+      const csvRows = [["Provinsi", "Kabupaten", "Tahun", "Produksi (Ton)", "Luas Panen (Ha)", "Yield (Ton/Ha)"]];
       production.forEach((row: Record<string, unknown>) => {
-        const region = regions.find((r: Record<string, unknown>) => r.id === row.region_id) as Record<string, string> | undefined;
+        const reg = row.regions as Record<string, string> | null;
         csvRows.push([
-          region?.province || "-", region?.name || "-",
-          String(row.year), String(row.month || "-"),
+          reg?.province || "-", reg?.name || "-",
+          String(row.year),
           String(row.production_ton), String(row.area_harvest_ha || "-"), String(row.yield_ton_ha || "-"),
         ]);
       });
@@ -97,18 +98,17 @@ export function DateRangeAndExportToolbar() {
   const handleExportXLSX = async () => {
     try {
       setExportingFormat("xlsx");
-      const { regions, production, predictions } = await fetchData();
+      const { production, predictions } = await fetchData();
 
       const wb = XLSX.utils.book_new();
 
       // Sheet 1: Produksi Historis
       const prodRows = production.map((row: Record<string, unknown>) => {
-        const region = regions.find((r: Record<string, unknown>) => r.id === row.region_id) as Record<string, string> | undefined;
+        const reg = row.regions as Record<string, string> | null;
         return {
-          Provinsi: region?.province || "-",
-          Kabupaten: region?.name || "-",
+          Provinsi: reg?.province || "-",
+          Kabupaten: reg?.name || "-",
           Tahun: row.year,
-          Bulan: row.month || "-",
           "Produksi (Ton)": row.production_ton || 0,
           "Luas Panen (Ha)": row.area_harvest_ha || "-",
           "Yield (Ton/Ha)": row.yield_ton_ha || "-",
@@ -116,7 +116,7 @@ export function DateRangeAndExportToolbar() {
       });
       const wsProd = XLSX.utils.json_to_sheet(prodRows);
       wsProd["!cols"] = [
-        { wch: 22 }, { wch: 28 }, { wch: 8 }, { wch: 8 },
+        { wch: 22 }, { wch: 28 }, { wch: 8 },
         { wch: 16 }, { wch: 16 }, { wch: 14 },
       ];
       XLSX.utils.book_append_sheet(wb, wsProd, "Produksi Historis");
@@ -124,10 +124,10 @@ export function DateRangeAndExportToolbar() {
       // Sheet 2: Prediksi
       if (predictions.length > 0) {
         const predRows = predictions.map((p: Record<string, unknown>) => {
-          const region = regions.find((r: Record<string, unknown>) => r.id === p.region_id) as Record<string, string> | undefined;
+          const reg = p.regions as Record<string, string> | null;
           return {
-            Provinsi: region?.province || "-",
-            Kabupaten: region?.name || "-",
+            Provinsi: reg?.province || "-",
+            Kabupaten: reg?.name || "-",
             Model: p.model_name || "-",
             "Tahun Target": p.target_year,
             "Prediksi Yield (t/ha)": p.predicted_yield || 0,
@@ -171,7 +171,7 @@ export function DateRangeAndExportToolbar() {
       const { regions, production, predictions, clusters } = await fetchData();
 
       const features = regions
-        .filter((r: Record<string, unknown>) => r.latitude != null && r.longitude != null)
+        .filter((r: Record<string, unknown>) => r.centroid_lat != null && r.centroid_lng != null)
         .map((r: Record<string, unknown>) => {
           const prodRows = production.filter((p: Record<string, unknown>) => p.region_id === r.id);
           const lastProd = prodRows.slice(-1)[0] as Record<string, unknown> | undefined;
@@ -180,7 +180,7 @@ export function DateRangeAndExportToolbar() {
           const riskLabel = cluster?.cluster_label === 0 ? "Tinggi" : cluster?.cluster_label === 1 ? "Sedang" : "Rendah";
           return {
             type: "Feature",
-            geometry: { type: "Point", coordinates: [r.longitude, r.latitude] },
+            geometry: { type: "Point", coordinates: [r.centroid_lng, r.centroid_lat] },
             properties: {
               id: r.id, name: r.name, province: r.province,
               last_production_ton: lastProd?.production_ton ?? null,
@@ -228,10 +228,10 @@ export function DateRangeAndExportToolbar() {
       // Table 1: Produksi Historis
       const prodHead = [["Provinsi", "Kabupaten", "Tahun", "Produksi (Ton)", "Yield (t/ha)"]];
       const prodBody = production.map((row: Record<string, unknown>) => {
-        const region = regions.find((r: Record<string, unknown>) => r.id === row.region_id) as Record<string, string> | undefined;
+        const reg = row.regions as Record<string, string> | null;
         return [
-          region?.province || "-",
-          region?.name || "-",
+          reg?.province || "-",
+          reg?.name || "-",
           String(row.year),
           row.production_ton ? Number(row.production_ton).toLocaleString("id-ID") : "-",
           row.yield_ton_ha ? Number(row.yield_ton_ha).toFixed(2) : "-",
@@ -265,10 +265,10 @@ export function DateRangeAndExportToolbar() {
 
         const predHead = [["Provinsi", "Kabupaten", "Model", "Tahun", "Yield (t/ha)", "Produksi (ton)"]];
         const predBody = predictions.map((p: Record<string, unknown>) => {
-          const region = regions.find((r: Record<string, unknown>) => r.id === p.region_id) as Record<string, string> | undefined;
+          const reg = p.regions as Record<string, string> | null;
           return [
-            region?.province || "-",
-            region?.name || "-",
+            reg?.province || "-",
+            reg?.name || "-",
             String(p.model_name || "-"),
             String(p.target_year),
             p.predicted_yield ? Number(p.predicted_yield).toFixed(2) : "-",
@@ -341,8 +341,8 @@ export function DateRangeAndExportToolbar() {
       // Build CSV content
       const csvRows = [["Provinsi", "Kabupaten", "Tahun", "Produksi (Ton)", "Yield (Ton/Ha)"]];
       production.forEach((row: Record<string, unknown>) => {
-        const r = regions.find((reg: Record<string, unknown>) => reg.id === row.region_id) as Record<string, string> | undefined;
-        csvRows.push([r?.province || "-", r?.name || "-", String(row.year), String(row.production_ton || 0), String(row.yield_ton_ha || 0)]);
+        const reg = row.regions as Record<string, string> | null;
+        csvRows.push([reg?.province || "-", reg?.name || "-", String(row.year), String(row.production_ton || 0), String(row.yield_ton_ha || 0)]);
       });
       const csvContent = csvRows.map((r) => r.join(",")).join("\n");
 
@@ -351,11 +351,11 @@ export function DateRangeAndExportToolbar() {
 
       // Build GeoJSON content
       const geoFeatures = regions
-        .filter((r: Record<string, unknown>) => r.latitude != null && r.longitude != null)
+        .filter((r: Record<string, unknown>) => r.centroid_lat != null && r.centroid_lng != null)
         .map((r: Record<string, unknown>) => {
           const pred = predictions.find((p: Record<string, unknown>) => p.region_id === r.id && p.target_year === 2026 && p.model_name === "xgboost") as Record<string, unknown> | undefined;
           const cl = clusters.find((c: Record<string, unknown>) => c.region_id === r.id) as Record<string, unknown> | undefined;
-          return { type: "Feature", geometry: { type: "Point", coordinates: [r.longitude, r.latitude] }, properties: { name: r.name, province: r.province, pred_yield: pred?.predicted_yield ?? null, risk: cl?.cluster_label === 0 ? "Tinggi" : cl?.cluster_label === 1 ? "Sedang" : "Rendah" } };
+          return { type: "Feature", geometry: { type: "Point", coordinates: [r.centroid_lng, r.centroid_lat] }, properties: { name: r.name, province: r.province, pred_yield: pred?.predicted_yield ?? null, risk: cl?.cluster_label === 0 ? "Tinggi" : cl?.cluster_label === 1 ? "Sedang" : "Rendah" } };
         });
       const geojsonContent = JSON.stringify({ type: "FeatureCollection", features: geoFeatures }, null, 2);
 
