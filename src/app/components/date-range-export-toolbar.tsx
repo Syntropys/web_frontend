@@ -456,7 +456,7 @@ export function DateRangeAndExportToolbar() {
         </button>
 
         {exportOpen && !isExporting && (
-          <div className="absolute right-0 sm:left-0 sm:right-auto mt-2 w-60 max-w-[calc(100vw-2rem)] rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-2 shadow-xl z-[60]">
+          <div className="absolute right-0 mt-2 w-60 max-w-[calc(100vw-2rem)] rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-2 shadow-xl z-[60]">
             <p className="text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] px-2 py-1.5 mb-1">
               Format Ekspor
             </p>
@@ -500,7 +500,7 @@ export function DateRangeAndExportToolbar() {
         </button>
 
         {filterOpen && (
-          <div className="absolute right-0 sm:left-0 sm:right-auto mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-4 shadow-xl z-[60]">
+          <div className="absolute right-0 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-4 shadow-xl z-[60]">
             <div className="flex items-center justify-between mb-3">
               <h4 className="font-serif text-[14px] italic font-semibold text-[#2A3530] dark:text-[#E8E6DF]">
                 Filter Wilayah
