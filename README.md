@@ -16,6 +16,23 @@ This repository contains the user-facing web dashboard for the **Agrolytics** Sm
 > **Production**: [https://agrolytics.my.id](https://agrolytics.my.id)
 > **PageSpeed**: Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100 (Desktop)
 
+### 🔄 Repository & Deployment Flow
+
+| Repository | URL | Role |
+| :--------- | :-- | :--- |
+| **Upstream** (Organization) | [Syntropys/web_frontend](https://github.com/Syntropys/web_frontend) | Main source of truth for team collaboration |
+| **Fork** (Deploy) | [rohidrivaldi/agrolytics-fix](https://github.com/rohidrivaldi/agrolytics-fix) | Connected to Vercel for auto-deploy (CI/CD) |
+
+```
+Syntropys/web_frontend (upstream)
+        │
+        ▼  git push upstream main
+rohidrivaldi/agrolytics-fix (origin)
+        │
+        ▼  auto-deploy on push
+    Vercel → https://agrolytics.my.id
+```
+
 # 🛠 Tech Stack
 
 <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white"/> <img src="https://img.shields.io/badge/React_18-61DAFB?style=flat-square&logo=react&logoColor=black"/> <img src="https://img.shields.io/badge/Vite_6-646CFF?style=flat-square&logo=vite&logoColor=white"/> <img src="https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white"/> <img src="https://img.shields.io/badge/React_Router_v7-CA4245?style=flat-square&logo=reactrouter&logoColor=white"/> <img src="https://img.shields.io/badge/Zustand_v5-2D3748?style=flat-square"/> <img src="https://img.shields.io/badge/TanStack_Query_v5-FF4154?style=flat-square&logo=reactquery&logoColor=white"/> <img src="https://img.shields.io/badge/Chart.js-FF6384?style=flat-square&logo=chartdotjs&logoColor=white"/> <img src="https://img.shields.io/badge/Leaflet-199900?style=flat-square&logo=leaflet&logoColor=white"/> <img src="https://img.shields.io/badge/Framer_Motion-0055FF?style=flat-square&logo=framer&logoColor=white"/> <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=flat-square&logo=supabase&logoColor=white"/> <img src="https://img.shields.io/badge/Zod_v4-3E67B1?style=flat-square&logo=zod&logoColor=white"/> <img src="https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white"/> <img src="https://img.shields.io/badge/pnpm-F69220?style=flat-square&logo=pnpm&logoColor=white"/>
