@@ -47,6 +47,7 @@ export default function PenggunaPage() {
   const [roleFilter, setRoleFilter] = useState<"" | Role>("");
   const [showForm, setShowForm] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<UserRow | null>(null);
+  const [pendingRole, setPendingRole] = useState<UserRow | null>(null);
 
   const mapDbUser = (p: any): UserRow => ({
     id: p.id,
@@ -123,24 +124,26 @@ export default function PenggunaPage() {
       alert("Anda tidak dapat mengubah role akun sendiri.");
       return;
     }
-    const newRole = user.role === "Admin" ? "user" : "admin";
-    const confirmMsg = newRole === "admin"
-      ? `Jadikan ${user.nama} sebagai Admin?`
-      : `Ubah ${user.nama} menjadi Pengguna biasa?`;
-    if (!confirm(confirmMsg)) return;
+    setPendingRole(user);
+  };
+
+  const confirmRole = async () => {
+    if (!pendingRole) return;
+    const newRole = pendingRole.role === "Admin" ? "user" : "admin";
     try {
       const { error } = await supabase
         .from("profiles")
         .update({ role: newRole })
-        .eq("id", user.id);
+        .eq("id", pendingRole.id);
       if (error) throw error;
       setUsers((prev) =>
         prev.map((u) =>
-          u.id === user.id
+          u.id === pendingRole.id
             ? { ...u, role: newRole === "admin" ? "Admin" : "Pengguna" }
             : u
         )
       );
+      setPendingRole(null);
     } catch (err: any) {
       alert(err.message || "Gagal mengubah role pengguna.");
     }
@@ -277,7 +280,7 @@ export default function PenggunaPage() {
                       className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 h-10 rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[12px] text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-[#5F6A64]"
                     >
                       <UserCog size={12} />
-                      {u.role === "Admin" ? "→ Pengguna" : "→ Admin"}
+                      {u.role === "Admin" ? "Ubah ke Pengguna" : "Jadikan Admin"}
                     </button>
                     <button
                       onClick={() => toggleStatus(u.id)}
@@ -356,7 +359,7 @@ export default function PenggunaPage() {
                             onClick={() => toggleRole(u.id)}
                             disabled={u.id === profile?.id}
                             aria-label={u.role === "Admin" ? "Jadikan Pengguna" : "Jadikan Admin"}
-                            title={u.role === "Admin" ? "Jadikan Pengguna" : "Jadikan Admin"}
+                            title={u.role === "Admin" ? "Ubah ke Pengguna" : "Jadikan Admin"}
                             className="w-8 h-8 inline-flex items-center justify-center rounded-md border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#5F6A64] dark:text-[#B8BFB9] hover:border-[#C9A24B] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                           >
                             <UserCog size={13} strokeWidth={1.7} />
@@ -416,6 +419,14 @@ export default function PenggunaPage() {
           user={pendingDelete}
           onCancel={cancelDelete}
           onConfirm={confirmDelete}
+        />
+      )}
+
+      {pendingRole && (
+        <ConfirmRoleDialog
+          user={pendingRole}
+          onCancel={() => setPendingRole(null)}
+          onConfirm={confirmRole}
         />
       )}
     </DashboardLayout>
@@ -771,6 +782,96 @@ function ConfirmDeleteDialog({
             className="inline-flex items-center justify-center h-10 px-4 rounded-lg bg-[#C9A24B] text-[#2A1F08] text-[13px] hover:bg-[#D4B05E] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#C9A24B] focus-visible:ring-offset-[#EFEBE1] dark:focus-visible:ring-offset-[#0E1619]"
           >
             Batal
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmRoleDialog({
+  user,
+  onCancel,
+  onConfirm,
+}: {
+  user: UserRow;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const newRole = user.role === "Admin" ? "Pengguna" : "Admin";
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
+    window.addEventListener("keydown", onKey);
+    cancelRef.current?.focus();
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onCancel]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-[#0A0F11]/60 backdrop-blur-sm"
+        onClick={onCancel}
+      />
+      <div
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="confirm-role-title"
+        aria-describedby="confirm-role-desc"
+        className="relative w-full max-w-sm rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/10 bg-[#EFEBE1] dark:bg-[#0E1619] p-6 shadow-2xl shadow-black/30"
+      >
+        <div className="flex flex-col items-center text-center">
+          <span
+            aria-hidden
+            className="inline-flex w-11 h-11 rounded-full bg-[#C9A24B]/10 dark:bg-[#C9A24B]/15 text-[#735A1E] dark:text-[#C9A24B] items-center justify-center ring-1 ring-[#C9A24B]/20 dark:ring-[#C9A24B]/25"
+          >
+            <UserCog size={18} strokeWidth={1.7} />
+          </span>
+          <h2
+            id="confirm-role-title"
+            className="mt-4 font-serif text-[20px] leading-tight tracking-tight text-[#2A3530] dark:text-[#E8E6DF]"
+          >
+            Ubah Role Pengguna?
+          </h2>
+          <p
+            id="confirm-role-desc"
+            className="mt-2 text-[13px] leading-[1.65] text-[#5F6A64] dark:text-[#A8AFA9]"
+          >
+            <span className="text-[#2A3530] dark:text-[#E8E6DF] font-medium">
+              {user.nama}
+            </span>{" "}
+            akan diubah dari
+          </p>
+          <div className="mt-3 flex items-center gap-2">
+            <span className={`inline-flex px-3 py-1 rounded-full text-[12px] font-medium ${roleTone[user.role]}`}>
+              {user.role}
+            </span>
+            <span className="text-[14px] text-[#5F6A64] dark:text-[#A8AFA9]">→</span>
+            <span className={`inline-flex px-3 py-1 rounded-full text-[12px] font-medium ${roleTone[newRole as Role]}`}>
+              {newRole}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-2.5">
+          <button
+            ref={cancelRef}
+            type="button"
+            onClick={onCancel}
+            className="inline-flex items-center justify-center h-10 px-4 rounded-lg border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 text-[#5F6A64] dark:text-[#B8BFB9] text-[13px] hover:border-[#C9A24B] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#C9A24B]/40 focus-visible:ring-offset-[#EFEBE1] dark:focus-visible:ring-offset-[#0E1619]"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg bg-[#C9A24B] text-[#2A1F08] text-[13px] hover:bg-[#D4B05E] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#C9A24B] focus-visible:ring-offset-[#EFEBE1] dark:focus-visible:ring-offset-[#0E1619]"
+          >
+            <UserCog size={13} strokeWidth={1.8} />
+            Ubah Role
           </button>
         </div>
       </div>
