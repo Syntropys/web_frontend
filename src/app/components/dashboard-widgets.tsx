@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   UploadCloud,
   Loader2,
+  Camera,
 } from "lucide-react";
 import { diseaseService, type DiseasePredictionResponse } from "@/services/disease";
 import { KalimantanMap } from "./peta";
@@ -491,6 +492,7 @@ export function DiseaseDetectionCard() {
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
@@ -588,7 +590,15 @@ export function DiseaseDetectionCard() {
                 type="file"
                 ref={fileInputRef}
                 onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }}
-                accept="image/png, image/jpeg, image/jpg"
+                accept="image/png, image/jpeg, image/jpg, image/webp"
+                className="hidden"
+              />
+              <input
+                type="file"
+                ref={cameraInputRef}
+                onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }}
+                accept="image/png, image/jpeg, image/jpg, image/webp"
+                capture="environment"
                 className="hidden"
               />
 
@@ -694,8 +704,25 @@ export function DiseaseDetectionCard() {
                         Tarik &amp; taruh<br />foto daun padi
                       </p>
                       <p className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.22)" }}>
-                        PNG · JPG · maks 5MB
+                        PNG · JPG · WEBP · maks 5MB
                       </p>
+                      {/* Camera & Upload buttons inside phone */}
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[8px] font-medium transition-all cursor-pointer"
+                          style={{ background: "rgba(201,162,75,0.2)", border: "1px solid rgba(201,162,75,0.35)", color: "#C9A24B" }}
+                        >
+                          <Camera size={10} /> Kamera
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[8px] font-medium transition-all cursor-pointer"
+                          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.5)" }}
+                        >
+                          <UploadCloud size={10} /> Galeri
+                        </button>
+                      </div>
                       <div className="mt-1.5 flex flex-wrap justify-center gap-1">
                         {["Blas", "HDB", "Hispa", "Tungro", "Bercak", "Sehat", "+4"].map((d) => (
                           <span
@@ -756,12 +783,21 @@ export function DiseaseDetectionCard() {
 
         {/* CTA below phone */}
         {!previewUrl && (
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer underline-offset-2 hover:underline"
-          >
-            atau klik untuk memilih dari komputer
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => cameraInputRef.current?.click()}
+              className="flex items-center gap-1.5 text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer underline-offset-2 hover:underline"
+            >
+              <Camera size={13} /> ambil dari kamera
+            </button>
+            <span className="text-[10px] text-[#5F6A64]/40 dark:text-[#A8AFA9]/40">atau</span>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-1.5 text-[11px] text-[#5F6A64] dark:text-[#A8AFA9] hover:text-[#735A1E] dark:hover:text-[#C9A24B] transition-colors cursor-pointer underline-offset-2 hover:underline"
+            >
+              <UploadCloud size={13} /> pilih dari galeri
+            </button>
+          </div>
         )}
 
         {/* Error */}
