@@ -123,21 +123,41 @@
 
 <body>
   <div id="root">
+    <style>
+      #__skeleton__{background:#efebe1;color:#2a3530}
+      #__skeleton__ .sk-hero-bg{opacity:.40}
+      #__skeleton__ .sk-grad1{background:linear-gradient(to bottom,rgba(239,235,225,.75) 0%,rgba(239,235,225,.5) 50%,rgba(239,235,225,1) 100%)}
+      #__skeleton__ .sk-grad2{background:linear-gradient(to right,rgba(239,235,225,.85) 0%,rgba(239,235,225,.2) 60%,transparent 100%)}
+      #__skeleton__ .sk-header{background-color:rgba(239,235,225,.85);border-bottom-color:rgba(42,53,48,.12)}
+      #__skeleton__ .sk-brand{color:#2a3530}
+      #__skeleton__ .sk-h1{color:#1a2620}
+      #__skeleton__ .sk-p{color:#3a4a44}
+      #__skeleton__ .sk-btn-outline{border-color:rgba(42,53,48,.25);color:#2a3530}
+      .dark #__skeleton__{background:#0b1215;color:#e8e6df}
+      .dark #__skeleton__ .sk-hero-bg{opacity:.20}
+      .dark #__skeleton__ .sk-grad1{background:linear-gradient(to bottom,rgba(11,18,21,.75) 0%,rgba(11,18,21,.5) 50%,rgba(11,18,21,1) 100%)}
+      .dark #__skeleton__ .sk-grad2{background:linear-gradient(to right,rgba(11,18,21,.85) 0%,rgba(11,18,21,.2) 60%,transparent 100%)}
+      .dark #__skeleton__ .sk-header{background-color:rgba(11,18,21,.85);border-bottom-color:rgba(232,230,223,.12)}
+      .dark #__skeleton__ .sk-brand{color:#e8e6df}
+      .dark #__skeleton__ .sk-h1{color:#e8e6df}
+      .dark #__skeleton__ .sk-p{color:#b8bfb9}
+      .dark #__skeleton__ .sk-btn-outline{border-color:rgba(232,230,223,.25);color:#e8e6df}
+    </style>
     <div id="__skeleton__"
-      style="min-height: 100vh; background-color: #efebe1; color: #2a3530; font-family: 'Inter', system-ui, sans-serif; position: relative; overflow: hidden;">
-      <div class="hero-bg"
-        style="position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.40;"></div>
-      <div
-        style="position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(239,235,225,0.75) 0%, rgba(239,235,225,0.5) 50%, rgba(239,235,225,1) 100%);"></div>
-      <div
-        style="position: absolute; inset: 0; background: linear-gradient(to right, rgba(239,235,225,0.85) 0%, rgba(239,235,225,0.2) 60%, transparent 100%);"></div>
+      style="min-height: 100vh; font-family: 'Inter', system-ui, sans-serif; position: relative; overflow: hidden;">
+      <div class="hero-bg sk-hero-bg"
+        style="position: absolute; inset: 0; background-size: cover; background-position: center;"></div>
+      <div class="sk-grad1"
+        style="position: absolute; inset: 0;"></div>
+      <div class="sk-grad2"
+        style="position: absolute; inset: 0;"></div>
 
-      <header
-        style="position: fixed; top: 0; left: 0; right: 0; height: 64px; border-bottom: 1px solid rgba(42,53,48,0.12); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background-color: rgba(239,235,225,0.85); display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(20px, 5vw, 56px); z-index: 40;">
+      <header class="sk-header"
+        style="position: fixed; top: 0; left: 0; right: 0; height: 64px; border-bottom: 1px solid; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(20px, 5vw, 56px); z-index: 40;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <div style="width: 22px; height: 22px; background-color: #c9a24b; border-radius: 50%;"></div>
-          <span
-            style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500; color: #2a3530;">Agrolytics</span>
+          <span class="sk-brand"
+            style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500;">Agrolytics</span>
         </div>
       </header>
 
@@ -149,13 +169,13 @@
             style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; color: #c9a24b; letter-spacing: 0.2em;">Agri
             BI · Est. 2026</span>
         </div>
-        <h1
-          style="font-family: 'Fraunces', serif; font-size: clamp(34px, 5vw, 76px); line-height: 1.05; font-weight: 500; margin: 0; letter-spacing: -0.02em; color: #1a2620; max-width: 960px;">
+        <h1 class="sk-h1"
+          style="font-family: 'Fraunces', serif; font-size: clamp(34px, 5vw, 76px); line-height: 1.05; font-weight: 500; margin: 0; letter-spacing: -0.02em; max-width: 960px;">
           Pastikan Hasil Panen Padi <span style="font-style: italic; color: #c9a24b;">Kalimantan</span> Anda Maksimal
           dengan Prediksi AI Presisi.
         </h1>
-        <p
-          style="margin-top: clamp(24px, 4vh, 32px); color: #3a4a44; font-size: clamp(14px, 2vw, 16px); line-height: 1.7; max-width: 650px;">
+        <p class="sk-p"
+          style="margin-top: clamp(24px, 4vh, 32px); font-size: clamp(14px, 2vw, 16px); line-height: 1.7; max-width: 650px;">
           Platform AI dan Business Intelligence untuk memprediksi produktivitas panen padi dan diagnosis penyakit
           tanaman secara instan berbasis data terintegrasi.
         </p>
@@ -163,8 +183,8 @@
           <div
             style="padding: 14px 28px; border-radius: 9999px; background-color: #c9a24b; color: #2a1f08; font-size: 13px; font-weight: 500; cursor: pointer;">
             Masuk ke Dashboard</div>
-          <div
-            style="padding: 14px 28px; border-radius: 9999px; border: 1px solid rgba(42,53,48,0.25); color: #2a3530; font-size: 13px; font-weight: 500; cursor: pointer;">
+          <div class="sk-btn-outline"
+            style="padding: 14px 28px; border-radius: 9999px; border: 1px solid; font-size: 13px; font-weight: 500; cursor: pointer;">
             Daftar Sekarang</div>
         </div>
       </div>
