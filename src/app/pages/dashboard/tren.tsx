@@ -199,6 +199,16 @@ export default function TrenPage() {
               Tahun
             </label>
             <div className="flex flex-wrap gap-1.5">
+              <button
+                onClick={() => setSelectedYears(selectedYears.length === YEARS.length ? [] : [...YEARS])}
+                className={`px-3 py-1 rounded-full text-[12px] font-medium transition-all cursor-pointer ${
+                  selectedYears.length === YEARS.length
+                    ? "bg-[#C9A24B] text-[#2A1F08] shadow-sm"
+                    : "border border-[#C9A24B]/30 text-[#735A1E] dark:text-[#C9A24B] hover:bg-[#C9A24B]/10 bg-white/50 dark:bg-white/[0.04]"
+                }`}
+              >
+                {selectedYears.length === YEARS.length ? "✓ Semua" : "Pilih Semua"}
+              </button>
               {YEARS.map((y) => {
                 const active = selectedYears.includes(y);
                 return (

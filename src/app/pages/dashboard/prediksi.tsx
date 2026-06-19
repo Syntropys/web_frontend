@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { DashboardLayout } from "../../components/dashboard-layout";
+import { ExportDropdown } from "../../components/export-dropdown";
 import { supabase } from "@/lib/supabase";
+import { downloadCsv, downloadXlsx, downloadPdf } from "@/lib/export-utils";
 import {
   ResponsiveContainer,
   LineChart,
@@ -135,6 +137,153 @@ export default function PrediksiPage() {
 
   const activeModelMeta = MODELS.filter((m) => activeModels.has(m.key));
 
+  // ─── Export handler ──────────────────────────────────────────────────────────
+  const handleExport = async (format: "csv" | "xlsx" | "pdf") => {
+    // Fetch ALL regions
+    const regRes = await supabase.from("regions").select("id, name, province").order("province").order("name");
+    const allRegions = (regRes.data || []) as Region[];
+    const regionMap = new Map(allRegions.map((r) => [r.id, r]));
+
+    // Fetch production per-year to avoid Supabase 1000-row limit
+    const prodChunks = await Promise.all(
+      HIST_YEARS.map((yr) =>
+        supabase
+          .from("production_history")
+          .select("region_id, year, yield_ton_ha, production_ton")
+          .eq("year", yr)
+          .limit(1000)
+          .then(({ data }) => (data || []) as (HistRow & { region_id: string })[])
+      )
+    );
+    const allProd = prodChunks.flat();
+
+    // Fetch predictions (should be ~168 rows: 56 regions × 3 models)
+    const predRes = await supabase
+      .from("predictions")
+      .select("region_id, model_name, target_year, predicted_yield, predicted_prod_ton")
+      .eq("model_version", "v1-real")
+      .limit(1000);
+    const allPred = (predRes.data || []) as (PredRow & { region_id: string })[];
+
+    // Safe number formatter
+    const safeNum = (v: unknown, decimals = 2) => {
+      if (v == null || v === "" || String(v) === "null" || String(v) === "undefined") return "-";
+      const n = Number(v);
+      return isNaN(n) ? "-" : n.toFixed(decimals);
+    };
+    const safeInt = (v: unknown) => {
+      if (v == null || v === "" || String(v) === "null" || String(v) === "undefined") return "-";
+      const n = Number(v);
+      return isNaN(n) ? "-" : String(Math.round(n));
+    };
+
+    if (format === "csv") {
+      const headers = [
+        "Provinsi", "Kabupaten", "Tahun",
+        "Yield_BPS (t/ha)", "Produksi_BPS (ton)",
+        "Yield_XGBoost", "Yield_RF", "Yield_Linear",
+        "Produksi_XGBoost", "Produksi_RF", "Produksi_Linear",
+      ];
+      const rows: string[][] = [];
+
+      allRegions.forEach((reg) => {
+        // Historical rows (2018-2025)
+        HIST_YEARS.forEach((yr) => {
+          const prod = allProd.find((p) => p.region_id === reg.id && p.year === yr);
+          rows.push([
+            reg.province, reg.name, String(yr),
+            safeNum(prod?.yield_ton_ha), safeInt(prod?.production_ton),
+            "-", "-", "-", "-", "-", "-",
+          ]);
+        });
+
+        // Prediction row (2026)
+        const xgb = allPred.find((p) => p.region_id === reg.id && p.model_name === "xgboost");
+        const rf = allPred.find((p) => p.region_id === reg.id && p.model_name === "random_forest");
+        const lr = allPred.find((p) => p.region_id === reg.id && p.model_name === "linear");
+        rows.push([
+          reg.province, reg.name, "2026",
+          "-", "-",
+          safeNum(xgb?.predicted_yield), safeNum(rf?.predicted_yield), safeNum(lr?.predicted_yield),
+          safeInt(xgb?.predicted_prod_ton), safeInt(rf?.predicted_prod_ton), safeInt(lr?.predicted_prod_ton),
+        ]);
+      });
+
+      downloadCsv("agrolytics_prediksi_2018_2026.csv", headers, rows);
+    }
+
+    if (format === "xlsx") {
+      // Sheet 1: Historis BPS
+      const histRows = allProd.map((p) => {
+        const reg = regionMap.get(p.region_id);
+        return {
+          Provinsi: reg?.province || "-",
+          Kabupaten: reg?.name || "-",
+          Tahun: p.year,
+          "Yield (t/ha)": safeNum(p.yield_ton_ha),
+          "Produksi (ton)": safeInt(p.production_ton),
+        };
+      });
+
+      // Sheet 2: Prediksi 2026
+      const predRows: Record<string, unknown>[] = [];
+      allRegions.forEach((reg) => {
+        MODELS.forEach((m) => {
+          const pred = allPred.find((p) => p.region_id === reg.id && p.model_name === m.key);
+          predRows.push({
+            Provinsi: reg.province,
+            Kabupaten: reg.name,
+            Model: m.label,
+            "Tahun Target": 2026,
+            "Yield Prediksi (t/ha)": safeNum(pred?.predicted_yield),
+            "Produksi Prediksi (ton)": safeInt(pred?.predicted_prod_ton),
+          });
+        });
+      });
+
+      downloadXlsx("agrolytics_prediksi_2018_2026.xlsx", [
+        { name: "Historis BPS (2018-2025)", data: histRows, colWidths: [22, 28, 8, 14, 16] },
+        { name: "Prediksi 2026", data: predRows, colWidths: [22, 28, 18, 12, 20, 22] },
+      ]);
+    }
+
+    if (format === "pdf") {
+      // Table 1: Historis BPS
+      const prodHead = [["Provinsi", "Kabupaten", "Tahun", "Yield (t/ha)", "Produksi (ton)"]];
+      const prodBody = allProd.map((p) => {
+        const reg = regionMap.get(p.region_id);
+        return [
+          reg?.province || "-",
+          reg?.name || "-",
+          String(p.year),
+          safeNum(p.yield_ton_ha),
+          safeInt(p.production_ton),
+        ];
+      });
+
+      // Table 2: Prediksi 2026
+      const predHead = [["Provinsi", "Kabupaten", "Model", "Yield (t/ha)", "Produksi (ton)"]];
+      const predBody: string[][] = [];
+      allRegions.forEach((reg) => {
+        MODELS.forEach((m) => {
+          const pred = allPred.find((p) => p.region_id === reg.id && p.model_name === m.key);
+          predBody.push([
+            reg.province,
+            reg.name,
+            m.label,
+            safeNum(pred?.predicted_yield),
+            safeInt(pred?.predicted_prod_ton),
+          ]);
+        });
+      });
+
+      downloadPdf("agrolytics_prediksi_2018_2026.pdf", "Agrolytics — Laporan Prediksi Produksi", "Periode: 2018–2026 (Historis + Prediksi 3 Model)", [
+        { title: "Produksi Historis BPS (2018–2025)", head: prodHead, body: prodBody },
+        { title: "Prediksi 2026 (XGBoost, Random Forest, Linear Regression)", head: predHead, body: predBody, headColor: [122, 154, 110] },
+      ]);
+    }
+  };
+
   return (
     <DashboardLayout
       pageTitle="Prediksi Produksi"
@@ -142,9 +291,12 @@ export default function PrediksiPage() {
       title="Proyeksi Produksi 2026"
       description="Tren historis 2018–2025 + proyeksi 2026 dari tiga model ML. Pilih wilayah dan aktifkan model untuk perbandingan."
       toolbar={
-        <div className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#C9A24B]/40 bg-[#C9A24B]/8 text-[#735A1E] dark:text-[#C9A24B] text-[12px] font-mono">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          BPS 2018–2025 + Proyeksi 2026
+        <div className="flex items-center gap-2">
+          <div className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#C9A24B]/40 bg-[#C9A24B]/8 text-[#735A1E] dark:text-[#C9A24B] text-[12px] font-mono">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            BPS 2018–2025 + Proyeksi 2026
+          </div>
+          <ExportDropdown onExport={handleExport} />
         </div>
       }
     >

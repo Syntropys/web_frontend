@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { DashboardLayout } from "../../components/dashboard-layout";
+import { ExportDropdown } from "../../components/export-dropdown";
 import { supabase } from "@/lib/supabase";
+import { downloadCsv, downloadXlsx, downloadPdf } from "@/lib/export-utils";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -26,6 +28,7 @@ type WeatherRow = {
 type Region = { id: string; name: string; province: string };
 
 const MONTH_LABELS = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+const ALL_YEARS = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
 
 export default function IklimPage() {
   const [regions, setRegions] = useState<Region[]>([]);
@@ -115,6 +118,122 @@ export default function IklimPage() {
     (r) => !search || r.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  // ─── Export handler ──────────────────────────────────────────────────────────
+  const handleExport = async (format: "csv" | "xlsx" | "pdf") => {
+    // Fetch ALL regions
+    const regRes = await supabase.from("regions").select("id, name, province").order("province").order("name");
+    const allRegions = (regRes.data || []) as Region[];
+    const regionMap = new Map(allRegions.map((r) => [r.id, r]));
+
+    // Fetch weather data per-year to avoid Supabase row limit (default 1000)
+    const weatherChunks = await Promise.all(
+      ALL_YEARS.map((yr) =>
+        supabase
+          .from("weather_history")
+          .select("region_id, year, month, rainfall_mm, temp_avg_c, humidity_pct")
+          .eq("year", yr)
+          .order("month")
+          .limit(1000)
+          .then(({ data }) => (data || []) as WeatherRow[])
+      )
+    );
+    const allWeather = weatherChunks.flat();
+
+    if (format === "csv") {
+      const headers = ["Provinsi", "Kabupaten", "Tahun", "Bulan", "Curah Hujan (mm)", "Suhu (°C)", "Kelembapan (%)"];
+      const rows: string[][] = [];
+
+      allWeather.forEach((w) => {
+        const reg = regionMap.get(w.region_id);
+        if (!reg) return;
+        rows.push([
+          reg.province,
+          reg.name,
+          String(w.year),
+          w.month != null ? MONTH_LABELS[w.month - 1] || String(w.month) : "Tahunan",
+          w.rainfall_mm != null ? Number(w.rainfall_mm).toFixed(1) : "-",
+          w.temp_avg_c != null ? Number(w.temp_avg_c).toFixed(1) : "-",
+          w.humidity_pct != null ? Number(w.humidity_pct).toFixed(1) : "-",
+        ]);
+      });
+
+      downloadCsv("agrolytics_iklim_2018_2025.csv", headers, rows);
+    }
+
+    if (format === "xlsx") {
+      // Sheet 1: Data Bulanan
+      const monthlyRows = allWeather
+        .filter((w) => w.month != null)
+        .map((w) => {
+          const reg = regionMap.get(w.region_id);
+          return {
+            Provinsi: reg?.province || "-",
+            Kabupaten: reg?.name || "-",
+            Tahun: w.year,
+            Bulan: w.month != null ? MONTH_LABELS[w.month - 1] : "-",
+            "Curah Hujan (mm)": w.rainfall_mm != null ? Number(Number(w.rainfall_mm).toFixed(1)) : "-",
+            "Suhu (°C)": w.temp_avg_c != null ? Number(Number(w.temp_avg_c).toFixed(1)) : "-",
+            "Kelembapan (%)": w.humidity_pct != null ? Number(Number(w.humidity_pct).toFixed(1)) : "-",
+          };
+        });
+
+      // Sheet 2: Rata-rata Tahunan
+      const annualRows: Record<string, unknown>[] = [];
+      allRegions.forEach((reg) => {
+        ALL_YEARS.forEach((yr) => {
+          const wxRows = allWeather.filter((w) => w.region_id === reg.id && w.year === yr && w.month != null);
+          if (wxRows.length === 0) return;
+          const avgVal = (key: keyof WeatherRow) => {
+            const vals = wxRows.map((r) => Number(r[key] ?? 0)).filter((v) => v > 0);
+            return vals.length ? Number((vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1)) : "-";
+          };
+          annualRows.push({
+            Provinsi: reg.province,
+            Kabupaten: reg.name,
+            Tahun: yr,
+            "Rata-rata Curah Hujan (mm)": avgVal("rainfall_mm"),
+            "Rata-rata Suhu (°C)": avgVal("temp_avg_c"),
+            "Rata-rata Kelembapan (%)": avgVal("humidity_pct"),
+          });
+        });
+      });
+
+      downloadXlsx("agrolytics_iklim_2018_2025.xlsx", [
+        { name: "Data Bulanan", data: monthlyRows, colWidths: [22, 28, 8, 8, 18, 12, 16] },
+        { name: "Rata-rata Tahunan", data: annualRows, colWidths: [22, 28, 8, 24, 20, 22] },
+      ]);
+    }
+
+    if (format === "pdf") {
+      // PDF only shows annual averages (monthly is too large)
+      const head = [["Provinsi", "Kabupaten", "Tahun", "Curah Hujan (mm)", "Suhu (°C)", "Kelembapan (%)"]];
+      const body: string[][] = [];
+
+      allRegions.forEach((reg) => {
+        ALL_YEARS.forEach((yr) => {
+          const wxRows = allWeather.filter((w) => w.region_id === reg.id && w.year === yr && w.month != null);
+          if (wxRows.length === 0) return;
+          const avgVal = (key: keyof WeatherRow) => {
+            const vals = wxRows.map((r) => Number(r[key] ?? 0)).filter((v) => v > 0);
+            return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : "-";
+          };
+          body.push([
+            reg.province,
+            reg.name,
+            String(yr),
+            String(avgVal("rainfall_mm")),
+            String(avgVal("temp_avg_c")),
+            String(avgVal("humidity_pct")),
+          ]);
+        });
+      });
+
+      downloadPdf("agrolytics_iklim_2018_2025.pdf", "Agrolytics — Laporan Data Iklim NASA POWER", "Rata-rata Tahunan 2018–2025 · Seluruh Wilayah Kalimantan", [
+        { title: "Rata-rata Iklim Tahunan per Kabupaten (2018–2025)", head, body, headColor: [107, 165, 200] },
+      ]);
+    }
+  };
+
   return (
     <DashboardLayout
       pageTitle="Iklim"
@@ -122,9 +241,12 @@ export default function IklimPage() {
       title="Data Iklim Wilayah"
       description="Curah hujan, suhu, dan kelembapan dari NASA POWER. Pilih wilayah dan tahun untuk analisis tren iklim."
       toolbar={
-        <div className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#6BA5C8]/40 bg-[#6BA5C8]/8 text-[#3A7A9F] dark:text-[#6BA5C8] text-[12px] font-mono">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          NASA POWER
+        <div className="flex items-center gap-2">
+          <div className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#6BA5C8]/40 bg-[#6BA5C8]/8 text-[#3A7A9F] dark:text-[#6BA5C8] text-[12px] font-mono">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            NASA POWER
+          </div>
+          <ExportDropdown onExport={handleExport} />
         </div>
       }
     >
