@@ -415,7 +415,7 @@ export function DateRangeAndExportToolbar() {
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-4 shadow-xl z-50">
+          <div className="absolute left-0 sm:right-0 sm:left-auto mt-2 w-72 rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-4 shadow-xl z-50">
             <h4 className="font-serif text-[14px] italic font-semibold mb-3 text-[#2A3530] dark:text-[#E8E6DF]">
               Rentang Tahun
             </h4>
@@ -479,7 +479,7 @@ export function DateRangeAndExportToolbar() {
         </button>
 
         {exportOpen && !isExporting && (
-          <div className="absolute right-0 mt-2 w-60 rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-2 shadow-xl z-50">
+          <div className="absolute left-0 sm:right-0 sm:left-auto mt-2 w-60 rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-2 shadow-xl z-50">
             <p className="text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9] px-2 py-1.5 mb-1">
               Format Ekspor
             </p>

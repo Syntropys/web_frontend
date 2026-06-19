@@ -232,9 +232,9 @@ export default function TrenPage() {
         {/* Chart */}
         <div className="rounded-2xl border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 bg-white/40 dark:bg-white/[0.04] p-5">
           {selectedRegions.length === 0 || selectedYears.length === 0 ? (
-            <div className="h-80 flex flex-col items-center justify-center gap-3 text-[#5F6A64] dark:text-[#A8AFA9]">
-              <span className="text-4xl opacity-30">📊</span>
-              <p className="text-[14px]">Pilih minimal 1 wilayah dan 1 tahun untuk menampilkan tren</p>
+            <div className="h-48 sm:h-80 flex flex-col items-center justify-center gap-3 text-[#5F6A64] dark:text-[#A8AFA9] px-4">
+              <span className="text-3xl sm:text-4xl opacity-30">📊</span>
+              <p className="text-[13px] sm:text-[14px] text-center">Pilih minimal 1 wilayah dan 1 tahun</p>
             </div>
           ) : loading ? (
             <div className="h-80 flex items-center justify-center">

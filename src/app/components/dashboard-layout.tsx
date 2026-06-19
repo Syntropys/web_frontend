@@ -82,7 +82,7 @@ export function DashboardLayout({
   }, [isLoading, isAuthenticated, navigate]);
 
   useEffect(() => {
-    document.title = `${pageTitle} — Agrolytics`;
+    document.title = pageTitle;
   }, [pageTitle]);
 
   useEffect(() => {
@@ -281,8 +281,8 @@ export function DashboardLayout({
             <span className="h-px w-8 bg-[#C9A24B]/40" />
           </div>
           
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+            <div className="min-w-0">
               <h1 className="font-serif text-[26px] sm:text-[30px] leading-[1.15] tracking-[-0.01em] text-[#2A3530] dark:text-[#E8E6DF]">
                 {title}
               </h1>
@@ -292,7 +292,7 @@ export function DashboardLayout({
                 </p>
               )}
             </div>
-            {toolbar && <div className="shrink-0 flex items-center gap-3">{toolbar}</div>}
+            {toolbar && <div className="shrink-0 flex flex-wrap items-center gap-2">{toolbar}</div>}
           </div>
 
           <div className="mt-8 pb-28">{children}</div>
