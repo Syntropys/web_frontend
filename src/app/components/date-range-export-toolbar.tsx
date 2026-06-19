@@ -56,105 +56,82 @@ export function DateRangeAndExportToolbar() {
 
   // ─── Fetch helper ───────────────────────────────────────────────────────────
   async function fetchData() {
-    const [regRes, prodRes, predRes, clRes, wxRes] = await Promise.all([
+    const [regRes, predRes, clRes, wxRes] = await Promise.all([
       supabase.from("regions").select("id, name, province, centroid_lat, centroid_lng"),
-      supabase.from("production_history").select("*, regions(name, province)").gte("year", startYear).lte("year", endYear).limit(5000),
       supabase.from("predictions").select("*, regions(name, province)").gte("target_year", startYear).lte("target_year", endYear).limit(5000),
       supabase.from("cluster_assignments").select("*"),
       supabase.from("weather_history").select("*").gte("year", startYear).lte("year", endYear).limit(5000),
     ]);
     return {
       regions: regRes.data || [],
-      production: prodRes.data || [],
       predictions: predRes.data || [],
       clusters: clRes.data || [],
       weather: wxRes.data || [],
     };
   }
 
-  // ─── CSV ────────────────────────────────────────────────────────────────────
+  // ─── CSV (Prediksi only) ─────────────────────────────────────────────────────
   const handleExportCSV = async () => {
     try {
       setExportingFormat("csv");
-      const { production } = await fetchData();
-      if (production.length === 0) { alert("Tidak ada data untuk diekspor."); return; }
+      const { predictions } = await fetchData();
+      if (predictions.length === 0) { alert("Tidak ada data prediksi untuk diekspor."); return; }
 
-      const csvRows = [["Provinsi", "Kabupaten", "Tahun", "Produksi (Ton)", "Luas Panen (Ha)", "Yield (Ton/Ha)"]];
-      production.forEach((row: Record<string, unknown>) => {
-        const reg = row.regions as Record<string, string> | null;
+      const csvRows = [["Provinsi", "Kabupaten", "Model", "Tahun", "Prediksi Yield (t/ha)", "Prediksi Produksi (ton)"]];
+      predictions.forEach((p: Record<string, unknown>) => {
+        const reg = p.regions as Record<string, string> | null;
         csvRows.push([
           reg?.province || "-", reg?.name || "-",
-          String(row.year),
-          String(row.production_ton), String(row.area_harvest_ha || "-"), String(row.yield_ton_ha || "-"),
+          String(p.model_name || "-"),
+          String(p.target_year),
+          String(p.predicted_yield || "-"), String(p.predicted_prod_ton || "-"),
         ]);
       });
 
       const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csvRows.map((r) => r.join(",")).join("\n");
-      downloadBlob(encodeURI(csvContent), `agrolytics_produksi_${startYear}_${endYear}.csv`);
+      downloadBlob(encodeURI(csvContent), `agrolytics_prediksi_${startYear}_${endYear}.csv`);
     } catch (err) { console.error(err); } finally { setExportingFormat(null); }
   };
 
-  // ─── XLSX (SheetJS) ──────────────────────────────────────────────────────────
+  // ─── XLSX (SheetJS) — Prediksi only ──────────────────────────────────────────
   const handleExportXLSX = async () => {
     try {
       setExportingFormat("xlsx");
-      const { production, predictions } = await fetchData();
+      const { predictions } = await fetchData();
 
       const wb = XLSX.utils.book_new();
 
-      // Sheet 1: Produksi Historis
-      const prodRows = production.map((row: Record<string, unknown>) => {
-        const reg = row.regions as Record<string, string> | null;
+      // Sheet: Prediksi ML
+      const predRows = predictions.map((p: Record<string, unknown>) => {
+        const reg = p.regions as Record<string, string> | null;
         return {
           Provinsi: reg?.province || "-",
           Kabupaten: reg?.name || "-",
-          Tahun: row.year,
-          "Produksi (Ton)": row.production_ton || 0,
-          "Luas Panen (Ha)": row.area_harvest_ha || "-",
-          "Yield (Ton/Ha)": row.yield_ton_ha || "-",
+          Model: p.model_name || "-",
+          "Tahun Target": p.target_year,
+          "Prediksi Yield (t/ha)": p.predicted_yield || 0,
+          "Prediksi Produksi (ton)": p.predicted_prod_ton || 0,
         };
       });
-      const wsProd = XLSX.utils.json_to_sheet(prodRows);
-      wsProd["!cols"] = [
-        { wch: 22 }, { wch: 28 }, { wch: 8 },
-        { wch: 16 }, { wch: 16 }, { wch: 14 },
+      const wsPred = XLSX.utils.json_to_sheet(predRows);
+      wsPred["!cols"] = [
+        { wch: 22 }, { wch: 28 }, { wch: 14 }, { wch: 14 },
+        { wch: 20 }, { wch: 22 },
       ];
-      XLSX.utils.book_append_sheet(wb, wsProd, "Produksi Historis");
+      XLSX.utils.book_append_sheet(wb, wsPred, "Prediksi ML");
 
-      // Sheet 2: Prediksi
-      if (predictions.length > 0) {
-        const predRows = predictions.map((p: Record<string, unknown>) => {
-          const reg = p.regions as Record<string, string> | null;
-          return {
-            Provinsi: reg?.province || "-",
-            Kabupaten: reg?.name || "-",
-            Model: p.model_name || "-",
-            "Tahun Target": p.target_year,
-            "Prediksi Yield (t/ha)": p.predicted_yield || 0,
-            "Prediksi Produksi (ton)": p.predicted_prod_ton || 0,
-          };
-        });
-        const wsPred = XLSX.utils.json_to_sheet(predRows);
-        wsPred["!cols"] = [
-          { wch: 22 }, { wch: 28 }, { wch: 14 }, { wch: 14 },
-          { wch: 20 }, { wch: 22 },
-        ];
-        XLSX.utils.book_append_sheet(wb, wsPred, "Prediksi");
-      }
-
-      XLSX.writeFile(wb, `agrolytics_${startYear}_${endYear}.xlsx`);
+      XLSX.writeFile(wb, `agrolytics_prediksi_${startYear}_${endYear}.xlsx`);
     } catch (err) { console.error(err); } finally { setExportingFormat(null); }
   };
 
-  // ─── JSON ────────────────────────────────────────────────────────────────────
+  // ─── JSON (tanpa BPS) ───────────────────────────────────────────────────────
   const handleExportJSON = async () => {
     try {
       setExportingFormat("json");
-      const { regions, production, predictions, clusters, weather } = await fetchData();
+      const { regions, predictions, clusters, weather } = await fetchData();
       const payload = {
         meta: { exportedAt: new Date().toISOString(), startYear, endYear, source: "Agrolytics v2" },
         regions,
-        production,
         predictions,
         clusters,
         weather,
@@ -168,13 +145,11 @@ export function DateRangeAndExportToolbar() {
   const handleExportGeoJSON = async () => {
     try {
       setExportingFormat("geojson");
-      const { regions, production, predictions, clusters } = await fetchData();
+      const { regions, predictions, clusters } = await fetchData();
 
       const features = regions
         .filter((r: Record<string, unknown>) => r.centroid_lat != null && r.centroid_lng != null)
         .map((r: Record<string, unknown>) => {
-          const prodRows = production.filter((p: Record<string, unknown>) => p.region_id === r.id);
-          const lastProd = prodRows.slice(-1)[0] as Record<string, unknown> | undefined;
           const pred2026 = predictions.find((p: Record<string, unknown>) => p.region_id === r.id && p.target_year === 2026 && p.model_name === "xgboost") as Record<string, unknown> | undefined;
           const cluster = clusters.find((c: Record<string, unknown>) => c.region_id === r.id) as Record<string, unknown> | undefined;
           const riskLabel = cluster?.cluster_label === 0 ? "Tinggi" : cluster?.cluster_label === 1 ? "Sedang" : "Rendah";
@@ -183,9 +158,6 @@ export function DateRangeAndExportToolbar() {
             geometry: { type: "Point", coordinates: [r.centroid_lng, r.centroid_lat] },
             properties: {
               id: r.id, name: r.name, province: r.province,
-              last_production_ton: lastProd?.production_ton ?? null,
-              last_yield_ton_ha: lastProd?.yield_ton_ha ?? null,
-              last_year: lastProd?.year ?? null,
               pred_yield_2026: pred2026?.predicted_yield ?? null,
               pred_prod_2026: pred2026?.predicted_prod_ton ?? null,
               cluster_label: cluster?.cluster_label ?? null,
@@ -208,7 +180,7 @@ export function DateRangeAndExportToolbar() {
   const handleExportPDF = async () => {
     try {
       setExportingFormat("pdf");
-      const { regions, production, predictions, clusters } = await fetchData();
+      const { regions, predictions, clusters } = await fetchData();
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const pdf = new jsPDF("p", "mm", "a4") as any;
@@ -217,7 +189,7 @@ export function DateRangeAndExportToolbar() {
       // Header
       pdf.setFontSize(18);
       pdf.setTextColor(42, 53, 48); // #2A3530
-      pdf.text("Agrolytics — Laporan Data", 14, 20);
+      pdf.text("Agrolytics — Laporan Prediksi", 14, 20);
       pdf.setFontSize(10);
       pdf.setTextColor(95, 106, 100); // #5F6A64
       pdf.text(`Periode: ${startYear} – ${endYear}  |  Diekspor: ${new Date().toLocaleDateString("id-ID")}`, 14, 27);
@@ -225,43 +197,9 @@ export function DateRangeAndExportToolbar() {
       pdf.setLineWidth(0.5);
       pdf.line(14, 30, pageW - 14, 30);
 
-      // Table 1: Produksi Historis
-      const prodHead = [["Provinsi", "Kabupaten", "Tahun", "Produksi (Ton)", "Yield (t/ha)"]];
-      const prodBody = production.map((row: Record<string, unknown>) => {
-        const reg = row.regions as Record<string, string> | null;
-        return [
-          reg?.province || "-",
-          reg?.name || "-",
-          String(row.year),
-          row.production_ton ? Number(row.production_ton).toLocaleString("id-ID") : "-",
-          row.yield_ton_ha ? Number(row.yield_ton_ha).toFixed(2) : "-",
-        ];
-      });
-
-      let nextY = 38;
-
-      if (prodBody.length > 0) {
-        pdf.setFontSize(12);
-        pdf.setTextColor(42, 53, 48);
-        pdf.text("Produksi Historis BPS", 14, nextY);
-
-        pdf.autoTable({
-          startY: nextY + 3,
-          head: prodHead,
-          body: prodBody,
-          theme: "grid",
-          headStyles: { fillColor: [201, 162, 75], textColor: [42, 31, 8], fontSize: 8, fontStyle: "bold" },
-          bodyStyles: { fontSize: 7, textColor: [42, 53, 48] },
-          alternateRowStyles: { fillColor: [247, 244, 238] },
-          margin: { left: 14, right: 14 },
-          styles: { cellPadding: 2, overflow: "linebreak" },
-        });
-      }
-
-      // Table 2: Prediksi (new page if needed)
+      // Table 1: Prediksi ML
       if (predictions.length > 0) {
-        const lastY = pdf.lastAutoTable?.finalY ?? 50;
-        const startY2 = lastY + 12 > 270 ? (pdf.addPage(), 20) : lastY + 12;
+        const startY2 = 38;
 
         pdf.setFontSize(12);
         pdf.setTextColor(42, 53, 48);
@@ -336,22 +274,22 @@ export function DateRangeAndExportToolbar() {
     } catch (err) { console.error(err); } finally { setExportingFormat(null); }
   };
 
-  // ─── ZIP (bundle semua) ──────────────────────────────────────────────────────
+  // ─── ZIP (bundle — tanpa BPS) ────────────────────────────────────────────────
   const handleExportZIP = async () => {
     try {
       setExportingFormat("zip");
-      const { regions, production, predictions, clusters, weather } = await fetchData();
+      const { regions, predictions, clusters, weather } = await fetchData();
 
-      // Build CSV content
-      const csvRows = [["Provinsi", "Kabupaten", "Tahun", "Produksi (Ton)", "Yield (Ton/Ha)"]];
-      production.forEach((row: Record<string, unknown>) => {
-        const reg = row.regions as Record<string, string> | null;
-        csvRows.push([reg?.province || "-", reg?.name || "-", String(row.year), String(row.production_ton || 0), String(row.yield_ton_ha || 0)]);
+      // Build CSV content (predictions only)
+      const csvRows = [["Provinsi", "Kabupaten", "Model", "Tahun", "Prediksi Yield (t/ha)", "Prediksi Produksi (ton)"]];
+      predictions.forEach((p: Record<string, unknown>) => {
+        const reg = p.regions as Record<string, string> | null;
+        csvRows.push([reg?.province || "-", reg?.name || "-", String(p.model_name || "-"), String(p.target_year), String(p.predicted_yield || "-"), String(p.predicted_prod_ton || "-")]);
       });
       const csvContent = csvRows.map((r) => r.join(",")).join("\n");
 
       // Build JSON content
-      const jsonContent = JSON.stringify({ meta: { exportedAt: new Date().toISOString(), startYear, endYear }, regions, production, predictions, clusters, weather }, null, 2);
+      const jsonContent = JSON.stringify({ meta: { exportedAt: new Date().toISOString(), startYear, endYear }, regions, predictions, clusters, weather }, null, 2);
 
       // Build GeoJSON content
       const geoFeatures = regions
@@ -363,14 +301,12 @@ export function DateRangeAndExportToolbar() {
         });
       const geojsonContent = JSON.stringify({ type: "FeatureCollection", features: geoFeatures }, null, 2);
 
-      // Simple ZIP structure as multi-part download (since no JSZip available)
-      // We'll download each as separate files
       const blobCSV = new Blob(["\uFEFF" + csvContent], { type: "text/csv" });
       const blobJSON = new Blob([jsonContent], { type: "application/json" });
       const blobGEO = new Blob([geojsonContent], { type: "application/geo+json" });
 
       const label = `${startYear}_${endYear}`;
-      blobToDownload(blobCSV, `agrolytics_${label}_produksi.csv`);
+      blobToDownload(blobCSV, `agrolytics_${label}_prediksi.csv`);
       await new Promise((r) => setTimeout(r, 300));
       blobToDownload(blobJSON, `agrolytics_${label}_data.json`);
       await new Promise((r) => setTimeout(r, 300));
