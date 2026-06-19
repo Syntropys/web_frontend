@@ -115,8 +115,8 @@ export default function TrenPage() {
       <div className="space-y-5">
         {/* Filter Panel */}
         <div className="rounded-2xl border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 bg-white/40 dark:bg-white/[0.04] p-5 space-y-5">
-          {/* Row 1: Province + Metric + Search */}
-          <div className="flex flex-wrap gap-3">
+          {/* Row 1: Province + Metric (side-by-side) + Search */}
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="block text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9]">
                 Provinsi
@@ -124,7 +124,7 @@ export default function TrenPage() {
               <select
                 value={province}
                 onChange={(e) => setProvince(e.target.value)}
-                className="h-9 px-3 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-[#F4F0E6] dark:bg-[#1A2326] text-[13px] text-[#2A3530] dark:text-[#E8E6DF] focus:outline-none focus:border-[#C9A24B] cursor-pointer"
+                className="h-9 w-full px-3 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-[#F4F0E6] dark:bg-[#1A2326] text-[13px] text-[#2A3530] dark:text-[#E8E6DF] focus:outline-none focus:border-[#C9A24B] cursor-pointer"
               >
                 <option value="">Semua Provinsi</option>
                 {provinces.map((p) => (
@@ -140,7 +140,7 @@ export default function TrenPage() {
               <select
                 value={metric}
                 onChange={(e) => setMetric(e.target.value as Metric)}
-                className="h-9 px-3 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-[#F4F0E6] dark:bg-[#1A2326] text-[13px] text-[#2A3530] dark:text-[#E8E6DF] focus:outline-none focus:border-[#C9A24B] cursor-pointer"
+                className="h-9 w-full px-3 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-[#F4F0E6] dark:bg-[#1A2326] text-[13px] text-[#2A3530] dark:text-[#E8E6DF] focus:outline-none focus:border-[#C9A24B] cursor-pointer"
               >
                 {Object.entries(METRIC_LABELS).map(([k, v]) => (
                   <option key={k} value={k}>{v}</option>
@@ -148,7 +148,7 @@ export default function TrenPage() {
               </select>
             </div>
 
-            <div className="space-y-1.5 flex-1 min-w-[160px]">
+            <div className="space-y-1.5 col-span-2">
               <label className="block text-[10px] font-mono uppercase tracking-widest text-[#5F6A64] dark:text-[#A8AFA9]">
                 Cari Wilayah
               </label>
