@@ -59,85 +59,130 @@ export const router = createBrowserRouter([
       },
       {
         path: '/dashboard',
+        element: (
+          <ProtectedLayout>
+            <div />
+          </ProtectedLayout>
+        ),
         loader: () => redirect('/dashboard/ringkasan'),
       },
       {
         path: '/dashboard/ringkasan',
+        element: (
+          <ProtectedLayout>
+            <div />
+          </ProtectedLayout>
+        ),
         lazy: async () => {
-          const { default: Page } = await import('./app/pages/dashboard/ringkasan')
-          const Component = () => <ProtectedLayout><Page /></ProtectedLayout>
+          const { default: Component } = await import('./app/pages/dashboard/ringkasan')
           return { Component }
         },
       },
       {
         path: '/dashboard/iklim',
+        element: (
+          <ProtectedLayout>
+            <div />
+          </ProtectedLayout>
+        ),
         lazy: async () => {
-          const { default: Page } = await import('./app/pages/dashboard/iklim')
-          const Component = () => <ProtectedLayout><Page /></ProtectedLayout>
+          const { default: Component } = await import('./app/pages/dashboard/iklim')
           return { Component }
         },
       },
       {
         path: '/dashboard/prediksi',
+        element: (
+          <ProtectedLayout>
+            <div />
+          </ProtectedLayout>
+        ),
         lazy: async () => {
-          const { default: Page } = await import('./app/pages/dashboard/prediksi')
-          const Component = () => <ProtectedLayout><Page /></ProtectedLayout>
+          const { default: Component } = await import('./app/pages/dashboard/prediksi')
           return { Component }
         },
       },
       {
         path: '/dashboard/risiko',
+        element: (
+          <ProtectedLayout>
+            <div />
+          </ProtectedLayout>
+        ),
         lazy: async () => {
-          const { default: Page } = await import('./app/pages/dashboard/risiko')
-          const Component = () => <ProtectedLayout><Page /></ProtectedLayout>
+          const { default: Component } = await import('./app/pages/dashboard/risiko')
           return { Component }
         },
       },
       {
         path: '/dashboard/peta',
+        element: (
+          <ProtectedLayout>
+            <div />
+          </ProtectedLayout>
+        ),
         lazy: async () => {
-          const { default: Page } = await import('./app/pages/dashboard/peta')
-          const Component = () => <ProtectedLayout><Page /></ProtectedLayout>
+          const { default: Component } = await import('./app/pages/dashboard/peta')
           return { Component }
         },
       },
       {
         path: '/dashboard/tren',
+        element: (
+          <ProtectedLayout>
+            <div />
+          </ProtectedLayout>
+        ),
         lazy: async () => {
-          const { default: Page } = await import('./app/pages/dashboard/tren')
-          const Component = () => <ProtectedLayout><Page /></ProtectedLayout>
+          const { default: Component } = await import('./app/pages/dashboard/tren')
           return { Component }
         },
       },
       {
         path: '/dashboard/prioritas',
+        element: (
+          <ProtectedLayout>
+            <div />
+          </ProtectedLayout>
+        ),
         lazy: async () => {
-          const { default: Page } = await import('./app/pages/dashboard/prioritas')
-          const Component = () => <ProtectedLayout><Page /></ProtectedLayout>
+          const { default: Component } = await import('./app/pages/dashboard/prioritas')
           return { Component }
         },
       },
       {
         path: '/dashboard/penyakit',
+        element: (
+          <ProtectedLayout>
+            <div />
+          </ProtectedLayout>
+        ),
         lazy: async () => {
-          const { default: Page } = await import('./app/pages/dashboard/penyakit')
-          const Component = () => <ProtectedLayout><Page /></ProtectedLayout>
+          const { default: Component } = await import('./app/pages/dashboard/penyakit')
           return { Component }
         },
       },
       {
         path: '/dashboard/admin/pengguna',
+        element: (
+          <AdminLayout>
+            <div />
+          </AdminLayout>
+        ),
         lazy: async () => {
-          const { default: Page } = await import('./app/pages/dashboard/admin/pengguna')
-          const Component = () => <AdminLayout><Page /></AdminLayout>
+          const { default: Component } = await import('./app/pages/dashboard/admin/pengguna')
           return { Component }
         },
       },
       {
         path: '/dashboard/admin/ingesti',
+        element: (
+          <AdminLayout>
+            <div />
+          </AdminLayout>
+        ),
         lazy: async () => {
-          const { default: Page } = await import('./app/pages/dashboard/admin/ingesti')
-          const Component = () => <AdminLayout><Page /></AdminLayout>
+          const { default: Component } = await import('./app/pages/dashboard/admin/ingesti')
           return { Component }
         },
       },
