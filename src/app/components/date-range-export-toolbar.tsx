@@ -9,6 +9,8 @@ import {
   Globe,
   Archive,
   Loader2,
+  MapPin,
+  X,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import jsPDF from "jspdf";
@@ -21,16 +23,37 @@ type ExportFormat = "csv" | "xlsx" | "json" | "geojson" | "pdf" | "zip";
 export function DateRangeAndExportToolbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
   const [startYear, setStartYear] = useState(2018);
   const [endYear, setEndYear] = useState(2026);
   const [exportingFormat, setExportingFormat] = useState<ExportFormat | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const exportRef = useRef<HTMLDivElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  // Region filter state
+  const [allRegions, setAllRegions] = useState<{ id: string; name: string; province: string }[]>([]);
+  const [filterProvince, setFilterProvince] = useState("");
+  const [filterRegionId, setFilterRegionId] = useState("");
+
+  // Load regions on mount
+  useEffect(() => {
+    supabase.from("regions").select("id, name, province").order("province").order("name").then(({ data }) => {
+      setAllRegions((data || []) as { id: string; name: string; province: string }[]);
+    });
+  }, []);
+
+  const provinces = [...new Set(allRegions.map((r) => r.province))].sort();
+  const filteredRegions = filterProvince
+    ? allRegions.filter((r) => r.province === filterProvince)
+    : allRegions;
+  const activeFilterCount = (filterProvince ? 1 : 0) + (filterRegionId ? 1 : 0);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
       if (exportRef.current && !exportRef.current.contains(e.target as Node)) setExportOpen(false);
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) setFilterOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -54,14 +77,29 @@ export function DateRangeAndExportToolbar() {
     dispatchRange(startYear, endYear);
   };
 
-  // ─── Fetch helper ───────────────────────────────────────────────────────────
+  // ─── Fetch helper (respects province/region filter) ────────────────────────
   async function fetchData() {
-    const [regRes, predRes, clRes, wxRes] = await Promise.all([
-      supabase.from("regions").select("id, name, province, centroid_lat, centroid_lng"),
-      supabase.from("predictions").select("*, regions(name, province)").gte("target_year", startYear).lte("target_year", endYear).limit(5000),
-      supabase.from("cluster_assignments").select("*"),
-      supabase.from("weather_history").select("*").gte("year", startYear).lte("year", endYear).limit(5000),
-    ]);
+    // Build region IDs to filter
+    let regionIds: string[] | null = null;
+    if (filterRegionId) {
+      regionIds = [filterRegionId];
+    } else if (filterProvince) {
+      regionIds = allRegions.filter((r) => r.province === filterProvince).map((r) => r.id);
+    }
+
+    let regQ = supabase.from("regions").select("id, name, province, centroid_lat, centroid_lng");
+    let predQ = supabase.from("predictions").select("*, regions(name, province)").gte("target_year", startYear).lte("target_year", endYear).limit(5000);
+    let clQ = supabase.from("cluster_assignments").select("*");
+    let wxQ = supabase.from("weather_history").select("*").gte("year", startYear).lte("year", endYear).limit(5000);
+
+    if (regionIds) {
+      regQ = regQ.in("id", regionIds);
+      predQ = predQ.in("region_id", regionIds);
+      clQ = clQ.in("region_id", regionIds);
+      wxQ = wxQ.in("region_id", regionIds);
+    }
+
+    const [regRes, predRes, clRes, wxRes] = await Promise.all([regQ, predQ, clQ, wxQ]);
     return {
       regions: regRes.data || [],
       predictions: predRes.data || [],
@@ -438,6 +476,80 @@ export function DateRangeAndExportToolbar() {
                 </button>
               );
             })}
+          </div>
+        )}
+      </div>
+
+      {/* Region Filter */}
+      <div className="relative" ref={filterRef}>
+        <button
+          onClick={() => setFilterOpen(!filterOpen)}
+          className={`inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border text-[13px] transition-all cursor-pointer font-medium ${
+            activeFilterCount > 0
+              ? "border-[#C9A24B]/40 bg-[#C9A24B]/8 text-[#735A1E] dark:text-[#C9A24B]"
+              : "border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/60 dark:bg-white/[0.04] text-[#2A3530] dark:text-[#E8E6DF] hover:border-[#C9A24B] hover:text-[#A07F2E] dark:hover:text-[#C9A24B]"
+          }`}
+        >
+          <MapPin size={13} className="text-[#735A1E] dark:text-[#C9A24B] shrink-0" />
+          <span className="hidden sm:inline">{activeFilterCount > 0 ? (filterRegionId ? filteredRegions.find((r) => r.id === filterRegionId)?.name || "Filter" : filterProvince) : "Wilayah"}</span>
+          <span className="sm:hidden">{activeFilterCount > 0 ? activeFilterCount : ""}</span>
+          {activeFilterCount > 0 && (
+            <span className="w-4 h-4 rounded-full bg-[#C9A24B] text-[#2A1F08] text-[9px] font-bold flex items-center justify-center">{activeFilterCount}</span>
+          )}
+          <ChevronDown size={11} className="opacity-50" />
+        </button>
+
+        {filterOpen && (
+          <div className="absolute right-0 sm:left-0 sm:right-auto mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-4 shadow-xl z-[60]">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-serif text-[14px] italic font-semibold text-[#2A3530] dark:text-[#E8E6DF]">
+                Filter Wilayah
+              </h4>
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={() => { setFilterProvince(""); setFilterRegionId(""); }}
+                  className="text-[10px] text-[#A04848] dark:text-[#D17878] hover:underline cursor-pointer flex items-center gap-1"
+                >
+                  <X size={10} /> Reset
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[10px] text-[#5F6A64] dark:text-[#A8AFA9] uppercase tracking-wider mb-1">Provinsi</label>
+                <select
+                  value={filterProvince}
+                  onChange={(e) => { setFilterProvince(e.target.value); setFilterRegionId(""); }}
+                  className="w-full px-2.5 py-2 rounded-lg border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/40 dark:bg-white/[0.03] text-[12px] text-[#2A3530] dark:text-[#E8E6DF] focus:outline-none focus:border-[#C9A24B] cursor-pointer"
+                >
+                  <option value="">Semua Provinsi</option>
+                  {provinces.map((p) => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] text-[#5F6A64] dark:text-[#A8AFA9] uppercase tracking-wider mb-1">Kabupaten/Kota</label>
+                <select
+                  value={filterRegionId}
+                  onChange={(e) => setFilterRegionId(e.target.value)}
+                  className="w-full px-2.5 py-2 rounded-lg border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/40 dark:bg-white/[0.03] text-[12px] text-[#2A3530] dark:text-[#E8E6DF] focus:outline-none focus:border-[#C9A24B] cursor-pointer"
+                >
+                  <option value="">{filterProvince ? `Semua di ${filterProvince}` : "Semua Kabupaten"}</option>
+                  {filteredRegions.map((r) => (
+                    <option key={r.id} value={r.id}>{r.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <p className="mt-3 text-[10px] text-[#5F6A64] dark:text-[#A8AFA9]">
+              {activeFilterCount > 0
+                ? `Ekspor akan memuat ${filterRegionId ? "1 kabupaten" : `${filteredRegions.length} kabupaten`}`
+                : "Ekspor akan memuat seluruh 56 kabupaten"}
+            </p>
           </div>
         )}
       </div>
