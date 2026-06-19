@@ -5,23 +5,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="index, follow, max-image-preview:large">
-  <meta name="description" content="Platform AI prediksi panen dan deteksi penyakit padi.">
+  <meta name="description"
+    content="Platform AI dan Business Intelligence untuk memprediksi produktivitas panen padi dan diagnosis penyakit tanaman secara instan di Kalimantan.">
   <meta name="keywords"
     content="business intelligence pertanian, prediksi panen padi kalimantan, deteksi penyakit daun padi, computer vision agrikultur, kecerdasan buatan penyakit tanaman, dashboard pertanian cerdas">
   <meta name="author" content="Tim Agrolytics">
-  <link rel="canonical" href="https://agrolytic-testing.vercel.app/">
+  <link rel="canonical" href="https://agrolytics.my.id/">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="id_ID">
   <meta property="og:site_name" content="Agrolytics">
-  <meta property="og:url" content="https://agrolytic-testing.vercel.app/">
+  <meta property="og:url" content="https://agrolytics.my.id/">
   <meta property="og:title" content="Smart Agricultural BI Kalimantan">
-  <meta property="og:description" content="Platform AI prediksi panen dan deteksi penyakit padi.">
-  <meta property="og:image" content="https://agrolytic-testing.vercel.app/hero.webp">
+  <meta property="og:description"
+    content="Platform AI dan Business Intelligence untuk memprediksi produktivitas panen padi dan diagnosis penyakit tanaman secara instan di Kalimantan.">
+  <meta property="og:image" content="https://agrolytics.my.id/hero.webp">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Dashboard prediksi panen padi Kalimantan">
   <meta name="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://agrolytic-testing.vercel.app/">
+  <meta property="twitter:url" content="https://agrolytics.my.id/">
   <meta name="twitter:title" content="Smart Agricultural BI Kalimantan">
-  <meta name="twitter:description" content="Platform AI prediksi panen dan deteksi penyakit padi.">
-  <meta name="twitter:image" content="https://agrolytic-testing.vercel.app/hero.webp">
+  <meta name="twitter:description"
+    content="Platform AI dan Business Intelligence untuk memprediksi produktivitas panen padi dan diagnosis penyakit tanaman secara instan di Kalimantan.">
+  <meta name="twitter:image" content="https://agrolytics.my.id/hero.webp">
+  <meta name="twitter:image:alt" content="Dashboard prediksi panen padi Kalimantan">
 
   <!-- JSON-LD Structured Data for AI agents & search engines -->
   <script type="application/ld+json">
@@ -87,7 +94,7 @@
   <link rel="preload" as="font" type="font/woff2" href="/fonts/fraunces-600.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/fonts/fraunces-italic.woff2" crossorigin>
 
-  <title>Agrolytics - Smart Agricultural BI Kalimantan</title>
+  <title>Smart Agricultural BI Kalimantan</title>
 
   <!-- Anti-FOUC: apply theme BEFORE first paint -->
   <script>
@@ -120,36 +127,128 @@
     })();
   </script>
   <style>
-    #__skeleton__{background:#efebe1;color:#2a3530}
-    #__skeleton__ .sk-hero-bg{opacity:.40}
-    #__skeleton__ .sk-grad1{background:linear-gradient(to bottom,rgba(239,235,225,.75) 0%,rgba(239,235,225,.5) 50%,rgba(239,235,225,1) 100%)}
-    #__skeleton__ .sk-grad2{background:linear-gradient(to right,rgba(239,235,225,.85) 0%,rgba(239,235,225,.2) 60%,transparent 100%)}
-    #__skeleton__ .sk-header{background-color:rgba(239,235,225,.85);border-bottom-color:rgba(42,53,48,.12)}
-    #__skeleton__ .sk-brand{color:#2a3530}
-    #__skeleton__ .sk-h1{color:#1a2620}
-    #__skeleton__ .sk-p{color:#3a4a44}
-    #__skeleton__ .sk-btn-outline{border-color:rgba(42,53,48,.25);color:#2a3530}
-    .dark #__skeleton__{background:#0b1215;color:#e8e6df}
-    .dark #__skeleton__ .sk-hero-bg{opacity:.20}
-    .dark #__skeleton__ .sk-grad1{background:linear-gradient(to bottom,rgba(11,18,21,.75) 0%,rgba(11,18,21,.5) 50%,rgba(11,18,21,1) 100%)}
-    .dark #__skeleton__ .sk-grad2{background:linear-gradient(to right,rgba(11,18,21,.85) 0%,rgba(11,18,21,.2) 60%,transparent 100%)}
-    .dark #__skeleton__ .sk-header{background-color:rgba(11,18,21,.85);border-bottom-color:rgba(232,230,223,.12)}
-    .dark #__skeleton__ .sk-brand{color:#e8e6df}
-    .dark #__skeleton__ .sk-h1{color:#e8e6df}
-    .dark #__skeleton__ .sk-p{color:#b8bfb9}
-    .dark #__skeleton__ .sk-btn-outline{border-color:rgba(232,230,223,.25);color:#e8e6df}
+    #__skeleton__ {
+      background: #efebe1;
+      color: #2a3530
+    }
+
+    #__skeleton__ .sk-hero-bg {
+      opacity: .40
+    }
+
+    #__skeleton__ .sk-grad1 {
+      background: linear-gradient(to bottom, rgba(239, 235, 225, .75) 0%, rgba(239, 235, 225, .5) 50%, rgba(239, 235, 225, 1) 100%)
+    }
+
+    #__skeleton__ .sk-grad2 {
+      background: linear-gradient(to right, rgba(239, 235, 225, .85) 0%, rgba(239, 235, 225, .2) 60%, transparent 100%)
+    }
+
+    #__skeleton__ .sk-header {
+      background-color: rgba(239, 235, 225, .85);
+      border-bottom-color: rgba(42, 53, 48, .12)
+    }
+
+    #__skeleton__ .sk-brand {
+      color: #2a3530
+    }
+
+    #__skeleton__ .sk-h1 {
+      color: #1a2620
+    }
+
+    #__skeleton__ .sk-p {
+      color: #3a4a44
+    }
+
+    #__skeleton__ .sk-btn-outline {
+      border-color: rgba(42, 53, 48, .25);
+      color: #2a3530
+    }
+
+    .dark #__skeleton__ {
+      background: #0b1215;
+      color: #e8e6df
+    }
+
+    .dark #__skeleton__ .sk-hero-bg {
+      opacity: .20
+    }
+
+    .dark #__skeleton__ .sk-grad1 {
+      background: linear-gradient(to bottom, rgba(11, 18, 21, .75) 0%, rgba(11, 18, 21, .5) 50%, rgba(11, 18, 21, 1) 100%)
+    }
+
+    .dark #__skeleton__ .sk-grad2 {
+      background: linear-gradient(to right, rgba(11, 18, 21, .85) 0%, rgba(11, 18, 21, .2) 60%, transparent 100%)
+    }
+
+    .dark #__skeleton__ .sk-header {
+      background-color: rgba(11, 18, 21, .85);
+      border-bottom-color: rgba(232, 230, 223, .12)
+    }
+
+    .dark #__skeleton__ .sk-brand {
+      color: #e8e6df
+    }
+
+    .dark #__skeleton__ .sk-h1 {
+      color: #e8e6df
+    }
+
+    .dark #__skeleton__ .sk-p {
+      color: #b8bfb9
+    }
+
+    .dark #__skeleton__ .sk-btn-outline {
+      border-color: rgba(232, 230, 223, .25);
+      color: #e8e6df
+    }
+
     /* Pure CSS fallback when JS is blocked/delayed */
-    @media(prefers-color-scheme:dark){
-      #__skeleton__{background:#0b1215;color:#e8e6df}
-      #__skeleton__ .sk-hero-bg{opacity:.20}
-      #__skeleton__ .sk-grad1{background:linear-gradient(to bottom,rgba(11,18,21,.75) 0%,rgba(11,18,21,.5) 50%,rgba(11,18,21,1) 100%)}
-      #__skeleton__ .sk-grad2{background:linear-gradient(to right,rgba(11,18,21,.85) 0%,rgba(11,18,21,.2) 60%,transparent 100%)}
-      #__skeleton__ .sk-header{background-color:rgba(11,18,21,.85);border-bottom-color:rgba(232,230,223,.12)}
-      #__skeleton__ .sk-brand{color:#e8e6df}
-      #__skeleton__ .sk-h1{color:#e8e6df}
-      #__skeleton__ .sk-p{color:#b8bfb9}
-      #__skeleton__ .sk-btn-outline{border-color:rgba(232,230,223,.25);color:#e8e6df}
-      html{background-color:#0b1215 !important}
+    @media(prefers-color-scheme:dark) {
+      #__skeleton__ {
+        background: #0b1215;
+        color: #e8e6df
+      }
+
+      #__skeleton__ .sk-hero-bg {
+        opacity: .20
+      }
+
+      #__skeleton__ .sk-grad1 {
+        background: linear-gradient(to bottom, rgba(11, 18, 21, .75) 0%, rgba(11, 18, 21, .5) 50%, rgba(11, 18, 21, 1) 100%)
+      }
+
+      #__skeleton__ .sk-grad2 {
+        background: linear-gradient(to right, rgba(11, 18, 21, .85) 0%, rgba(11, 18, 21, .2) 60%, transparent 100%)
+      }
+
+      #__skeleton__ .sk-header {
+        background-color: rgba(11, 18, 21, .85);
+        border-bottom-color: rgba(232, 230, 223, .12)
+      }
+
+      #__skeleton__ .sk-brand {
+        color: #e8e6df
+      }
+
+      #__skeleton__ .sk-h1 {
+        color: #e8e6df
+      }
+
+      #__skeleton__ .sk-p {
+        color: #b8bfb9
+      }
+
+      #__skeleton__ .sk-btn-outline {
+        border-color: rgba(232, 230, 223, .25);
+        color: #e8e6df
+      }
+
+      html {
+        background-color: #0b1215 !important
+      }
     }
   </style>
 </head>
@@ -160,15 +259,17 @@
       style="min-height: 100vh; font-family: 'Inter', system-ui, sans-serif; position: relative; overflow: hidden;">
       <div class="hero-bg sk-hero-bg"
         style="position: absolute; inset: 0; background-size: cover; background-position: center;"></div>
-      <div class="sk-grad1"
-        style="position: absolute; inset: 0;"></div>
-      <div class="sk-grad2"
-        style="position: absolute; inset: 0;"></div>
+      <div class="sk-grad1" style="position: absolute; inset: 0;"></div>
+      <div class="sk-grad2" style="position: absolute; inset: 0;"></div>
 
       <header class="sk-header"
         style="position: fixed; top: 0; left: 0; right: 0; height: 64px; border-bottom: 1px solid; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(20px, 5vw, 56px); z-index: 40;">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <svg width="22" height="22" viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 58 L 32 30" stroke="#c9a24b" stroke-width="4" stroke-linecap="round"/><path d="M32 34 C 20 32 12 22 12 12 C 22 12 30 20 32 32 Z" fill="#c9a24b"/><path d="M32 34 C 44 32 52 22 52 12 C 42 12 34 20 32 32 Z" fill="#c9a24b" opacity="0.75"/></svg>
+          <svg width="22" height="22" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <path d="M32 58 L 32 30" stroke="#c9a24b" stroke-width="4" stroke-linecap="round" />
+            <path d="M32 34 C 20 32 12 22 12 12 C 22 12 30 20 32 32 Z" fill="#c9a24b" />
+            <path d="M32 34 C 44 32 52 22 52 12 C 42 12 34 20 32 32 Z" fill="#c9a24b" opacity="0.75" />
+          </svg>
           <span class="sk-brand"
             style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500;">Agrolytics</span>
         </div>
@@ -205,7 +306,7 @@
   </div>
   <script>
     // Hide landing skeleton immediately for non-landing routes to prevent FOUC
-    (function() {
+    (function () {
       var p = window.location.pathname;
       if (p !== '/' && p !== '') {
         var sk = document.getElementById('__skeleton__');
