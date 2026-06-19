@@ -1,11 +1,11 @@
 # 🌾 Agrolytics Web Frontend
 
-![Status](https://img.shields.io/badge/Repo_Status-Evolving-1F2937?style=flat-square)
+![Status](https://img.shields.io/badge/Repo_Status-Completed-1F2937?style=flat-square)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-1F2937?style=flat-square)](https://github.com/Syntropys/web_frontend/blob/main/LICENSE)
 [![Lead Dev](https://img.shields.io/badge/Lead_Dev-@Zevhys-1F2937?style=flat-square)]()
 [![Dev](https://img.shields.io/badge/Dev-@rohidrivaldi-1F2937?style=flat-square)]()
 ![Created](https://img.shields.io/badge/Created-18--May--2026-1F2937?style=flat-square)
-![Version](https://img.shields.io/badge/Version-v2.0.0-1F2937?style=flat-square)
+![Version](https://img.shields.io/badge/Version-v1.0.0-1F2937?style=flat-square)
 ![Repo Size](https://img.shields.io/github/repo-size/Syntropys/web_frontend?label=Repo%20Size&color=1F2937&style=flat-square)
 ![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2FSyntropys%2Fweb_frontend&countColor=%231F2937&style=flat-square&labelStyle=none)
 [![Issues Welcome](https://img.shields.io/badge/Issues-Welcome-1F2937.svg?style=flat-square)](https://github.com/Syntropys/web_frontend/issues)
@@ -14,7 +14,25 @@
 This repository contains the user-facing web dashboard for the **Agrolytics** Smart Agricultural Business Intelligence platform. It provides an interactive interface for monitoring, predicting, and analyzing rice paddy production across 56 regencies/cities in Kalimantan, Indonesia — integrating real BPS production data, NASA POWER climate data, ML-based yield predictions (XGBoost), K-Means risk clustering, and AI-powered paddy disease detection (10-class CNN ensemble).
 
 > **Production**: [https://agrolytics.my.id](https://agrolytics.my.id)
-> **PageSpeed**: Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100 (Desktop)
+
+## 📊 Google PageSpeed Insights (Lighthouse)
+
+| Kategori | Mobile | Desktop |
+| :------- | :----: | :-----: |
+| ⚡ Performance | 96 | 100 |
+| ♿ Accessibility | 100 | 100 |
+| ✅ Best Practices | 100 | 100 |
+| 🔍 SEO | 100 | 100 |
+
+| Mobile | Desktop |
+| :----: | :-----: |
+| ![PageSpeed Mobile](assets/pagespeed-mobile.png) | ![PageSpeed Desktop](assets/pagespeed-desktop.png) |
+
+## 🔒 Mozilla HTTP Observatory (Keamanan Header)
+
+Skor **B+ (80/100)** — 9 dari 10 tes lolos. Dilengkapi CSP ketat, HSTS, X-Frame-Options, X-Content-Type-Options, dan header keamanan lainnya.
+
+![HTTP Observatory](assets/http-observatory.png)
 
 ### 🔄 Repository & Deployment Flow
 
