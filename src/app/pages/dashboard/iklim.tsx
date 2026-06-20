@@ -3,6 +3,7 @@ import { DashboardLayout } from "../../components/dashboard-layout";
 import { ExportDropdown } from "../../components/export-dropdown";
 import { supabase } from "@/lib/supabase";
 import { downloadCsv, downloadXlsx, downloadPdf } from "@/lib/export-utils";
+import { useThemeStore } from "../../../stores/useThemeStore";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -14,6 +15,8 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
+  ReferenceLine,
+  ReferenceDot,
 } from "recharts";
 
 type WeatherRow = {
@@ -31,6 +34,7 @@ const MONTH_LABELS = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt
 const ALL_YEARS = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
 
 export default function IklimPage() {
+  const { theme } = useThemeStore();
   const [regions, setRegions] = useState<Region[]>([]);
   const [regionId, setRegionId] = useState<string>("");
   const [weather, setWeather] = useState<WeatherRow[]>([]);
@@ -102,6 +106,10 @@ export default function IklimPage() {
       };
     });
   }, [weather, years]);
+
+  const selectedAnnualRow = useMemo(() => {
+    return annualData.find((d) => d.year === String(yearFilter));
+  }, [annualData, yearFilter]);
 
   // KPI aggregates
   const kpiData = useMemo(() => {
@@ -377,6 +385,36 @@ export default function IklimPage() {
                       <Legend wrapperStyle={{ fontSize: 11 }} iconType="circle" iconSize={7} />
                       <Area type="monotone" dataKey="Curah Hujan" stroke="#6BA5C8" fill="url(#gradRain)" strokeWidth={2} dot={false} connectNulls />
                       <Area type="monotone" dataKey="Suhu" stroke="#C9A24B" fill="url(#gradTemp)" strokeWidth={2} dot={false} connectNulls />
+                      {selectedAnnualRow && (
+                        <>
+                          <ReferenceLine
+                            x={String(yearFilter)}
+                            stroke={theme === "dark" ? "rgba(201, 162, 75, 0.4)" : "rgba(115, 90, 30, 0.3)"}
+                            strokeWidth={1.5}
+                            strokeDasharray="3 3"
+                          />
+                          {selectedAnnualRow["Curah Hujan"] != null && (
+                            <ReferenceDot
+                              x={String(yearFilter)}
+                              y={selectedAnnualRow["Curah Hujan"]}
+                              r={5}
+                              fill="#6BA5C8"
+                              stroke={theme === "dark" ? "#0E1619" : "#F7F4EE"}
+                              strokeWidth={1.5}
+                            />
+                          )}
+                          {selectedAnnualRow["Suhu"] != null && (
+                            <ReferenceDot
+                              x={String(yearFilter)}
+                              y={selectedAnnualRow["Suhu"]}
+                              r={5}
+                              fill="#C9A24B"
+                              stroke={theme === "dark" ? "#0E1619" : "#F7F4EE"}
+                              strokeWidth={1.5}
+                            />
+                          )}
+                        </>
+                      )}
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
