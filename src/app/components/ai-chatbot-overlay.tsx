@@ -55,6 +55,38 @@ function TypingDots() {
   );
 }
 
+function parseFormatting(text: string): string {
+  // Escape HTML tags to prevent HTML injection
+  let html = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  // Code Blocks: ```code```
+  html = html.replace(/```([\s\S]+?)```/g, '<pre class="bg-black/5 dark:bg-white/5 font-mono p-2 rounded-lg my-1 text-[11px] overflow-x-auto">$1</pre>');
+
+  // Inline Code/Highlight: `code`
+  html = html.replace(/`([^`\n]+?)`/g, '<code class="bg-black/5 dark:bg-white/5 px-1 py-0.5 rounded font-mono text-[11px] text-[#735A1E] dark:text-[#C9A24B]">$1</code>');
+
+  // Bold: **bold** (markdown) and *bold* (whatsapp)
+  html = html.replace(/\*\*([^\*\n]+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*([^\*\n]+?)\*/g, '<strong>$1</strong>');
+
+  // Italic: _italic_
+  html = html.replace(/_([^\_\n]+?)_/g, '<em>$1</em>');
+
+  // Strikethrough: ~strikethrough~
+  html = html.replace(/~([^~\n]+?)~/g, '<del>$1</del>');
+
+  // Quote Blocks: lines starting with &gt;
+  html = html.replace(/^&gt;\s+(.+)$/gm, '<blockquote class="border-l-2 border-[#C9A24B] pl-2.5 my-1 text-[#5F6A64] dark:text-[#A8AFA9] italic">$1</blockquote>');
+
+  // Bullet points: lines starting with * or - followed by space
+  html = html.replace(/^[\*\-]\s+(.+)$/gm, '<li class="ml-4 list-disc my-0.5">$1</li>');
+
+  return html;
+}
+
 function BubbleMessage({
   message,
   isNew,
@@ -63,6 +95,8 @@ function BubbleMessage({
   isNew: boolean;
 }) {
   const isUser = message.role === "user";
+  const parsedHtml = isUser ? message.content : parseFormatting(message.content);
+
   return (
     <div
       className={`flex ${isUser ? "justify-end" : "justify-start"} ${
@@ -75,14 +109,15 @@ function BubbleMessage({
         </span>
       )}
       <div
-        className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-[1.6] ${
+        className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-[1.6] whitespace-pre-wrap break-words ${
           isUser
             ? "bg-[#C9A24B] text-[#2A1F08] rounded-tr-sm font-medium shadow-sm"
             : "bg-white/60 dark:bg-white/[0.06] text-[#2A3530] dark:text-[#E8E6DF] border border-[#2A3530]/10 dark:border-[#E8E6DF]/8 rounded-tl-sm shadow-sm"
         }`}
-      >
-        {message.content}
-      </div>
+        {...(isUser
+          ? { children: message.content }
+          : { dangerouslySetInnerHTML: { __html: parsedHtml } })}
+      />
     </div>
   );
 }
