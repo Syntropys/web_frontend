@@ -308,12 +308,12 @@ export default function PrediksiPage() {
         : `Data historis BPS tahun ${selectedYear}. Pilih tahun lain untuk membandingkan atau lihat proyeksi 2026.`}
       toolbar={
         <div className="flex flex-nowrap items-center gap-1.5 sm:gap-2">
-          <div className="inline-flex items-center gap-0.5 sm:gap-1 h-9 px-1 sm:px-1.5 rounded-full border border-[#C9A24B]/40 bg-[#C9A24B]/8 overflow-x-auto">
+          <div className="inline-flex items-center gap-0.5 sm:gap-1 h-9 px-1 sm:px-1.5 rounded-full border border-[#C9A24B]/40 bg-[#C9A24B]/8">
             {SELECTABLE_YEARS.map((yr) => (
               <button
                 key={yr}
                 onClick={() => setSelectedYear(yr)}
-                className={`px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-mono transition-all cursor-pointer whitespace-nowrap ${
+                className={`${yr < 2024 ? "hidden sm:inline-flex" : "inline-flex"} px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-mono transition-all cursor-pointer whitespace-nowrap ${
                   selectedYear === yr
                     ? "bg-[#C9A24B] text-[#2A1F08] font-medium"
                     : "text-[#735A1E] dark:text-[#C9A24B] hover:bg-[#C9A24B]/20"

@@ -292,7 +292,7 @@ export function DashboardLayout({
                 </p>
               )}
             </div>
-            {toolbar && <div className="shrink-0 flex flex-wrap items-center gap-2 max-w-full overflow-x-auto">{toolbar}</div>}
+            {toolbar && <div className="shrink-0 flex flex-wrap items-center gap-2">{toolbar}</div>}
           </div>
 
           <div className="mt-8 pb-28">{children}</div>
