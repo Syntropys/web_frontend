@@ -1,0 +1,18 @@
+{
+  "name": "Agrolytics",
+  "short_name": "Agrolytics",
+  "description": "Platform AI dan Business Intelligence untuk memprediksi produktivitas panen padi dan diagnosis penyakit tanaman secara instan di Kalimantan.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#efebe1",
+  "theme_color": "#2a3530",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
