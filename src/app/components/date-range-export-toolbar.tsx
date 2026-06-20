@@ -384,7 +384,7 @@ export function DateRangeAndExportToolbar() {
       {/* Date Range Picker */}
       <div className="relative">
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => { setExportOpen(false); setFilterOpen(false); setIsOpen(!isOpen); }}
           className="inline-flex items-center gap-1 sm:gap-2 h-9 px-2.5 sm:px-3.5 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/60 dark:bg-white/[0.04] text-[12px] sm:text-[13px] hover:border-[#C9A24B] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-all cursor-pointer font-medium text-[#2A3530] dark:text-[#E8E6DF]"
         >
           <Calendar size={13} className="text-[#735A1E] dark:text-[#C9A24B] shrink-0" />
@@ -442,7 +442,7 @@ export function DateRangeAndExportToolbar() {
       {/* Export Dropdown */}
       <div className="relative" ref={exportRef}>
         <button
-          onClick={() => setExportOpen(!exportOpen)}
+          onClick={() => { setIsOpen(false); setFilterOpen(false); setExportOpen(!exportOpen); }}
           disabled={isExporting}
           className="inline-flex items-center gap-1 sm:gap-1.5 h-9 px-2.5 sm:px-3.5 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/60 dark:bg-white/[0.04] text-[12px] sm:text-[13px] hover:border-[#C9A24B] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-all cursor-pointer font-medium text-[#2A3530] dark:text-[#E8E6DF] disabled:opacity-50"
         >
@@ -483,7 +483,7 @@ export function DateRangeAndExportToolbar() {
       {/* Region Filter */}
       <div className="relative" ref={filterRef}>
         <button
-          onClick={() => setFilterOpen(!filterOpen)}
+          onClick={() => { setIsOpen(false); setExportOpen(false); setFilterOpen(!filterOpen); }}
           className={`inline-flex items-center gap-1 sm:gap-1.5 h-9 px-2.5 sm:px-3.5 rounded-xl border text-[12px] sm:text-[13px] transition-all cursor-pointer font-medium ${
             activeFilterCount > 0
               ? "border-[#C9A24B]/40 bg-[#C9A24B]/8 text-[#735A1E] dark:text-[#C9A24B]"
