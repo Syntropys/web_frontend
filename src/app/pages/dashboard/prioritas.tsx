@@ -455,39 +455,19 @@ function DetailPanel({ prioritasKey, wilayah, provinsi, produksi, yieldVal, acti
       } catch (apiErr) {
         console.warn("Gagal menggunakan backend Edge function, menggunakan draf simulasi lokal untuk pengujian...", apiErr);
         
-        reportText = `Nomor: ${letterNumber}
-Sifat: Penting / Sangat Segera
-Lampiran: 1 (satu) Berkas Laporan Analisis
-Hal: Rekomendasi Kebijakan Peningkatan Produktivitas Padi dan Mitigasi Risiko Pangan ${cleanWilayah}
-
-Kalimantan, 21 Juni 2026
-
-Kepada Yth.
-Kepala Dinas Pertanian dan Ketahanan Pangan
-Provinsi ${provinsi}
-di Tempat
-
-Dengan hormat,
-
-Berdasarkan hasil analisis komputasi platform Decision Support System (DSS) Agrolytics mengenai proyeksi produksi padi tahun 2026 menggunakan model predictive analytics XGBoost (R²=0.986) dan klasterisasi risiko K-Means, dengan ini kami sampaikan rekomendasi strategis untuk wilayah ${cleanWilayah}.
+        reportText = `Berdasarkan hasil analisis komputasi platform Decision Support System (DSS) Agrolytics mengenai proyeksi produksi padi tahun 2026 menggunakan model predictive analytics XGBoost (R²=0.986) dan klasterisasi risiko K-Means, dengan ini kami sampaikan rekomendasi strategis untuk wilayah ${cleanWilayah}.
 
 Berdasarkan data pemodelan terbaru, ${cleanWilayah} diprediksi memiliki produktivitas (yield) rata-rata sebesar ${yieldVal.toFixed(2)} t/ha dengan total volume produksi komoditas padi mencapai ${Math.round(produksi).toLocaleString("id-ID")} ton. Mempertimbangkan indikator kerentanan pangan dan proyeksi tersebut, wilayah ini dimasukkan ke dalam kategori Prioritas ${meta.label.toUpperCase()} dengan arahan aksi "${action}".
 
-Guna memperkuat ketahanan pangan setempat dan mengantisipasi gejolak produksi, kami merekomendasikan langkah-langkah intervensi kebijakan strategis berbasis data sebagai berikut:
-
-${rec.items.map((item, index) => `${index + 1}. ${item} - Langkah ini esensial untuk diimplementasikan guna memastikan stabilitas produksi padi daerah secara berkelanjutan.`).join("\n\n")}
-
-Langkah-langkah tersebut di atas diharapkan dapat dilaksanakan secara sinergis dan kolaboratif antar-sektor dengan dukungan pemanfaatan teknologi informasi serta sistem informasi geografis untuk monitoring berkala perkembangan luas tambah tanam (LTT).
-
-Demikian surat rekomendasi kebijakan ini kami sampaikan, dengan harapan dapat menjadi acuan berharga dalam penyusunan program kerja dinas pertanian setempat guna menjaga stabilitas suplai pangan regional di seluruh wilayah Kalimantan.`;
+Demikian rekomendasi kebijakan ini kami sampaikan, dengan harapan dapat menjadi acuan substansial dalam penyusunan program kerja dinas pertanian setempat guna menjaga stabilitas suplai pangan regional Kalimantan yang berkelanjutan.`;
       }
 
       const doc = new jsPDF("p", "mm", "a4");
       
       // Draw Kop Surat (Letterhead) - Compact height
       doc.setFillColor(247, 244, 238);
-      doc.rect(0, 0, 210, 36, "F");
-
+      doc.rect(0, 0, 210, 30, "F");
+      
       // Draw SVG Sprout Logo (Agrolytics Gold Sprout)
       const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
         <path d="M32 60 L 32 32" stroke="#C9A24B" stroke-width="6" stroke-linecap="round"/>
@@ -591,33 +571,71 @@ Demikian surat rekomendasi kebijakan ini kami sampaikan, dengan harapan dapat me
       const lineHeightFactor = 1.3;
       const lineSpacing = fontSize * lineHeightFactor * 0.352778; // approx 4.68 mm
 
-      paragraphs.forEach((trimmed: string) => {
-        // Split text to fit within A4 printable width (180mm with 15mm margins)
-        const lines = doc.splitTextToSize(trimmed, 180);
+      const renderParagraph = (textStr: string) => {
+        const lines = doc.splitTextToSize(textStr, 180);
         const paragraphHeight = lines.length * lineSpacing;
 
-        // Check if paragraph fits on the current page (limit to 278mm)
         if (currentY + paragraphHeight > 278) {
-          // Draw Footer before adding new page
           doc.setFont("times", "italic");
           doc.setFontSize(8);
           doc.setTextColor(150);
           doc.text(`Agrolytics DSS AI  |  Halaman ${doc.getNumberOfPages()}`, 105, 287, { align: "center" });
 
           doc.addPage();
-          currentY = 20; // Start higher on the second page since there's no Kop
+          currentY = 20;
           doc.setFont("times", "normal");
           doc.setFontSize(10.2);
           doc.setTextColor(42, 53, 48);
         }
 
-        doc.text(trimmed, 15, currentY, {
+        doc.text(textStr, 15, currentY, {
           maxWidth: 180,
           align: "justify",
           lineHeightFactor: lineHeightFactor
         });
 
-        currentY += paragraphHeight + 1.2; // slight extra spacing after each text block
+        currentY += paragraphHeight + 3.0; // Paragraph gap
+      };
+
+      const renderBulletPoint = (textStr: string) => {
+        const lines = doc.splitTextToSize(textStr, 170);
+        const paragraphHeight = lines.length * lineSpacing;
+
+        if (currentY + paragraphHeight > 278) {
+          doc.setFont("times", "italic");
+          doc.setFontSize(8);
+          doc.setTextColor(150);
+          doc.text(`Agrolytics DSS AI  |  Halaman ${doc.getNumberOfPages()}`, 105, 287, { align: "center" });
+
+          doc.addPage();
+          currentY = 20;
+          doc.setFont("times", "normal");
+          doc.setFontSize(10.2);
+          doc.setTextColor(42, 53, 48);
+        }
+
+        doc.text(textStr, 20, currentY, {
+          maxWidth: 170,
+          align: "left",
+          lineHeightFactor: lineHeightFactor
+        });
+
+        currentY += paragraphHeight + 1.8; // Bullet points are closely grouped
+      };
+
+      paragraphs.forEach((trimmed: string, idx: number) => {
+        renderParagraph(trimmed);
+
+        // If this was the second paragraph (index 1), inject the list of recommendations
+        if (idx === 1) {
+          renderParagraph(`Guna memperkuat ketahanan pangan setempat dan mengantisipasi gejolak penurunan produksi, platform Agrolytics menyusun beberapa rencana aksi rekomendasi intervensi kebijakan taktis sebagai berikut:`);
+          
+          rec.items.forEach((item, itemIdx) => {
+            renderBulletPoint(`${itemIdx + 1}. ${item}`);
+          });
+          
+          currentY += 1.5; // Slight padding after list before next paragraph
+        }
       });
 
       // Digital Signature block

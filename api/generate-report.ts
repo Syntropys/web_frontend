@@ -2,7 +2,7 @@ export const config = {
   runtime: "edge",
 };
 
-const GEMINI_MODEL = "gemini-2.5-flash";
+const GEMINI_MODEL = "gemini-1.5-flash";
 
 export default async function handler(req: Request) {
   // Only allow POST
@@ -81,22 +81,18 @@ ATURAN PENTING (SANGAT KETAT):
 - Estimasi Yield Padi 2026: ${predictedYield > 0 ? predictedYield.toFixed(2) : "—"} t/ha
 - Estimasi Total Produksi Padi 2026: ${predictedProd > 0 ? Math.round(predictedProd).toLocaleString("id-ID") : "—"} ton
 - Tingkat Risiko/Prioritas: Prioritas ${priorityKey.toUpperCase()} (Aksi Rekomendasi: ${recommendedAction})
-- Intervensi Rekomendasi Awal: ${recommendedItems.join(", ")}
 
-Struktur Paragraf yang Harus Dihasilkan:
+Struktur Paragraf yang Harus Dihasilkan (Tepat 3 Paragraf):
 1. Paragraf 1 (Pendahuluan):
    Sampaikan bahwa berdasarkan hasil analisis komputasi platform Decision Support System (DSS) Agrolytics mengenai proyeksi produksi padi tahun 2026 menggunakan model predictive analytics XGBoost (R²=0.986) dan klasterisasi risiko K-Means, dengan ini disampaikan rekomendasi strategis untuk Kabupaten ${regionName}.
 
 2. Paragraf 2 (Pemaparan Data & Kondisi):
    Paparkan data hasil prediksi secara naratif. Sebutkan bahwa Kabupaten ${regionName} diprediksi memiliki produktivitas (yield) sebesar ${predictedYield.toFixed(2)} t/ha dengan total produksi komoditas padi mencapai ${Math.round(predictedProd).toLocaleString("id-ID")} ton. Jelaskan implikasi dari pengelompokan daerah ini ke dalam kategori Prioritas ${priorityKey.toUpperCase()} dengan arahan aksi "${recommendedAction}".
 
-3. Paragraf 3 & 4 (Rencana Aksi & Detail Intervensi):
-   Jabarkan rincian rencana aksi taktis berbasis data untuk memperkuat ketahanan pangan setempat. Kembangkan dan jelaskan poin-poin berikut ke dalam bentuk narasi formal yang mendalam:
-   - ${recommendedItems.join("\n   - ")}
-   Berikan penekanan pada pentingnya kolaborasi antar-sektor serta pemanfaatan teknologi informasi untuk monitoring berkala.
+3. Paragraf 3 (Penutup):
+   Sampaikan kalimat penutup dinas formal, menyatakan harapan agar rekomendasi kebijakan ini dapat menjadi acuan penyusunan program kerja dinas pertanian setempat guna menjaga stabilitas suplai pangan regional Kalimantan.
 
-4. Paragraf 5 (Penutup):
-   Sampaikan kalimat penutup dinas formal, menyatakan harapan agar rekomendasi kebijakan ini dapat menjadi acuan penyusunan program kerja dinas pertanian setempat guna menjaga stabilitas suplai pangan regional Kalimantan.`;
+PENTING: JANGAN sebutkan rincian rencana aksi rekomendasi seperti pembagian benih, penyuluhan, irigasi, atau subsidi pupuk di dalam teks Anda, karena poin-poin tersebut akan dimasukkan secara otomatis oleh sistem di bagian lain. Cukup hasilkan 3 paragraf di atas secara berurutan.`;
 
     const contents = [
       {
