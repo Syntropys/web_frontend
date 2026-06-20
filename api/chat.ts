@@ -43,6 +43,7 @@ export default async function handler(req: Request) {
       context?: {
         regionsCount: number;
         avgYield2026: string;
+        databaseSummary?: string;
       };
     };
 
@@ -55,11 +56,13 @@ export default async function handler(req: Request) {
 
     const regionsCount = context?.regionsCount ?? 56;
     const avgYield2026 = context?.avgYield2026 ?? "3.52";
+    const databaseSummary = context?.databaseSummary ?? "";
 
     const systemPrompt = `Anda adalah asisten cerdas Decision Support AI untuk platform Agrolytics.
 Tugas Anda membantu pengguna menganalisis perbandingan produksi, data historis BPS, curah hujan NASA POWER, dan prediksi model XGBoost, Random Forest, dan Linear Regression untuk padi di Kalimantan.
 Informasi Tambahan: total wilayah terdata ${regionsCount} kabupaten. Estimasi rata-rata produktivitas 2026 adalah ${avgYield2026} t/ha.
 Model terbaik adalah XGBoost dengan R²=0.986. Data historis dari BPS 2018-2025. Data cuaca dari NASA POWER.
+${databaseSummary ? `\nBerikut adalah data ringkasan aktual dari database:\n${databaseSummary}\n` : ""}
 Gunakan bahasa Indonesia yang ramah, sopan, bernada profesional, dan ringkas. Jangan terlalu panjang lebar, tapi berikan insight bernilai tinggi.
 Format jawaban: gunakan paragraf singkat, bisa pakai list jika relevan. Maksimal 3-4 kalimat per poin.`;
 

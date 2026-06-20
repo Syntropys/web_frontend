@@ -87,6 +87,91 @@ function BubbleMessage({
   );
 }
 
+function buildDatabaseSummary(
+  regions: Array<{ id: string; name: string; province: string }>,
+  predictions: Array<{ region_id: string; predicted_yield: number | null; predicted_prod_ton: number | null }>,
+  clusters: Array<{ region_id: string; cluster_label: number }>
+): string {
+  if (!regions.length) return "Tidak ada data wilayah.";
+
+  const merged = regions.map((r) => {
+    const p = predictions.find((pred) => pred.region_id === r.id);
+    const c = clusters.find((cl) => cl.region_id === r.id);
+    return {
+      name: r.name,
+      province: r.province,
+      yield: p?.predicted_yield ?? 0,
+      prod: p?.predicted_prod_ton ?? 0,
+      cluster: c?.cluster_label ?? 2,
+    };
+  });
+
+  const riskCounts = { 0: 0, 1: 0, 2: 0 };
+  merged.forEach((m) => {
+    const c = m.cluster as 0 | 1 | 2;
+    if (c === 0 || c === 1 || c === 2) {
+      riskCounts[c]++;
+    }
+  });
+
+  // Top & Bottom 5 regions by predicted production
+  const sortedByProd = [...merged].sort((a, b) => b.prod - a.prod);
+  const topProd = sortedByProd.slice(0, 5);
+  const bottomProd = sortedByProd.filter(x => x.prod > 0).slice(-5).reverse();
+
+  // Top & Bottom 3 regions by predicted yield
+  const sortedByYield = [...merged].sort((a, b) => b.yield - a.yield);
+  const topYield = sortedByYield.slice(0, 3);
+  const bottomYield = sortedByYield.filter(x => x.yield > 0).slice(-3).reverse();
+
+  // Province-level averages
+  const provGroups: Record<string, { totalYield: number; totalProd: number; count: number }> = {};
+  merged.forEach((m) => {
+    if (!provGroups[m.province]) {
+      provGroups[m.province] = { totalYield: 0, totalProd: 0, count: 0 };
+    }
+    provGroups[m.province].totalYield += m.yield;
+    provGroups[m.province].totalProd += m.prod;
+    provGroups[m.province].count += 1;
+  });
+
+  const provSummaries = Object.entries(provGroups)
+    .map(([name, data]) => {
+      const avgYield = (data.totalYield / data.count).toFixed(2);
+      return `- ${name}: Rata-rata Yield ${avgYield} t/ha, Total Produksi ${Math.round(data.totalProd).toLocaleString("id-ID")} ton (${data.count} kab/kota)`;
+    })
+    .join("\n");
+
+  // High risk regions
+  const highRisk = merged
+    .filter((m) => m.cluster === 0)
+    .map((m) => m.name)
+    .join(", ");
+
+  return `Total Wilayah Terdata: ${regions.length} kabupaten/kota di Kalimantan.
+Sebaran Risiko Produksi Padi (Klaster K-Means 2026):
+- Risiko Tinggi (Cluster 0): ${riskCounts[0]} kabupaten
+- Risiko Sedang (Cluster 1): ${riskCounts[1]} kabupaten
+- Risiko Rendah (Cluster 2): ${riskCounts[2]} kabupaten
+
+Wilayah Risiko Tinggi (Cluster 0): ${highRisk || "Tidak ada"}
+
+Top 5 Estimasi Produksi Tertinggi (2026):
+${topProd.map((x, i) => `${i + 1}. ${x.name} (${x.province}) - ${Math.round(x.prod).toLocaleString("id-ID")} ton (Yield: ${x.yield.toFixed(2)} t/ha)`).join("\n")}
+
+Bottom 5 Estimasi Produksi Terendah (2026):
+${bottomProd.map((x, i) => `${i + 1}. ${x.name} (${x.province}) - ${Math.round(x.prod).toLocaleString("id-ID")} ton (Yield: ${x.yield.toFixed(2)} t/ha)`).join("\n")}
+
+Top 3 Produktivitas (Yield) Tertinggi (2026):
+${topYield.map((x, i) => `${i + 1}. ${x.name} (${x.province}) - ${x.yield.toFixed(2)} t/ha`).join("\n")}
+
+Bottom 3 Produktivitas (Yield) Terendah (2026):
+${bottomYield.map((x, i) => `${i + 1}. ${x.name} (${x.province}) - ${x.yield.toFixed(2)} t/ha`).join("\n")}
+
+Statistik per Provinsi (Estimasi 2026):
+${provSummaries}`;
+}
+
 export function AiChatbotOverlay() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -234,27 +319,35 @@ export function AiChatbotOverlay() {
       setLoading(true);
 
       try {
-        const [regionsRes, predictionsRes] = await Promise.all([
-          supabase.from("regions").select("name, province"),
+        const [regionsRes, predictionsRes, clustersRes] = await Promise.all([
+          supabase.from("regions").select("id, name, province"),
           supabase
             .from("predictions")
-            .select("predicted_yield, predicted_prod_ton, target_year")
+            .select("region_id, predicted_yield, predicted_prod_ton")
+            .eq("target_year", 2026)
             .eq("model_name", "xgboost")
             .eq("model_version", "v1-real"),
+          supabase.from("cluster_assignments").select("region_id, cluster_label"),
         ]);
 
-        const regionsCount = regionsRes.data?.length || 56;
+        const regions = (regionsRes.data || []) as Array<{ id: string; name: string; province: string }>;
         const predictions = (predictionsRes.data || []) as Array<{
+          region_id: string;
           predicted_yield: number | null;
           predicted_prod_ton: number | null;
-          target_year: number;
         }>;
+        const clusters = (clustersRes.data || []) as Array<{ region_id: string; cluster_label: number }>;
+
+        const regionsCount = regions.length || 56;
         const totalYield = predictions.reduce(
           (acc, p) => acc + (p.predicted_yield || 0),
           0
         );
         const avgYield2026 =
           regionsCount > 0 ? (totalYield / regionsCount).toFixed(2) : "3.52";
+
+        // Build rich database context summary to feed into Gemini system prompt
+        const databaseSummary = buildDatabaseSummary(regions, predictions, clusters);
 
         const history = messages
           .filter((m) => m.id !== "greeting")
@@ -267,7 +360,7 @@ export function AiChatbotOverlay() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               messages: [...history, { role: "user", content: userText.trim() }],
-              context: { regionsCount, avgYield2026 },
+              context: { regionsCount, avgYield2026, databaseSummary },
             }),
           });
 
