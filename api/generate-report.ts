@@ -66,16 +66,16 @@ export default async function handler(req: Request) {
     const dynamicLetterNumber = letterNumber || `521/${Math.floor(1000 + Math.random() * 9000)}/AGR-REKOM/VI/2026`;
 
     const systemPrompt = `Anda adalah staf ahli analisis kebijakan pertanian senior di platform Agrolytics.
-Tugas Anda adalah menulis draf surat rekomendasi kebijakan dinas resmi dalam bahasa Indonesia yang sangat formal, diplomatik, birokratis, dan persuasif.
+Tugas Anda adalah menulis teks/paragraf analisis rekomendasi kebijakan pertanian resmi dalam bahasa Indonesia yang sangat formal, diplomatik, birokratis, dan persuasif.
 
 ATURAN PENTING (SANGAT KETAT):
 1. JANGAN gunakan format markdown seperti bintang double (**), bintang (*), pagar (#), atau list markdown (- atau *).
 2. Tuliskan surat secara langsung dalam format paragraf teks biasa dengan spasi pemisah antar paragraf yang jelas.
 3. Hindari penggunaan tag HTML atau pemformatan teks kaya lainnya.
 4. Nada bicara harus sangat formal, sesuai dengan gaya korespondensi resmi instansi pemerintah/kementerian di Indonesia.
-5. SANGAT PENTING: Akhiri surat langsung setelah paragraf penutup (jangan menulis kalimat 'Hormat Kami', nama penandatangan, atau ruang tanda tangan, karena bagian tanda tangan ini akan digambar secara otomatis secara grafis oleh sistem PDF).`;
+5. SANGAT PENTING: JANGAN menuliskan Kop Surat, nomor surat, sifat, lampiran, perihal, tanggal, alamat tujuan, salam pembuka (seperti 'Dengan hormat'), salam penutup (seperti 'Hormat Kami'), nama penandatangan, atau ruang tanda tangan. Mulailah langsung dengan paragraf pertama (pendahuluan analisis) dan akhiri langsung setelah paragraf penutup selesai.`;
 
-    const userPrompt = `Tuliskan draf surat rekomendasi kebijakan pertanian resmi untuk wilayah berikut:
+    const userPrompt = `Tuliskan paragraf analisis rekomendasi kebijakan pertanian resmi untuk wilayah berikut:
 - Kabupaten: ${regionName}
 - Provinsi: ${provinceName}
 - Estimasi Yield Padi 2026: ${predictedYield > 0 ? predictedYield.toFixed(2) : "—"} t/ha
@@ -83,37 +83,20 @@ ATURAN PENTING (SANGAT KETAT):
 - Tingkat Risiko/Prioritas: Prioritas ${priorityKey.toUpperCase()} (Aksi Rekomendasi: ${recommendedAction})
 - Intervensi Rekomendasi Awal: ${recommendedItems.join(", ")}
 
-Struktur Surat yang Harus Diikuti:
-1. Mulai langsung dengan penulisan rincian surat formal di bagian atas kiri:
-   Nomor: ${dynamicLetterNumber}
-   Sifat: Penting / Sangat Segera
-   Lampiran: 1 (satu) Berkas Laporan Analisis
-   Hal: Rekomendasi Kebijakan Peningkatan Produktivitas Padi dan Mitigasi Risiko Pangan Kabupaten ${regionName}
+Struktur Paragraf yang Harus Dihasilkan:
+1. Paragraf 1 (Pendahuluan):
+   Sampaikan bahwa berdasarkan hasil analisis komputasi platform Decision Support System (DSS) Agrolytics mengenai proyeksi produksi padi tahun 2026 menggunakan model predictive analytics XGBoost (R²=0.986) dan klasterisasi risiko K-Means, dengan ini disampaikan rekomendasi strategis untuk Kabupaten ${regionName}.
 
-2. Baris berikutnya (Tanggal):
-   Kalimantan, 21 Juni 2026
-
-3. Alamat Tujuan:
-   Kepada Yth.
-   Kepala Dinas Pertanian dan Ketahanan Pangan
-   Provinsi ${provinceName}
-   di Tempat
-
-4. Paragraf 1 (Pendahuluan):
-   Sampaikan dengan sangat formal bahwa berdasarkan hasil analisis komputasi platform Decision Support System (DSS) Agrolytics mengenai proyeksi produksi padi tahun 2026 menggunakan model predictive analytics XGBoost (R²=0.986) dan klasterisasi risiko K-Means, dengan ini disampaikan rekomendasi strategis untuk Kabupaten ${regionName}.
-
-5. Paragraf 2 (Pemaparan Data & Kondisi):
+2. Paragraf 2 (Pemaparan Data & Kondisi):
    Paparkan data hasil prediksi secara naratif. Sebutkan bahwa Kabupaten ${regionName} diprediksi memiliki produktivitas (yield) sebesar ${predictedYield.toFixed(2)} t/ha dengan total produksi komoditas padi mencapai ${Math.round(predictedProd).toLocaleString("id-ID")} ton. Jelaskan implikasi dari pengelompokan daerah ini ke dalam kategori Prioritas ${priorityKey.toUpperCase()} dengan arahan aksi "${recommendedAction}".
 
-6. Paragraf 3 & 4 (Rencana Aksi & Detail Intervensi):
+3. Paragraf 3 & 4 (Rencana Aksi & Detail Intervensi):
    Jabarkan rincian rencana aksi taktis berbasis data untuk memperkuat ketahanan pangan setempat. Kembangkan dan jelaskan poin-poin berikut ke dalam bentuk narasi formal yang mendalam:
    - ${recommendedItems.join("\n   - ")}
    Berikan penekanan pada pentingnya kolaborasi antar-sektor serta pemanfaatan teknologi informasi untuk monitoring berkala.
 
-7. Paragraf 5 (Penutup):
-   Sampaikan kalimat penutup dinas formal, menyatakan harapan agar surat rekomendasi kebijakan ini dapat menjadi acuan penyusunan anggaran dan program intervensi dinas pertanian setempat guna menjaga stabilitas suplai beras regional Kalimantan.
-
-PENTING: Jangan tuliskan salam penutup (Hormat Kami), nama analis, atau tanda tangan di akhir teks. Cukup berhenti setelah titik terakhir dari paragraf penutup.`;
+4. Paragraf 5 (Penutup):
+   Sampaikan kalimat penutup dinas formal, menyatakan harapan agar rekomendasi kebijakan ini dapat menjadi acuan penyusunan program kerja dinas pertanian setempat guna menjaga stabilitas suplai pangan regional Kalimantan.`;
 
     const contents = [
       {
