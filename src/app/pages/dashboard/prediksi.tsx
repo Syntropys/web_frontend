@@ -12,12 +12,13 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
+  ReferenceLine,
 } from "recharts";
 
 // Historical BPS data: 2018–2025. Predictions target 2026.
 const HIST_YEARS = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
 const PRED_YEAR = 2026;
-const SELECTABLE_YEARS = [2022, 2023, 2024, 2025, 2026];
+const SELECTABLE_YEARS = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
 
 const MODELS = [
   { key: "xgboost", label: "XGBoost", color: "#C9A24B", checked: true },
@@ -313,7 +314,7 @@ export default function PrediksiPage() {
               <button
                 key={yr}
                 onClick={() => setSelectedYear(yr)}
-                className={`${yr < 2024 ? "hidden sm:inline-flex" : "inline-flex"} px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-mono transition-all cursor-pointer whitespace-nowrap ${
+                className={`${yr < 2023 ? "hidden sm:inline-flex" : "inline-flex"} px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-mono transition-all cursor-pointer whitespace-nowrap ${
                   selectedYear === yr
                     ? "bg-[#C9A24B] text-[#2A1F08] font-medium"
                     : "text-[#735A1E] dark:text-[#C9A24B] hover:bg-[#C9A24B]/20"
@@ -478,6 +479,20 @@ export default function PrediksiPage() {
                       connectNulls
                     />
                   ))}
+                  {/* Selected year highlight */}
+                  <ReferenceLine
+                    x={String(selectedYear)}
+                    stroke="#C9A24B"
+                    strokeWidth={2}
+                    strokeDasharray="4 4"
+                    label={{
+                      value: String(selectedYear),
+                      position: "top",
+                      fill: "#C9A24B",
+                      fontSize: 11,
+                      fontWeight: 600,
+                    }}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             )}
