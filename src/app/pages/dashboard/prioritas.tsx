@@ -430,37 +430,11 @@ function DetailPanel({ prioritasKey, wilayah, provinsi, produksi, yieldVal, acti
       const hashNum = Math.floor(1000 + Math.random() * 9000);
       const letterNumber = `521/${hashNum}/AGR-REKOM/${currentMonthRoman}/${currentYear}`;
 
-      let reportText = "";
-      try {
-        const response = await fetch("/api/generate-report", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            regionName: cleanWilayah,
-            provinceName: provinsi,
-            predictedYield: yieldVal,
-            predictedProd: produksi,
-            priorityKey: meta.label,
-            recommendedAction: action,
-            recommendedItems: rec.items,
-          }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          reportText = data.text;
-        } else {
-          throw new Error("Gagal memanggil Edge function.");
-        }
-      } catch (apiErr) {
-        console.warn("Gagal menggunakan backend Edge function, menggunakan draf simulasi lokal untuk pengujian...", apiErr);
-        
-        reportText = `Berdasarkan hasil analisis komputasi platform Decision Support System (DSS) Agrolytics mengenai proyeksi produksi padi tahun 2026 menggunakan model predictive analytics XGBoost (R²=0.986) dan klasterisasi risiko K-Means, dengan ini kami sampaikan rekomendasi strategis untuk wilayah ${cleanWilayah}.
+      const reportText = `Berdasarkan hasil analisis komputasi platform Decision Support System (DSS) Agrolytics mengenai proyeksi produksi padi tahun 2026 menggunakan model predictive analytics XGBoost (R²=0.986) dan klasterisasi risiko K-Means, dengan ini kami sampaikan rekomendasi strategis untuk wilayah ${cleanWilayah}.
 
 Berdasarkan data pemodelan terbaru, ${cleanWilayah} diprediksi memiliki produktivitas (yield) rata-rata sebesar ${yieldVal.toFixed(2)} t/ha dengan total volume produksi komoditas padi mencapai ${Math.round(produksi).toLocaleString("id-ID")} ton. Mempertimbangkan indikator kerentanan pangan dan proyeksi tersebut, wilayah ini dimasukkan ke dalam kategori Prioritas ${meta.label.toUpperCase()} dengan arahan aksi "${action}".
 
 Demikian rekomendasi kebijakan ini kami sampaikan, dengan harapan dapat menjadi acuan substansial dalam penyusunan program kerja dinas pertanian setempat guna menjaga stabilitas suplai pangan regional Kalimantan yang berkelanjutan.`;
-      }
 
       const doc = new jsPDF("p", "mm", "a4");
       
