@@ -4,7 +4,6 @@ import { RouterErrorBoundary } from './app/components/error-boundary'
 import { HydrateFallback } from './app/components/hydrate-fallback'
 import { RequireAuth } from './guards/RequireAuth'
 import { RequireAdmin } from './guards/RequireAdmin'
-import Landing from './app/pages/landing'
 
 // Layout wrapper for protected routes
 function ProtectedLayout({ children }: { children: React.ReactNode }) {
@@ -21,7 +20,13 @@ export const router = createBrowserRouter([
     ErrorBoundary: RouterErrorBoundary,
     HydrateFallback,
     children: [
-      { path: '/', Component: Landing },
+      {
+        path: '/',
+        lazy: async () => {
+          const { default: Component } = await import('./app/pages/landing')
+          return { Component }
+        },
+      },
       {
         path: '/masuk',
         lazy: async () => {
