@@ -380,12 +380,12 @@ export function DateRangeAndExportToolbar() {
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-2" ref={ref}>
+    <div className="flex flex-nowrap items-center gap-1.5 sm:gap-2" ref={ref}>
       {/* Date Range Picker */}
       <div className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="inline-flex items-center gap-2 h-9 px-3.5 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/60 dark:bg-white/[0.04] text-[13px] hover:border-[#C9A24B] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-all cursor-pointer font-medium text-[#2A3530] dark:text-[#E8E6DF]"
+          className="inline-flex items-center gap-1 sm:gap-2 h-9 px-2.5 sm:px-3.5 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/60 dark:bg-white/[0.04] text-[12px] sm:text-[13px] hover:border-[#C9A24B] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-all cursor-pointer font-medium text-[#2A3530] dark:text-[#E8E6DF]"
         >
           <Calendar size={13} className="text-[#735A1E] dark:text-[#C9A24B] shrink-0" />
           <span>{startYear} – {endYear}</span>
@@ -393,7 +393,7 @@ export function DateRangeAndExportToolbar() {
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 sm:left-0 sm:right-auto mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-4 shadow-xl z-[60]">
+          <div className="absolute left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F4F0E6] dark:bg-[#0E1619] p-4 shadow-xl z-[60]">
             <h4 className="font-serif text-[14px] italic font-semibold mb-3 text-[#2A3530] dark:text-[#E8E6DF]">
               Rentang Tahun
             </h4>
@@ -444,7 +444,7 @@ export function DateRangeAndExportToolbar() {
         <button
           onClick={() => setExportOpen(!exportOpen)}
           disabled={isExporting}
-          className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/60 dark:bg-white/[0.04] text-[13px] hover:border-[#C9A24B] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-all cursor-pointer font-medium text-[#2A3530] dark:text-[#E8E6DF] disabled:opacity-50"
+          className="inline-flex items-center gap-1 sm:gap-1.5 h-9 px-2.5 sm:px-3.5 rounded-xl border border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/60 dark:bg-white/[0.04] text-[12px] sm:text-[13px] hover:border-[#C9A24B] hover:text-[#A07F2E] dark:hover:text-[#C9A24B] transition-all cursor-pointer font-medium text-[#2A3530] dark:text-[#E8E6DF] disabled:opacity-50"
         >
           {isExporting ? (
             <Loader2 size={13} className="animate-spin text-[#C9A24B]" />
@@ -484,7 +484,7 @@ export function DateRangeAndExportToolbar() {
       <div className="relative" ref={filterRef}>
         <button
           onClick={() => setFilterOpen(!filterOpen)}
-          className={`inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border text-[13px] transition-all cursor-pointer font-medium ${
+          className={`inline-flex items-center gap-1 sm:gap-1.5 h-9 px-2.5 sm:px-3.5 rounded-xl border text-[12px] sm:text-[13px] transition-all cursor-pointer font-medium ${
             activeFilterCount > 0
               ? "border-[#C9A24B]/40 bg-[#C9A24B]/8 text-[#735A1E] dark:text-[#C9A24B]"
               : "border-[#2A3530]/15 dark:border-[#E8E6DF]/15 bg-white/60 dark:bg-white/[0.04] text-[#2A3530] dark:text-[#E8E6DF] hover:border-[#C9A24B] hover:text-[#A07F2E] dark:hover:text-[#C9A24B]"
