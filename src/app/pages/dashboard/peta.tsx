@@ -2,7 +2,7 @@ import { DashboardLayout } from "../../components/dashboard-layout";
 import { KalimantanMap } from "../../components/peta";
 import { supabase } from "../../../lib/supabase";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { Download, ChevronDown } from "lucide-react";
+import { Download, ChevronDown, Play, Pause } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface RegionData {
@@ -103,7 +103,36 @@ export default function PetaPage() {
   const [loading, setLoading] = useState(true);
   const [showKmeansPng, setShowKmeansPng] = useState(false);
   const [sortMode, setSortMode] = useState<"cluster" | "yield" | "prod">("cluster");
-  const [selectedYear] = useState(2026); // expandable for future years
+  
+  // Time-lapse state
+  const YEARS = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
+  const [selectedYear, setSelectedYear] = useState(2026);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    if (selectedYear === 2026) {
+      setIsPlaying(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      const idx = YEARS.indexOf(selectedYear);
+      if (idx < YEARS.length - 1) {
+        setSelectedYear(YEARS[idx + 1]);
+      }
+    }, 1500); // 1.5s transition
+    return () => clearTimeout(timer);
+  }, [isPlaying, selectedYear]);
+
+  const togglePlay = () => {
+    setIsPlaying((p) => {
+      if (!p && selectedYear === 2026) {
+        setSelectedYear(2018); // Reset to start if starting from the end
+      }
+      return !p;
+    });
+  };
+
   const [exportOpen, setExportOpen] = useState(false);
   const exportRef = useRef<HTMLDivElement>(null);
 
@@ -124,18 +153,10 @@ export default function PetaPage() {
     async function fetchData() {
       setLoading(true);
       try {
-        const [regionsRes, clustersRes, predictionsRes] = await Promise.all([
-          supabase.from("regions").select("id, bps_code, name, province, centroid_lat, centroid_lng"),
-          supabase.from("cluster_assignments").select("region_id, cluster_label"),
-          supabase.from("predictions")
-            .select("region_id, predicted_yield, predicted_prod_ton")
-            .eq("target_year", 2026)
-            .eq("model_name", "xgboost")
-            .eq("model_version", "v1-real"),
-        ]);
+        const regionsRes = await supabase
+          .from("regions")
+          .select("id, bps_code, name, province, centroid_lat, centroid_lng");
         const regions = (regionsRes.data || []) as Array<{ id: string; bps_code: string; name: string; province: string; centroid_lat: number | null; centroid_lng: number | null }>;
-        const clusters = (clustersRes.data || []) as Array<{ region_id: string; cluster_label: number }>;
-        const preds = (predictionsRes.data || []) as Array<{ region_id: string; predicted_yield: number | null; predicted_prod_ton: number | null }>;
 
         const map = new Map<string, RegionData>();
         regions.forEach((r) => {
@@ -150,23 +171,67 @@ export default function PetaPage() {
             centroid_lng: r.centroid_lng ? Number(r.centroid_lng) : null,
           });
         });
-        clusters.forEach((c) => {
-          const region = regions.find((r) => r.id === c.region_id);
-          if (region) {
-            const entry = map.get(region.bps_code);
-            if (entry) entry.cluster_label = c.cluster_label;
-          }
-        });
-        preds.forEach((p) => {
-          const region = regions.find((r) => r.id === p.region_id);
-          if (region) {
-            const entry = map.get(region.bps_code);
-            if (entry) {
-              entry.predicted_yield = p.predicted_yield ? Number(p.predicted_yield) : null;
-              entry.predicted_prod = p.predicted_prod_ton ? Number(p.predicted_prod_ton) : null;
+
+        if (selectedYear === 2026) {
+          const [clustersRes, predictionsRes] = await Promise.all([
+            supabase.from("cluster_assignments").select("region_id, cluster_label"),
+            supabase.from("predictions")
+              .select("region_id, predicted_yield, predicted_prod_ton")
+              .eq("target_year", 2026)
+              .eq("model_name", "xgboost")
+              .eq("model_version", "v1-real"),
+          ]);
+          const clusters = (clustersRes.data || []) as Array<{ region_id: string; cluster_label: number }>;
+          const preds = (predictionsRes.data || []) as Array<{ region_id: string; predicted_yield: number | null; predicted_prod_ton: number | null }>;
+
+          clusters.forEach((c) => {
+            const region = regions.find((r) => r.id === c.region_id);
+            if (region) {
+              const entry = map.get(region.bps_code);
+              if (entry) entry.cluster_label = c.cluster_label;
             }
-          }
-        });
+          });
+          preds.forEach((p) => {
+            const region = regions.find((r) => r.id === p.region_id);
+            if (region) {
+              const entry = map.get(region.bps_code);
+              if (entry) {
+                entry.predicted_yield = p.predicted_yield ? Number(p.predicted_yield) : null;
+                entry.predicted_prod = p.predicted_prod_ton ? Number(p.predicted_prod_ton) : null;
+              }
+            }
+          });
+        } else {
+          const historyRes = await supabase
+            .from("production_history")
+            .select("region_id, yield_ton_ha, production_ton")
+            .eq("year", selectedYear);
+          const history = (historyRes.data || []) as Array<{ region_id: string; yield_ton_ha: number | null; production_ton: number | null }>;
+
+          history.forEach((h) => {
+            const region = regions.find((r) => r.id === h.region_id);
+            if (region) {
+              const entry = map.get(region.bps_code);
+              if (entry) {
+                const yieldVal = h.yield_ton_ha ? Number(h.yield_ton_ha) : null;
+                entry.predicted_yield = yieldVal;
+                entry.predicted_prod = h.production_ton ? Number(h.production_ton) : null;
+
+                if (yieldVal !== null) {
+                  if (yieldVal < 3.3) {
+                    entry.cluster_label = 0;
+                  } else if (yieldVal < 3.8) {
+                    entry.cluster_label = 1;
+                  } else {
+                    entry.cluster_label = 2;
+                  }
+                } else {
+                  entry.cluster_label = 2;
+                }
+              }
+            }
+          });
+        }
         setDbData(map);
       } catch (err) {
         console.error(err);
@@ -263,15 +328,19 @@ export default function PetaPage() {
   return (
     <DashboardLayout
       pageTitle="Peta Spasial"
-      eyebrow="Peta"
-      title="Distribusi Kerentanan Spasial"
-      description="Visualisasi sebaran kerentanan K-Means per wilayah Kalimantan — prediksi XGBoost 2026."
+      eyebrow={selectedYear === 2026 ? "Proyeksi" : "Historis"}
+      title={selectedYear === 2026 ? "Distribusi Kerentanan Spasial" : `Distribusi Produktivitas Historis (${selectedYear})`}
+      description={
+        selectedYear === 2026
+          ? "Visualisasi sebaran kerentanan K-Means per wilayah Kalimantan — prediksi XGBoost 2026."
+          : `Visualisasi sebaran tingkat produktivitas BPS per wilayah Kalimantan — tahun ${selectedYear}.`
+      }
       toolbar={
         <div className="flex items-center gap-2">
-          {/* Year badge — fixed 2026, future-ready */}
+          {/* Year badge */}
           <div className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-[#C9A24B]/40 bg-[#C9A24B]/8 text-[#735A1E] dark:text-[#C9A24B] text-[12px] font-mono">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Proyeksi {selectedYear}
+            {selectedYear === 2026 ? "Proyeksi 2026" : `Historis ${selectedYear}`}
           </div>
 
           {/* Export dropdown */}
@@ -306,7 +375,7 @@ export default function PetaPage() {
         <StatBadge label="Prioritas Sedang" value={counts[1]} sub="kabupaten" color="#7E8E78" />
         <StatBadge label="Prioritas Rendah" value={counts[2]} sub="kabupaten" color="#5A6A60" />
         <StatBadge
-          label="Total Produksi 2026"
+          label={selectedYear === 2026 ? "Total Produksi 2026" : `Total Produksi ${selectedYear}`}
           value={totalProd > 0 ? `${(totalProd / 1_000_000).toFixed(2)} Jt` : "—"}
           sub={`Rata² ${avgYield.toFixed(2)} t/ha`}
           color="#C9A24B"
@@ -345,7 +414,49 @@ export default function PetaPage() {
               dbData={mapDbData}
               selectedBpsCode={selectedBpsCode}
               onSelectRegion={setSelectedBpsCode}
+              selectedYear={selectedYear}
             />
+          </div>
+
+          {/* Timeline Player controls */}
+          <div className="rounded-2xl border border-[#2A3530]/12 dark:border-[#E8E6DF]/10 bg-white/40 dark:bg-white/[0.04] p-4 flex flex-col sm:flex-row items-center gap-4">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={togglePlay}
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-[#C9A24B] hover:bg-[#B08D3E] text-[#2A1F08] hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
+                title={isPlaying ? "Pause" : "Play"}
+              >
+                {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
+              </button>
+              <div className="text-[14px] font-mono font-bold text-[#2A3530] dark:text-[#E8E6DF] w-12 text-center">
+                {selectedYear}
+              </div>
+            </div>
+
+            {/* Timeline slider progress track */}
+            <div className="flex-grow w-full flex items-center gap-2">
+              {YEARS.map((yr) => (
+                <div key={yr} className="flex-1 flex flex-col items-center">
+                  <button
+                    onClick={() => {
+                      setIsPlaying(false);
+                      setSelectedYear(yr);
+                    }}
+                    className={`w-full h-2 rounded-full transition-all cursor-pointer ${
+                      selectedYear === yr
+                        ? "bg-[#C9A24B]"
+                        : selectedYear > yr
+                        ? "bg-[#C9A24B]/40 hover:bg-[#C9A24B]/60"
+                        : "bg-[#2A3530]/10 dark:bg-white/[0.06] hover:bg-[#2A3530]/20 dark:hover:bg-white/10"
+                    }`}
+                    title={String(yr)}
+                  />
+                  <span className={`text-[10px] font-mono mt-1 ${selectedYear === yr ? "text-[#C9A24B] font-bold" : "text-[#5F6A64] dark:text-[#A8AFA9]"}`}>
+                    {yr === 2026 ? "2026 (Pred)" : yr}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Selected region info */}

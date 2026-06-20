@@ -1,4 +1,4 @@
-import { memo, useEffect, useState, useMemo } from "react";
+import { memo, useEffect, useState, useMemo, useRef } from "react";
 import { Reveal } from "./reveal";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -10,6 +10,7 @@ export const KalimantanMap = memo(function KalimantanMap({
   dbData,
   selectedBpsCode,
   onSelectRegion,
+  selectedYear = 2026,
 }: {
   dbData?: Map<string, {
     name: string;
@@ -21,6 +22,7 @@ export const KalimantanMap = memo(function KalimantanMap({
   }>;
   selectedBpsCode: string | null;
   onSelectRegion?: (bpsCode: string | null) => void;
+  selectedYear?: number;
 }) {
   const { theme } = useThemeStore();
   const [kabGeoData, setKabGeoData] = useState<any>(null);
@@ -35,6 +37,45 @@ export const KalimantanMap = memo(function KalimantanMap({
   }>>(new Map());
 
   const activeDbData = dbData || internalDbData;
+
+  const geoJsonRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (geoJsonRef.current) {
+      geoJsonRef.current.eachLayer((layer: any) => {
+        const rawBpsCode = layer.feature.properties.CC_2 || "";
+        const { entry: dbEntry } = resolveDbEntry(rawBpsCode);
+        const clusterLabel = dbEntry ? dbEntry.cluster_label : 2;
+        const color = getRegencyColor(clusterLabel, theme === "dark");
+        
+        layer.setStyle({
+          fillColor: color,
+          fillOpacity: 0.55,
+          color: theme === "dark" ? "#1B2A25" : "#E2DCD0",
+          weight: 0.6,
+        });
+
+        const regName = layer.feature.properties.NAME_2 || "";
+        const provName = layer.feature.properties.NAME_1 || "";
+        const yieldVal = dbEntry && dbEntry.predicted_yield 
+          ? `${dbEntry.predicted_yield.toFixed(2)} t/ha` 
+          : "Tidak ada data";
+        
+        const priority = getPriorityText(clusterLabel);
+
+        layer.setPopupContent(`
+          <div class="custom-popup-content">
+            <h3 class="popup-title" style="color: ${color};">${regName}</h3>
+            <p class="popup-province" style="margin: 0; font-size: 10px; text-transform: uppercase; color: #8A958E;">${provName}</p>
+            <div style="margin-top: 6px; border-top: 1px solid rgba(140, 110, 38, 0.15); padding-top: 6px;">
+              <p class="popup-priority" style="margin: 0;">Prioritas: <strong style="color: ${color};">${priority}</strong></p>
+              <p class="popup-yield" style="margin: 4px 0 0 0;">${selectedYear === 2026 ? "Estimasi Yield" : "Yield BPS"}: <strong>${yieldVal}</strong></p>
+            </div>
+          </div>
+        `);
+      });
+    }
+  }, [activeDbData, theme, selectedYear, kabGeoData]);
 
   // GeoJSON uses old BPS codes (pre-2012 when Kalimantan Utara was still part of Kaltim).
   // Database uses new BPS codes. This maps old GeoJSON CC_2 → new DB bps_code.
@@ -161,7 +202,7 @@ export const KalimantanMap = memo(function KalimantanMap({
         <p class="popup-province" style="margin: 0; font-size: 10px; text-transform: uppercase; color: #8A958E;">${provName}</p>
         <div style="margin-top: 6px; border-top: 1px solid rgba(140, 110, 38, 0.15); padding-top: 6px;">
           <p class="popup-priority" style="margin: 0;">Prioritas: <strong style="color: ${color};">${priority}</strong></p>
-          <p class="popup-yield" style="margin: 4px 0 0 0;">Estimasi Yield: <strong>${yieldVal}</strong></p>
+          <p class="popup-yield" style="margin: 4px 0 0 0;">${selectedYear === 2026 ? "Estimasi Yield" : "Yield BPS"}: <strong>${yieldVal}</strong></p>
         </div>
       </div>
       `,
@@ -229,6 +270,9 @@ export const KalimantanMap = memo(function KalimantanMap({
   return (
     <div data-lenis-prevent className="h-[420px] w-full rounded-xl overflow-hidden border border-[#2A3530]/15 dark:border-[#E8E6DF]/12 bg-[#F7F3EA] dark:bg-[#0F181B] relative z-0">
       <style>{`
+        .leaflet-interactive {
+          transition: fill 0.6s ease-in-out, fill-opacity 0.6s ease-in-out, stroke 0.6s ease-in-out;
+        }
         .custom-leaflet-popup .leaflet-popup-content-wrapper {
           background: ${theme === "dark" ? "rgba(15, 24, 27, 0.95)" : "rgba(247, 243, 234, 0.95)"} !important;
           backdrop-filter: blur(8px);
@@ -314,11 +358,12 @@ export const KalimantanMap = memo(function KalimantanMap({
           attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
           url={tileUrl}
         />
-        <MapController selectedBpsCode={selectedBpsCode} dbData={activeDbData} onSelectRegion={onSelectRegion} />
+        <MapController selectedBpsCode={selectedBpsCode} dbData={activeDbData} onSelectRegion={onSelectRegion} selectedYear={selectedYear} />
         {/* Render Regencies Layer (interactive choropleth) */}
         {kabGeoData && (
           <GeoJSON
-            key={theme + "-kabupaten-" + activeDbData.size + "-" + (kabGeoData ? "loaded" : "empty")}
+            ref={geoJsonRef}
+            key={theme + "-kabupaten-" + (kabGeoData ? "loaded" : "empty")}
             data={kabGeoData}
             onEachFeature={onEachRegencyFeature}
           />
@@ -340,6 +385,7 @@ function MapController({
   selectedBpsCode,
   dbData,
   onSelectRegion,
+  selectedYear = 2026,
 }: {
   selectedBpsCode: string | null;
   dbData: Map<string, {
@@ -351,6 +397,7 @@ function MapController({
     centroid_lng?: number | null;
   }>;
   onSelectRegion?: (bpsCode: string | null) => void;
+  selectedYear?: number;
 }) {
   const map = useMap();
   
@@ -385,7 +432,7 @@ function MapController({
           <p class="popup-province" style="margin: 0; font-size: 10px; text-transform: uppercase; color: #8A958E;">${entry.province}</p>
           <div style="margin-top: 6px; border-top: 1px solid rgba(140, 110, 38, 0.15); padding-top: 6px;">
             <p class="popup-priority" style="margin: 0;">Prioritas: <strong style="color: ${color};">${priorityText}</strong></p>
-            <p class="popup-yield" style="margin: 4px 0 0 0;">Estimasi Yield: <strong>${yieldVal}</strong></p>
+            <p class="popup-yield" style="margin: 4px 0 0 0;">${selectedYear === 2026 ? "Estimasi Yield" : "Yield BPS"}: <strong>${yieldVal}</strong></p>
           </div>
         </div>
       `;
@@ -394,7 +441,7 @@ function MapController({
         className: "custom-leaflet-popup",
       });
     }
-  }, [selectedBpsCode, dbData, map]);
+  }, [selectedBpsCode, dbData, map, selectedYear]);
 
   return null;
 }
