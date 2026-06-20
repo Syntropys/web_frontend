@@ -74,6 +74,7 @@ export default defineConfig({
   assetsInclude: ["**/*.svg", "**/*.csv"],
 
   build: {
+    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {
