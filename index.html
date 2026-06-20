@@ -94,7 +94,7 @@
   <title>Smart Agricultural BI Kalimantan</title>
 
   <!-- Anti-FOUC: apply theme BEFORE first paint -->
-  <script src="/theme-init.js"></script>
+  <script>(function(){try{var s=localStorage.getItem('agrolytics-theme-v3');var t='light';if(s){try{var p=JSON.parse(s);if(p&&p.state&&p.state.theme)t=p.state.theme}catch(e){if(s==='dark'||s==='light')t=s}}if(t==='dark'){document.documentElement.classList.add('dark');document.documentElement.style.backgroundColor='#0b1215'}else{document.documentElement.classList.remove('dark');document.documentElement.style.backgroundColor='#efebe1'}}catch(e){document.documentElement.style.backgroundColor='#efebe1'}})()</script>
   <style>
     #__skeleton__ {
       background: #efebe1;
@@ -273,7 +273,7 @@
       </div>
     </div>
   </div>
-  <script src="/skeleton-init.js"></script>
+  <script>(function(){var p=window.location.pathname;if(p!=='/'&&p!==''){var sk=document.getElementById('__skeleton__');if(sk)sk.style.display='none';var root=document.getElementById('root');if(root){var d=document.documentElement.classList.contains('dark');var bg=d?'#0b1215':'#efebe1';var fg=d?'#b8bfb9':'#5f6a64';root.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:'+bg+'"><div style="display:flex;align-items:center;gap:12px;color:'+fg+'"><svg style="animation:spin 1s linear infinite;width:20px;height:20px" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity=".25"/><path fill="currentColor" opacity=".75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg><span style="font-size:14px;font-family:Inter,system-ui,sans-serif">Memuat\u2026</span></div></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>'}}})();</script>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 
