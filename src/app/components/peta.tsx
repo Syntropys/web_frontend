@@ -36,6 +36,21 @@ export const KalimantanMap = memo(function KalimantanMap({
 
   const activeDbData = dbData || internalDbData;
 
+  // GeoJSON uses old BPS codes (pre-2012 when Kalimantan Utara was still part of Kaltim).
+  // Database uses new BPS codes. This maps old GeoJSON CC_2 → new DB bps_code.
+  const BPS_CODE_MAP: Record<string, string> = {
+    "6406": "6501", // Malinau
+    "6407": "6502", // Bulungan
+    "6408": "6504", // Nunukan
+    "6410": "6503", // Tana Tidung
+    "6473": "6571", // Tarakan
+  };
+
+  const resolveDbEntry = (geojsonCode: string) => {
+    const mappedCode = BPS_CODE_MAP[geojsonCode] || geojsonCode;
+    return { entry: activeDbData.get(mappedCode), bpsCode: mappedCode };
+  };
+
   useEffect(() => {
     // Fetch Regencies GeoJSON
     fetch("/kalimantan_kab.json")
@@ -125,12 +140,12 @@ export const KalimantanMap = memo(function KalimantanMap({
   };
 
   const onEachRegencyFeature = (feature: any, layer: any) => {
-    const bpsCode = feature.properties.CC_2 || "";
+    const rawBpsCode = feature.properties.CC_2 || "";
     const regName = feature.properties.NAME_2 || "";
     const provName = feature.properties.NAME_1 || "";
     
-    // Look up in database data
-    const dbEntry = activeDbData.get(bpsCode);
+    // Look up in database data (with old→new BPS code mapping for KalUtara)
+    const { entry: dbEntry, bpsCode } = resolveDbEntry(rawBpsCode);
     const clusterLabel = dbEntry ? dbEntry.cluster_label : 2;
     const yieldVal = dbEntry && dbEntry.predicted_yield 
       ? `${dbEntry.predicted_yield.toFixed(2)} t/ha` 
