@@ -106,7 +106,7 @@ Format jawaban: gunakan paragraf singkat, bisa pakai list jika relevan. Maksimal
           contents,
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 1024,
+            maxOutputTokens: 4096,
             topP: 0.9,
           },
         }),
