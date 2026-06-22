@@ -533,7 +533,7 @@ export default function PrediksiPage() {
                       <td className="px-4 py-3 text-right font-mono">0.15 t/ha</td>
                       <td className="px-4 py-3 text-center">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-[#7A9A6E]/15 text-[#5A8A4E] dark:text-[#7A9A6E] border border-[#7A9A6E]/20">
-                          Sangat Tinggi (Best)
+                          Sangat Tinggi
                         </span>
                       </td>
                     </tr>
