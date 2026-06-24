@@ -518,48 +518,69 @@ export default function PrediksiPage() {
                       <th className="px-4 py-2.5 font-normal">Model</th>
                       <th className="px-4 py-2.5 font-normal text-right">R² (R-Squared)</th>
                       <th className="px-4 py-2.5 font-normal text-right">MAE (Error)</th>
-                      <th className="px-4 py-2.5 font-normal text-right">RMSE</th>
-                      <th className="px-4 py-2.5 font-normal text-center">Status Keandalan</th>
+                      <th className="px-4 py-2.5 font-normal text-right hidden sm:table-cell">RMSE</th>
+                      <th className="px-4 py-2.5 font-normal text-center hidden sm:table-cell">Status Keandalan</th>
                     </tr>
                   </thead>
                   <tbody className="text-[#2A3530] dark:text-[#E8E6DF]">
                     <tr className="border-b border-[#2A3530]/6 dark:border-[#E8E6DF]/6 hover:bg-[#C9A24B]/3 dark:hover:bg-white/[0.02] transition-colors">
-                      <td className="px-4 py-3 font-medium flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#C9A24B]" />
-                        XGBoost
+                      <td className="px-4 py-3 font-medium">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#C9A24B]" />
+                          <span>XGBoost</span>
+                        </div>
+                        <div className="sm:hidden mt-1 pl-[18px]">
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-mono bg-[#7A9A6E]/15 text-[#5A8A4E] dark:text-[#7A9A6E] border border-[#7A9A6E]/20">
+                            Sangat Tinggi
+                          </span>
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-right font-mono font-semibold text-[#7A9A6E]">0.986</td>
                       <td className="px-4 py-3 text-right font-mono">0.12 t/ha</td>
-                      <td className="px-4 py-3 text-right font-mono">0.15 t/ha</td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-3 text-right font-mono hidden sm:table-cell">0.15 t/ha</td>
+                      <td className="px-4 py-3 text-center hidden sm:table-cell">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-[#7A9A6E]/15 text-[#5A8A4E] dark:text-[#7A9A6E] border border-[#7A9A6E]/20">
                           Sangat Tinggi
                         </span>
                       </td>
                     </tr>
                     <tr className="border-b border-[#2A3530]/6 dark:border-[#E8E6DF]/6 hover:bg-[#C9A24B]/3 dark:hover:bg-white/[0.02] transition-colors">
-                      <td className="px-4 py-3 font-medium flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#7A9A6E]" />
-                        Random Forest
+                      <td className="px-4 py-3 font-medium">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#7A9A6E]" />
+                          <span>Random Forest</span>
+                        </div>
+                        <div className="sm:hidden mt-1 pl-[18px]">
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-mono bg-[#C9A24B]/15 text-[#735A1E] dark:text-[#C9A24B] border border-[#C9A24B]/20">
+                            Tinggi
+                          </span>
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-right font-mono">0.942</td>
                       <td className="px-4 py-3 text-right font-mono">0.21 t/ha</td>
-                      <td className="px-4 py-3 text-right font-mono">0.26 t/ha</td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-3 text-right font-mono hidden sm:table-cell">0.26 t/ha</td>
+                      <td className="px-4 py-3 text-center hidden sm:table-cell">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-[#C9A24B]/15 text-[#735A1E] dark:text-[#C9A24B] border border-[#C9A24B]/20">
                           Tinggi
                         </span>
                       </td>
                     </tr>
                     <tr className="hover:bg-[#C9A24B]/3 dark:hover:bg-white/[0.02] transition-colors">
-                      <td className="px-4 py-3 font-medium flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#6BA5C8]" />
-                        Linear Regression
+                      <td className="px-4 py-3 font-medium">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#6BA5C8]" />
+                          <span>Linear Regression</span>
+                        </div>
+                        <div className="sm:hidden mt-1 pl-[18px]">
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-mono bg-[#2A3530]/10 dark:bg-white/[0.06] text-[#5F6A64] dark:text-[#A8AFA9] border border-[#2A3530]/15 dark:border-white/10">
+                            Sedang
+                          </span>
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-right font-mono">0.812</td>
                       <td className="px-4 py-3 text-right font-mono">0.45 t/ha</td>
-                      <td className="px-4 py-3 text-right font-mono">0.52 t/ha</td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-3 text-right font-mono hidden sm:table-cell">0.52 t/ha</td>
+                      <td className="px-4 py-3 text-center hidden sm:table-cell">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-[#2A3530]/10 dark:bg-white/[0.06] text-[#5F6A64] dark:text-[#A8AFA9] border border-[#2A3530]/15 dark:border-white/10">
                           Sedang
                         </span>
