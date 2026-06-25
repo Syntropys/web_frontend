@@ -531,7 +531,7 @@ export default function PrediksiPage() {
                         </div>
                         <div className="sm:hidden mt-1 pl-[18px]">
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-mono bg-[#7A9A6E]/15 text-[#5A8A4E] dark:text-[#7A9A6E] border border-[#7A9A6E]/20">
-                            BEST
+                            Unggul
                           </span>
                         </div>
                       </td>
@@ -540,7 +540,7 @@ export default function PrediksiPage() {
                       <td className="px-4 py-3 text-right font-mono hidden sm:table-cell">0.15 t/ha</td>
                       <td className="px-4 py-3 text-center hidden sm:table-cell">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-[#7A9A6E]/15 text-[#5A8A4E] dark:text-[#7A9A6E] border border-[#7A9A6E]/20">
-                          BEST
+                          Unggul
                         </span>
                       </td>
                     </tr>
